@@ -10,6 +10,7 @@
 
 int main(int argc, char** argv)
 {
+    //commit test
     Ryao::Logger::Init();
     Ryao::Arrow arrow(Eigen::Vector3d({1.0, 2.0, 3.0}), Eigen::Vector3d({2.0, 6.0, 4.0}));
     return 0;
