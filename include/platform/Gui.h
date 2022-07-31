@@ -4,6 +4,7 @@
 #include <igl/opengl/glfw/Viewer.h>
 #include <igl/opengl/glfw/imgui/ImGuiMenu.h>
 #include "Arrow.h"
+#include "ReferencePlane.h"
 
 namespace Ryao {
 
