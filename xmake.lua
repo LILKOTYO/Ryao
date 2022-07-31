@@ -9,7 +9,7 @@ set_project("Ryao")
 target("libiglxmake")
     set_kind("binary")
     add_files("src/*.cpp")
-    add_files("include/*.cpp")
+    add_files("include/platform/*.cpp")
     
     add_includedirs("include/platform", "external/imgui", "external/libigl-imgui")
     

@@ -32,7 +32,41 @@ namespace Ryao {
 
 class BaseObject {
 public:
+    // Load Mesh
+    //---------------------------------------------------------------
+    bool loadMesh(const std::string& path);
+    void setMesh(const Eigen::MatrixXd& V, const Eigen::MatrixXi& F);
+    void findAndLoadMesh(const std::string& file);
     
+    //
+    //--------------------------------------------------------------
+    void reset();
+    void recomputeCOM();
+
+    // Config Object
+    //--------------------------------------------------------------
+    void setScale(double s);
+    void setID(int id);
+    virtual void setType(ObjType t);
+    void setPosition(const Eigen::Vector3d& p);
+	void setRotation(const Eigen::Quaterniond& q);
+	void setRotation(const Eigen::Matrix3d& R);
+	void setColors(const Eigen::MatrixXd& C);
+
+    // Get State
+    //--------------------------------------------------------------
+    double getScale() const;
+	int getID() const;
+	ObjType getType() const;
+	Eigen::Vector3d getPosition() const;
+	Eigen::Quaterniond getRotation() const;
+	Eigen::Matrix3d getRotationMatrix() const;
+	Eigen::Vector3d getVertexPosition(int vertexIndex) const;
+	void getMesh(Eigen::MatrixXd& V, Eigen::MatrixXi& F) const;
+	void getColors(Eigen::MatrixXd& C) const;
+
+    virtual ~BaseObject() {}
+
 protected:
     /*
 	 * Reset class variables specific to a certain object. Is called by
