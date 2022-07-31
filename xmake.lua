@@ -11,7 +11,7 @@ target("libiglxmake")
     add_files("src/*.cpp")
     add_files("include/*.cpp")
     
-    add_includedirs("include", "external/imgui", "external/libigl-imgui")
+    add_includedirs("include/platform", "external/imgui", "external/libigl-imgui")
     
     add_packages("spdlog", "glfw", "glad", "stb", "glm", "libigl")
 
