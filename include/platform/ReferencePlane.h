@@ -35,8 +35,8 @@ public:
         #if defined(RYAO_DEBUG) || defined(RYAO_REFERENCE_PLANE_DEBUG)  
         RYAO_INFO("---------------------------REFERENCE PLANE DEBUGGING START-----------------------");
         RYAO_INFO("The Size is: {}", size);
-        RYAO_INFO("The Start Point is: {}", start);
-        RYAO_INFO("The End Point is: {}", end);
+        RYAO_INFO("The Start Point number is: {}", start.size());
+        RYAO_INFO("The End Point number is: {}", end.size());
         RYAO_INFO("The Color is: {}", color);
         RYAO_INFO("---------------------------REFERENCE PLANE DEBUGGING END-----------------------");
         #endif
