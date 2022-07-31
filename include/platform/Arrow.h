@@ -43,7 +43,7 @@ public:
 		head[3] = end - 0.1 * (direction - per2);
 
         #if defined(RYAO_DEBUG) || defined(RYAO_ARROW_DEBUG)
-        RYAO_INFO("SHIT");
+        RYAO_INFO("---------------------------ARROW DEBUGGING START-----------------------");
         RYAO_INFO("The Start Point is: ({0}, {1}, {2})", start[0], start[1], start[2]);
         RYAO_INFO("The End Point is: ({0}, {1}, {2})", end[0], end[1], end[2]);
         RYAO_INFO("The Dir is: {}", direction);
@@ -52,6 +52,7 @@ public:
         RYAO_INFO("The Head is: {0}, {1}, {2}, {3}", head[0], head[1], head[2], head[3]);
         RYAO_INFO("The Color is {}", color);
         RYAO_INFO("The Id is {}", id);
+        RYAO_INFO("---------------------------ARROW DEBUGGING END-----------------------");
         #endif
     }
 
