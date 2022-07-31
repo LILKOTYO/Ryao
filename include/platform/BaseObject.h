@@ -22,8 +22,8 @@ struct Mesh {
     Eigen::MatrixXd V_normals;  // one normal per vertex
 
     // UV parametrization
-    Eigen::MatrixXd V_uv;   // UV vertices
-    Eigen::MatrixXi F_uv;   // optional faces for UVs
+    // Eigen::MatrixXd V_uv;   // UV vertices
+    // Eigen::MatrixXi F_uv;   // optional faces for UVs
 };
 
 enum class ObjType { STATIC, DYNAMIC};
