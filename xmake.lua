@@ -9,9 +9,9 @@ set_project("Ryao")
 target("libiglxmake")
     set_kind("binary")
     add_files("src/*.cpp")
-    add_files("include/platform/*.cpp")
+    add_files("core/platform/*.cpp")
     
-    add_includedirs("include/platform", "external/imgui", "external/libigl-imgui")
+    add_includedirs("core/platform", "external/imgui", "external/libigl-imgui")
     
     add_packages("spdlog", "glfw", "glad", "stb", "glm", "libigl")
 
