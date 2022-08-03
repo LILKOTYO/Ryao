@@ -3,6 +3,7 @@
 
 #include "Simulation.h"
 
+#include <chrono>
 #include <igl/opengl/glfw/Viewer.h>
 #include <igl/opengl/glfw/imgui/ImGuiMenu.h>
 #include <mutex>
