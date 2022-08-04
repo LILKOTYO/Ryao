@@ -2,7 +2,7 @@
 #define RYAO_SIMULATOR_H
 
 #include "Simulation.h"
-
+#include "Logger.h"
 #include <chrono>
 #include <igl/opengl/glfw/Viewer.h>
 #include <igl/opengl/glfw/imgui/ImGuiMenu.h>
@@ -32,10 +32,115 @@ public:
         m_recording(false) {}
 
     virtual ~Simulator() {
-        
+        killSimulatorThread();
+        delete p_simulation;
+        p_simulation = NULL;
     }
 
+    /*
+     * Run the simulation, if it has been paused (or never started). 
+     */
+    void run(bool single = false) {
+        m_status_mutex.lock();
+        if (!m_started) {
+            // if it have not started, reset the simulation and then start
+            p_simulation->reset();
+            m_started = true;
+            if (single) {
+                RYAO_INFO("Single Step");
+            }
+            else {
+                RYAO_INFO("Start Simulation");
+            }
+        }
+        else if (m_please_pause) {
+            // if it has been paused, start simulation
+            if (single) {
+                RYAO_INFO("Single Step");
+            }
+            else {
+                RYAO_INFO("Resume Simulation");
+            }
+        }
+        // if the simulation already started(not paused), then do nothing
+        if (m_please_pause) {
+            m_single_iteration = single;
+        }
+        if (!single) {
+            m_please_pause = false;
+        }
+        m_status_mutex.unlock();    
+    }
+
+    /*
+	 * Resets the p_simulation (and leaves it in a paused state; call run() to
+	 * start it).
+	 */
+    void reset() {
+        killSimulatorThread();
+        if (m_started) {
+            RYAO_INFO("Reset Simulation");
+        }
+        m_please_die = m_running = m_started = false;
+        m_please_pause = true;
+
+        clearRecords();
+        setRecording(m_recording);
+
+        p_simulation->reset();
+        p_simulation->updateRenderGeometry();
+        p_simulator_thread = new std::thread(&Simulator::runSimThread, this);
+    }
+
+    void clearRecords() {
+        for (size_t i =0; i < m_record.size(); i++) {
+            m_record[i] = std::queue<std::pair<Eigen::MatrixXd, Eigen::MatrixXi>>();
+        }
+    }
+
+    virtual void setRecording(bool r) = 0;
+
 protected:
+    // Implement in the child class
+    // Custom records for each simulation
+
+    // void storeRecord() {
+	// 	auto os = p_simulation->getObjects();
+	// 	Eigen::MatrixXd V;
+	// 	Eigen::MatrixXi F;
+	// 	for (size_t i = 0; i < os.size(); i++) {
+	// 		os[i].getMesh(V, F);
+	// 		m_record[i].push(std::make_pair(V, F));
+	// 		while (m_record[i].size() > (size_t)m_numRecords) {
+	// 			m_record[i].pop();
+	// 		}
+	// 	}
+	// }
+    virtual void storeRecord() = 0;
+
+    void runSimThread() {
+        m_status_mutex.lock();
+        m_running = true;
+        m_status_mutex.unlock();
+
+        bool done = false;
+        while (!done) {
+            m_status_mutex.lock();
+            bool pausenow = m_please_pause;
+            bool single = m_single_iteration;
+            m_status_mutex.unlock();
+
+            if (pausenow && !single) {
+                // do not use too much CPU time
+                std::this_thread::sleep_for(milliseconds(10));
+            }
+            else {
+                if (m_maxSteps >= 0 && m_maxSteps <= p_simulation->getStep()) {
+                    
+                }
+            }
+        }
+    }
 
     void killSimulatorThread() {
         if (p_simulator_thread) {
