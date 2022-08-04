@@ -92,6 +92,54 @@ public:
         p_simulator_thread = new std::thread(&Simulator::runSimThread, this);
     }
 
+    /*
+	 * Pause a m_running p_simulation. The p_simulation will pause at the end of
+	 * its current "step"; this method will not interrupt simulateOneStep
+	 * mid-processing.
+	 */
+    void pause() {
+        m_status_mutex.lock();
+        m_please_pause = true;
+        m_status_mutex.unlock();
+        RYAO_INFO("Pause Simulation");
+    }
+
+    bool isPaused() {
+        bool result = false;
+        m_status_mutex.lock();
+        if (m_running && m_please_pause) {
+            result = true;
+        }
+        m_status_mutex.unlock();
+        return result;
+    }
+
+    bool hasStarted() const { return m_started; }
+
+    void render(igl::opengl::glfw::Viewer &viewer) {
+        m_render_mutex.lock();
+        p_simulation->renderRenderGeometry(viewer);
+        m_render_mutex.unlock();
+    }
+
+    double getDuration() const {
+        return duration_cast<microseconds>(m_duration).count() * 0.001;
+    }
+
+    double getSimulationTime() const {return p_simulation->getTime(); }
+
+    unsigned long getSimulationStep() const { return p_simulation->getStep(); }
+
+    void setSimulationSpeed(int speed) {
+        // speed: frame / second
+        m_maxTimePerStep = std::round(1000 / speed);
+    }
+
+    // set maximum number of timesteps after which the simulation will stop, -1
+	// for infinite simulation
+    void setMaxSteps(int n = -1) { m_maxSteps = n; } 
+
+
     void clearRecords() {
         for (size_t i =0; i < m_record.size(); i++) {
             m_record[i] = std::queue<std::pair<Eigen::MatrixXd, Eigen::MatrixXi>>();
@@ -99,6 +147,14 @@ public:
     }
 
     virtual void setRecording(bool r) = 0;
+
+    bool isRecording() const { return m_recording; }
+
+    void setNumRecords(int n) { m_numRecords = n; }
+
+    std::vector<std::queue<std::pair<Eigen::MatrixXd, Eigen::MatrixXi>>>& getRecords() {
+        return m_record;
+    }
 
 protected:
     // Implement in the child class
@@ -118,6 +174,10 @@ protected:
 	// }
     virtual void storeRecord() = 0;
 
+    /**
+     * @brief Run Simulation Thread (one step)
+     * 
+     */
     void runSimThread() {
         m_status_mutex.lock();
         m_running = true;
@@ -136,10 +196,45 @@ protected:
             }
             else {
                 if (m_maxSteps >= 0 && m_maxSteps <= p_simulation->getStep()) {
-                    
+                    // pause if current steps > max steps 
+                    pause();
+                    continue;
                 }
+
+                // time execution of one loop (advance + rendering)
+                high_resolution_clock::time_point start = high_resolution_clock::now();
+
+                done = p_simulation->advance();
+
+                if (m_recording) {
+                    storeRecord();
+                }
+
+                m_render_mutex.lock();
+                p_simulation->updateRenderGeometry();
+                m_render_mutex.unlock();
+
+                high_resolution_clock::time_point end = high_resolution_clock::now();
+
+                m_duration = end - start;
+
+                // sleep such that simulation runs at the set iterations per second
+                milliseconds sleepTime = milliseconds(m_maxTimePerStep) - duration_cast<milliseconds>(m_duration);
+                std::this_thread::sleep_for(sleepTime);
             }
+
+            m_status_mutex.lock();
+            if (single) {
+                m_single_iteration = false;
+            }
+            if (m_please_die) {
+                done = true;
+            }
+            m_status_mutex.unlock();
         }
+        m_status_mutex.lock();
+        m_running = false;
+        m_status_mutex.unlock();
     }
 
     void killSimulatorThread() {
