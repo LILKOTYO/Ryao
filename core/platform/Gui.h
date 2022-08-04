@@ -14,7 +14,101 @@ namespace Ryao {
  * this class to perform a simulation and customize the menu.
  */
 class Gui {
+public:
+    Gui() {}
 
+    ~Gui() {}
+
+    /**
+     * @brief Set simulation to be performed in the simulator
+     * 
+     * @param sim  
+     */
+    void setSimulation(Simulation *sim);
+
+    /**
+     * @brief Initialize all the necessary data structures and callbacks and open the window. 
+     * 
+     */
+    void start();
+
+    /**
+     * @brief Call the setters for simulation in this method to update the 
+     * parameters entered in the GUI. This method is called before the 
+     * simulation is started for the first time.
+     */
+    virtual void updateSimulationParameters() = 0;
+
+    /**
+     * @brief Clear some sustom datastructures/visualizations when the user
+     * requests it.
+     */
+    virtual void clearSimulation() {}
+
+    /**
+     * @brief Callback to enable custom shortcuts
+     * 
+     * @param viewer the imgui viewer
+     * @param key 
+     * @param modifiers 
+     * @return true 
+     * @return false 
+     */
+    virtual bool childKeyCallback(igl::opengl::glfw::Viewer &viewer,
+        unsigned int key, int modifiers) {
+        return false;
+    }
+
+    /**
+     * @brief Setup your own (additional) ImGUI components in this method.
+     * 
+     */
+    virtual void drawSimulationParameterMenu() {}
+
+    /**
+     * @brief Setup your own (additional) ImGUI debugging output.
+     * 
+     */
+    virtual void drawSimulationStats() {}
+
+#pragma region ArrowInterface
+
+    /**
+     * @brief Create and add an arrow to be displayed in the GUI. Returns the index of 
+     * the drawn arrow (keep it if you want to delete this arrow later)
+     * @param start -start point of the arrow
+     * @param end -end point of the arrow
+     * @param color -the color of the arrow, default = red
+     * @return int -the index of the arrow
+     */
+    int addArrow(const Eigen::Vector3d &start, const Eigen::Vector3d &end,
+        const Eigen::Vector3d &color = Eigen::RowVector3d(1, 0, 0));
+
+    /**
+     * @brief Delete arrow at given index
+     * 
+     * @param index 
+     */
+    void removeArrow(size_t index);
+
+#pragma endregion ArrowInterface
+
+    /**
+     * @brief Show the standard basis axes (x, y, z)
+     * 
+     * @param show_axes 
+     */
+    void showAxes(bool show_axes);
+
+    /**
+     * @brief Callback to show a different vector for a clicked vertex than the normal
+     * 
+     */
+    std::function<void(int clickedVertexIndex, int clickedObjectIndex,
+        Eigen::Vector3d &pos, Eigen::Vector3d &dir)> 
+        callback_clicked_vertex = nullptr;
+
+    void turnOffLight() { m_viewer.core().lighting_factor = 0; }
 
 protected:
     void drawArrow(const Arrow &arrow);
@@ -43,12 +137,13 @@ protected:
 
     bool drawCallback(igl::opengl::glfw::Viewer &viewer);
 
-    bool scrollCallback(igl::opengl::glfw::Viewer &viewer);
+    bool scrollCallback(igl::opengl::glfw::Viewer &viewer, float delta_y);
 
     bool mouseCallback(igl::opengl::glfw::Viewer &viewer,
         igl::opengl::glfw::imgui::ImGuiMenu &menu, int button, int modifier);
 
     igl::opengl::glfw::Viewer m_viewer;
+    igl::opengl::glfw::imgui::ImGuiPlugin m_plugins;
 
     Simulator* p_simulator = NULL;
     bool m_request_clear = false;

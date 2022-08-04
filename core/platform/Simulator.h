@@ -146,7 +146,7 @@ public:
         }
     }
 
-    virtual void setRecording(bool r) = 0;
+    virtual void setRecording(bool r) {}
 
     bool isRecording() const { return m_recording; }
 
@@ -172,7 +172,7 @@ protected:
 	// 		}
 	// 	}
 	// }
-    virtual void storeRecord() = 0;
+    virtual void storeRecord() {}
 
     /**
      * @brief Run Simulation Thread (one step)
