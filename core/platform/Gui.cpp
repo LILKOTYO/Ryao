@@ -85,7 +85,19 @@ void Gui::start() {
 }
 
 void Gui::resetSimulation() {
-    
+    p_simulator->reset();
+    m_timeAverage = 0.0;
 }
+
+#pragma region ArrowInterface
+
+int Gui::addArrow(const Eigen::Vector3d &start, const Eigen::Vector3d &end,
+    const Eigen::Vector3d &color) {
+    m_arrows.push_back(Arrow(start, end, color));
+    m_arrows.back().id = m_numArrows++;
+    return m_arrows.back().id;
+}
+
+#pragma endregion ArrowInterface
 
 }

@@ -1,7 +1,6 @@
 add_rules("mode.debug", "mode.release")
 
-add_requires("spdlog", "glfw", "glad", "stb", "glm")
-add_requires("libigl", {configs = {imgui = true}})
+add_requires("spdlog", "glfw", "glad", "stb", "glm", "libigl")
 
 set_languages("cxx17")
 
@@ -13,7 +12,6 @@ target("libiglxmake")
     add_files("core/platform/*.cpp")
     
     add_includedirs("core/platform", "external/imgui", "external/libigl-imgui")
-    -- add_headerfiles("core/platform/*.h", "external/imgui/*.h", "external/libigl-imgui/*.h")
     
     add_packages("spdlog", "glfw", "glad", "stb", "glm", "libigl")
 
