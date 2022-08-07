@@ -98,6 +98,80 @@ int Gui::addArrow(const Eigen::Vector3d &start, const Eigen::Vector3d &end,
     return m_arrows.back().id;
 }
 
+void Gui::removeArrow(size_t index) {
+    bool found = false;
+    for (size_t i = 0; i < m_arrows.size(); i++) {
+        if (m_arrows[i].id == index) {
+            // found the arrow we want first
+            found = true;
+            m_arrows.erase(m_arrows.begin() + i);
+        }
+    }
+    assert(found && "unable to find index");
+}
+
+void Gui::drawArrow(const Arrow& arrow) {
+    m_viewer.data_list[0].add_edges(arrow.start, arrow.end, arrow.color);
+    m_viewer.data_list[0].add_edges(arrow.end, arrow.head[0], arrow.color);
+    m_viewer.data_list[0].add_edges(arrow.end, arrow.head[1], arrow.color);
+    m_viewer.data_list[0].add_edges(arrow.end, arrow.head[2], arrow.color);
+    m_viewer.data_list[0].add_edges(arrow.end, arrow.head[3], arrow.color);
+    m_viewer.data_list[0].add_edges(arrow.head[0], arrow.head[2], arrow.color);
+    m_viewer.data_list[0].add_edges(arrow.head[1], arrow.head[2], arrow.color);
+    m_viewer.data_list[0].add_edges(arrow.head[1], arrow.head[3], arrow.color);
+    m_viewer.data_list[0].add_edges(arrow.head[3], arrow.head[0], arrow.color);
+    m_viewer.data_list[0].add_edges(arrow.head[3], arrow.head[2], arrow.color);
+    m_viewer.data_list[0].add_edges(arrow.head[1], arrow.head[0], arrow.color);
+}
+
 #pragma endregion ArrowInterface
+
+void Gui::drawReferencePlane() {
+    m_viewer.data_list[0].add_edges(m_referencePlane.start, m_referencePlane.end, m_referencePlane.color);
+}
+
+void Gui::showVertexArrow() {
+    if (m_clickedArrow >= 0) {
+        removeArrow(m_clickedArrow);
+        m_clickedArrow = -1;
+    }
+    if (m_clickedVertex >= 0) {
+        Eigen::Vector3d pos;
+        Eigen::Vector3d norm;
+        if (callback_clicked_vertex) {
+            callback_clicked_vertex(m_clickedVertex, m_clickedObject, pos, norm);
+        }
+        else {
+            pos = m_viewer.data_list[m_clickedObject].V.row(m_clickedVertex);
+            norm = m_viewer.data_list[m_clickedObject].V_normals.row(m_clickedVertex);
+        }
+        m_clickedArrow =
+			addArrow(pos, pos + norm, Eigen::RowVector3d(1.0, 0, 0));
+    }
+}
+
+bool Gui::drawCallback(igl::opengl::glfw::Viewer &viewer) {
+    if (m_request_clear) {
+        for (auto &d : viewer.data_list) {
+            d.clear();
+        }
+        m_request_clear = false;
+        m_clickedVertex = -1;
+        if (m_clickedArrow >= 0) {
+            removeArrow(m_clickedArrow);
+            m_clickedArrow = -1;
+        }
+    }
+
+    viewer.data_list[0].clear();
+    if (m_arrows.size() > 0 || m_showReferencePlane) {
+        for (size_t i = 0; i < m_arrows.size(); i++) {
+            drawArrow(m_arrows[i]);
+        }
+        if (m_showReferencePlane) drawReferencePlane();
+    }
+    p_simulator->render(viewer);
+    return false;
+}
 
 }

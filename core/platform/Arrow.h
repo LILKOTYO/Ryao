@@ -29,7 +29,8 @@ public:
 
         Eigen::RowVector3d per1 = direction.cross(Eigen::Vector3d(1, 0, 0)).normalized() * 0.5;
 
-        if (std::isnan(per1.sum())) {
+        // used to be std::isnan(per1.sum())
+        if (per1.norm() == 0.0f) {
             // once the element in per1 is NaN, construct the axis-system using (0, 1, 0)
             per1 = direction.cross(Eigen::Vector3d(0, 1, 0)).normalized() * 0.5;
         }
