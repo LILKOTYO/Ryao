@@ -1,58 +1,105 @@
 #include <igl/readOBJ.h>
 #include <igl/opengl/glfw/Viewer.h>
+#include <igl/opengl/glfw/imgui/ImGuiPlugin.h>
+#include <igl/opengl/glfw/imgui/ImGuiMenu.h>
+#include <igl/opengl/glfw/imgui/ImGuiHelpers.h>
 #include <iostream>
-
-Eigen::MatrixXd V1,V2;
-Eigen::MatrixXi F1,F2;
-Eigen::MatrixXd C1,C2;
-
-// This function is called every time a keyboard button is pressed
-bool key_down(igl::opengl::glfw::Viewer& viewer, unsigned char key, int modifier)
-{
-  std::cout<<"Key: "<<key<<" "<<(unsigned int)key<<std::endl;
-  if (key == '1')
-  {
-    // Clear should be called before drawing the mesh
-    viewer.data().clear();
-    // Draw_mesh creates or updates the vertices and faces of the displayed mesh.
-    // If a mesh is already displayed, draw_mesh returns an error if the given V and
-    // F have size different than the current ones
-    viewer.data().set_mesh(V1, F1);
-    viewer.data().set_colors(C1);
-    viewer.core().align_camera_center(V1,F1);
-  }
-  else if (key == '2')
-  {
-    viewer.data().clear();
-    viewer.data().set_mesh(V2, F2);
-    viewer.data().set_colors(C2);
-    viewer.core().align_camera_center(V2,F2);
-  }
-
-  return false;
-}
-
 
 int main(int argc, char *argv[])
 {
-  // Load two meshes
-  igl::readOBJ("./resources/obj/armadillo_midres.obj", V1, F1);
-  igl::readOBJ("./resources/obj/armadillo_lowres.obj", V2, F2);
-  std::cout<<R"(
-1 Switch to bunny mesh
-2 Switch to cube mesh
-    )";
-  C1 =
-    (V1.rowwise()            - V1.colwise().minCoeff()).array().rowwise()/
-    (V1.colwise().maxCoeff() - V1.colwise().minCoeff()).array();
-  C2 =
-  (V2.rowwise()            - V2.colwise().minCoeff()).array().rowwise()/
-  (V2.colwise().maxCoeff() - V2.colwise().minCoeff()).array();
+  Eigen::MatrixXd V;
+  Eigen::MatrixXi F;
+
+  // Load a mesh in OFF format
+  igl::readOBJ("./resources/obj/bunny.obj", V, F);
+
+  // Init the viewer
   igl::opengl::glfw::Viewer viewer;
-  // Register a keyboard callback that allows to switch between
-  // the two loaded meshes
-  viewer.callback_key_down = &key_down;
-  viewer.data().set_mesh(V1, F1);
-  viewer.data().set_colors(C1);
+
+  // Attach a menu plugin
+  igl::opengl::glfw::imgui::ImGuiPlugin plugin;
+  viewer.plugins.push_back(&plugin);
+  igl::opengl::glfw::imgui::ImGuiMenu menu;
+  plugin.widgets.push_back(&menu);
+
+  // Customize the menu
+  double doubleVariable = 0.1f; // Shared between two menus
+
+  // Add content to the default menu window
+  menu.callback_draw_viewer_menu = [&]()
+  {
+    // Draw parent menu content
+    menu.draw_viewer_menu();
+
+    // Add new group
+    if (ImGui::CollapsingHeader("New Group", ImGuiTreeNodeFlags_DefaultOpen))
+    {
+      // Expose variable directly ...
+      ImGui::InputDouble("double", &doubleVariable, 0, 0, "%.4f");
+
+      // ... or using a custom callback
+      static bool boolVariable = true;
+      if (ImGui::Checkbox("bool", &boolVariable))
+      {
+        // do something
+        std::cout << "boolVariable: " << std::boolalpha << boolVariable << std::endl;
+      }
+
+      // Expose an enumeration type
+      enum Orientation { Up=0, Down, Left, Right };
+      static Orientation dir = Up;
+      ImGui::Combo("Direction", (int *)(&dir), "Up\0Down\0Left\0Right\0\0");
+
+      // We can also use a std::vector<std::string> defined dynamically
+      static int num_choices = 3;
+      static std::vector<std::string> choices;
+      static int idx_choice = 0;
+      if (ImGui::InputInt("Num letters", &num_choices))
+      {
+        num_choices = std::max(1, std::min(26, num_choices));
+      }
+      if (num_choices != (int) choices.size())
+      {
+        choices.resize(num_choices);
+        for (int i = 0; i < num_choices; ++i)
+          choices[i] = std::string(1, 'A' + i);
+        if (idx_choice >= num_choices)
+          idx_choice = num_choices - 1;
+      }
+      ImGui::Combo("Letter", &idx_choice, choices);
+
+      // Add a button
+      if (ImGui::Button("Print Hello", ImVec2(-1,0)))
+      {
+        std::cout << "Hello\n";
+      }
+    }
+  };
+
+  // Draw additional windows
+  menu.callback_draw_custom_window = [&]()
+  {
+    // Define next window position + size
+    ImGui::SetNextWindowPos(ImVec2(180.f * menu.menu_scaling(), 10), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize(ImVec2(200, 160), ImGuiCond_FirstUseEver);
+    ImGui::Begin(
+        "New Window", nullptr,
+        ImGuiWindowFlags_NoSavedSettings
+    );
+
+    // Expose the same variable directly ...
+    ImGui::PushItemWidth(-80);
+    ImGui::DragScalar("double", ImGuiDataType_Double, &doubleVariable, 0.1, 0, 0, "%.4f");
+    ImGui::PopItemWidth();
+
+    static std::string str = "bunny";
+    ImGui::InputText("Name", str);
+
+    ImGui::End();
+  };
+
+  // Plot the mesh
+  viewer.data().set_mesh(V, F);
+  viewer.data().add_label(viewer.data().V.row(0) + viewer.data().V_normals.row(0).normalized()*0.005, "Hello World!");
   viewer.launch();
 }
