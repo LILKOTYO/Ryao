@@ -1,79 +1,58 @@
+#include <igl/readOBJ.h>
 #include <igl/opengl/glfw/Viewer.h>
-#include <igl/copyleft/tetgen/tetrahedralize.h>
-#include <igl/readOFF.h>
-#include <igl/barycenter.h>
+#include <iostream>
 
-
-// Input polygon
-Eigen::MatrixXd V;
-Eigen::MatrixXi F;
-Eigen::MatrixXd B;
-
-// Tetrahedralized interior
-Eigen::MatrixXd TV;
-Eigen::MatrixXi TT;
-Eigen::MatrixXi TF;
+Eigen::MatrixXd V1,V2;
+Eigen::MatrixXi F1,F2;
+Eigen::MatrixXd C1,C2;
 
 // This function is called every time a keyboard button is pressed
 bool key_down(igl::opengl::glfw::Viewer& viewer, unsigned char key, int modifier)
 {
-  using namespace std;
-  using namespace Eigen;
-
-  if (key >= '1' && key <= '9')
+  std::cout<<"Key: "<<key<<" "<<(unsigned int)key<<std::endl;
+  if (key == '1')
   {
-    double t = double((key - '1')+1) / 9.0;
-
-    VectorXd v = B.col(2).array() - B.col(2).minCoeff();
-    v /= v.col(0).maxCoeff();
-
-    vector<int> s;
-
-    for (unsigned i=0; i<v.size();++i)
-      if (v(i) < t)
-        s.push_back(i);
-
-    MatrixXd V_temp(s.size()*4,3);
-    MatrixXi F_temp(s.size()*4,3);
-
-    for (unsigned i=0; i<s.size();++i)
-    {
-      V_temp.row(i*4+0) = TV.row(TT(s[i],0));
-      V_temp.row(i*4+1) = TV.row(TT(s[i],1));
-      V_temp.row(i*4+2) = TV.row(TT(s[i],2));
-      V_temp.row(i*4+3) = TV.row(TT(s[i],3));
-      F_temp.row(i*4+0) << (i*4)+0, (i*4)+1, (i*4)+3;
-      F_temp.row(i*4+1) << (i*4)+0, (i*4)+2, (i*4)+1;
-      F_temp.row(i*4+2) << (i*4)+3, (i*4)+2, (i*4)+0;
-      F_temp.row(i*4+3) << (i*4)+1, (i*4)+2, (i*4)+3;
-    }
-
+    // Clear should be called before drawing the mesh
     viewer.data().clear();
-    viewer.data().set_mesh(V_temp,F_temp);
-    viewer.data().set_face_based(true);
+    // Draw_mesh creates or updates the vertices and faces of the displayed mesh.
+    // If a mesh is already displayed, draw_mesh returns an error if the given V and
+    // F have size different than the current ones
+    viewer.data().set_mesh(V1, F1);
+    viewer.data().set_colors(C1);
+    viewer.core().align_camera_center(V1,F1);
   }
-
+  else if (key == '2')
+  {
+    viewer.data().clear();
+    viewer.data().set_mesh(V2, F2);
+    viewer.data().set_colors(C2);
+    viewer.core().align_camera_center(V2,F2);
+  }
 
   return false;
 }
 
+
 int main(int argc, char *argv[])
 {
-  using namespace Eigen;
-  using namespace std;
-
-  // Load a surface mesh
-  igl::readOFF("..test/bunny.off",V,F);
-
-  // Tetrahedralize the interior
-  igl::copyleft::tetgen::tetrahedralize(V,F,"pq1.414Y", TV,TT,TF);
-
-  // Compute barycenters
-  igl::barycenter(TV,TT,B);
-
-  // Plot the generated mesh
+  // Load two meshes
+  igl::readOBJ("./resources/obj/armadillo_midres.obj", V1, F1);
+  igl::readOBJ("./resources/obj/armadillo_lowres.obj", V2, F2);
+  std::cout<<R"(
+1 Switch to bunny mesh
+2 Switch to cube mesh
+    )";
+  C1 =
+    (V1.rowwise()            - V1.colwise().minCoeff()).array().rowwise()/
+    (V1.colwise().maxCoeff() - V1.colwise().minCoeff()).array();
+  C2 =
+  (V2.rowwise()            - V2.colwise().minCoeff()).array().rowwise()/
+  (V2.colwise().maxCoeff() - V2.colwise().minCoeff()).array();
   igl::opengl::glfw::Viewer viewer;
+  // Register a keyboard callback that allows to switch between
+  // the two loaded meshes
   viewer.callback_key_down = &key_down;
-  key_down(viewer,'5',0);
+  viewer.data().set_mesh(V1, F1);
+  viewer.data().set_colors(C1);
   viewer.launch();
 }
