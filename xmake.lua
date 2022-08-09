@@ -1,7 +1,7 @@
 add_rules("mode.debug", "mode.release")
 
 add_requires("spdlog", "glfw", "glad", "stb", "glm")
-add_requires("libigl", {configs = {imgui = true}})
+add_requires("libigl", {configs = {cgal = true, imgui = true}})
 
 set_languages("cxx17")
 

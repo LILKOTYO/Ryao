@@ -279,4 +279,39 @@ bool Gui::keyCallback(igl::opengl::glfw::Viewer &viewer, unsigned int key, int m
     return false;
 } 
 
+bool Gui::mouseCallback(igl::opengl::glfw::Viewer &viewer,
+    igl::opengl::glfw::imgui::ImGuiMenu &menu, int button, int modifier) {
+    // get vertices, project them onto screen and find closest vertex to mouse
+    float minDist = std::numeric_limits<float>::infinity();
+	int vertex = -1;
+	int object = -1;
+	for (size_t i = 0; i < viewer.data_list.size(); i++) {
+		Eigen::MatrixXf Vf = viewer.data_list[i].V.cast<float>();
+		Eigen::MatrixXf projections;
+		igl::project(Vf, viewer.core().view, viewer.core().proj,
+			viewer.core().viewport, projections);
+
+		Eigen::VectorXf x = projections.col(0).array() - viewer.current_mouse_x;
+		Eigen::VectorXf y = -projections.col(1).array() +
+			viewer.core().viewport(3) - viewer.current_mouse_y;
+		Eigen::VectorXf distances =
+			(x.array().square() + y.array().square()).matrix().cwiseSqrt();
+
+		int vi = -1;
+		float dist = distances.minCoeff(&vi);
+		if (dist < minDist) {
+			minDist = dist;
+			vertex = vi;
+			object = i;
+		}
+	}
+	if (minDist < 20) {
+		// only select vertex if user clicked "close"
+		m_clickedVertex = vertex;
+		m_clickedObject = object;
+		showVertexArrow();
+	}
+	return false;
+}
+
 }

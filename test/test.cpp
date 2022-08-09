@@ -7,7 +7,7 @@
 int main(int argc, char * argv[])
 {
   igl::opengl::glfw::Viewer viewer;
-  const auto names = {"sphere.obj"};
+  const auto names = {"dragon.obj"};
     //{"dragon.obj","sphere.obj","bunny.obj"};
   std::map<int, Eigen::RowVector3d> colors;
   int last_selected = -1;
