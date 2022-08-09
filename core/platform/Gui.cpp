@@ -174,4 +174,109 @@ bool Gui::drawCallback(igl::opengl::glfw::Viewer &viewer) {
     return false;
 }
 
+bool Gui::scrollCallback(igl::opengl::glfw::Viewer &viewer, float delta_y) {
+    double factor = 1.5;
+    if (delta_y > 0) {
+        viewer.core().camera_zoom *= factor;
+    }
+    else {
+        viewer.core().camera_zoom /= factor;
+    }
+    return true;
+}
+
+void Gui::toggleSimulation() {
+    if (p_simulator->isPaused()) {
+        if (!p_simulator->hasStarted()) {
+            updateSimulationParameters();
+        }
+        p_simulator->run();
+    }
+    else {
+        p_simulator->pause();
+    }
+}
+
+void Gui::singleStep() {
+    if (!p_simulator->hasStarted()) {
+        updateSimulationParameters();
+    }
+    p_simulator->run(true);
+}
+
+void Gui::clearScreen() {
+    m_request_clear = true;
+    clearSimulation();
+}
+
+bool Gui::keyCallback(igl::opengl::glfw::Viewer &viewer, unsigned int key, int modifiers) {
+    switch (key) {
+    case 'I':
+    case 'i':
+        for (auto &d : viewer.data_list) {
+            // |= bytewise OR 
+            d.dirty = igl::opengl::MeshGL::DIRTY_NORMAL;
+            d.invert_normals = !d.invert_normals;
+        }
+        return true;
+    case 'L':
+    case 'l':
+        for (auto &d : viewer.data_list) {
+            d.show_lines = !d.show_lines;
+        }
+        return true;
+    case 'T':
+    case 't':
+        for (auto &d : viewer.data_list) {
+            d.show_faces = !d.show_faces;
+        }
+        return true;
+    case ';':
+        for (auto &d : viewer.data_list) {
+            d.show_vertex_labels = !d.show_vertex_labels;
+        }
+        return true;
+    case ':':
+        for (auto &d : viewer.data_list) {
+            d.show_face_labels = !d.show_face_labels;
+        }
+        return true;
+    case ' ':
+        toggleSimulation();
+        return true;
+    case 'R':
+    case 'r':
+        resetSimulation();
+        return true;
+    case 'A':
+    case 'a':
+        singleStep();
+        // return true;
+    case 'C':
+    case 'c':
+        clearScreen();
+        return true;
+    case '-':
+        if (!m_fastForward) {
+            p_simulator->setSimulationSpeed(240);
+        }
+        else {
+            p_simulator->setSimulationSpeed(m_simSpeed);
+        }
+        m_fastForward = !m_fastForward;
+        return true;
+    case '.':
+        viewer.core().lighting_factor += 0.1;
+        break;
+    case ',':
+        viewer.core().lighting_factor -+ 0.1;
+        break;
+    default:
+        return childKeyCallback(viewer, key, modifiers);
+    }
+    viewer.core().lighting_factor =
+        std::min(std::max(viewer.core().lighting_factor, 0.0f), 1.0f);
+    return false;
+} 
+
 }

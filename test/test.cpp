@@ -1,105 +1,54 @@
-#include <igl/readOBJ.h>
 #include <igl/opengl/glfw/Viewer.h>
-#include <igl/opengl/glfw/imgui/ImGuiPlugin.h>
-#include <igl/opengl/glfw/imgui/ImGuiMenu.h>
-#include <igl/opengl/glfw/imgui/ImGuiHelpers.h>
+#include <GLFW/glfw3.h>
+#include <string>
 #include <iostream>
+#include <map>
 
-int main(int argc, char *argv[])
+int main(int argc, char * argv[])
 {
-  Eigen::MatrixXd V;
-  Eigen::MatrixXi F;
-
-  // Load a mesh in OFF format
-  igl::readOBJ("./resources/obj/bunny.obj", V, F);
-
-  // Init the viewer
   igl::opengl::glfw::Viewer viewer;
-
-  // Attach a menu plugin
-  igl::opengl::glfw::imgui::ImGuiPlugin plugin;
-  viewer.plugins.push_back(&plugin);
-  igl::opengl::glfw::imgui::ImGuiMenu menu;
-  plugin.widgets.push_back(&menu);
-
-  // Customize the menu
-  double doubleVariable = 0.1f; // Shared between two menus
-
-  // Add content to the default menu window
-  menu.callback_draw_viewer_menu = [&]()
+  const auto names = {"sphere.obj"};
+    //{"dragon.obj","sphere.obj","bunny.obj"};
+  std::map<int, Eigen::RowVector3d> colors;
+  int last_selected = -1;
+  for(const auto & name : names)
   {
-    // Draw parent menu content
-    menu.draw_viewer_menu();
+    viewer.load_mesh_from_file( "./resources/obj/" + std::string(name));
+    colors.emplace(viewer.data().id, 0.5*Eigen::RowVector3d::Random().array() + 0.5);
+  }
 
-    // Add new group
-    if (ImGui::CollapsingHeader("New Group", ImGuiTreeNodeFlags_DefaultOpen))
+  viewer.callback_key_down =
+    [&](igl::opengl::glfw::Viewer &, unsigned int key, int mod)
+  {
+    if(key == GLFW_KEY_BACKSPACE)
     {
-      // Expose variable directly ...
-      ImGui::InputDouble("double", &doubleVariable, 0, 0, "%.4f");
-
-      // ... or using a custom callback
-      static bool boolVariable = true;
-      if (ImGui::Checkbox("bool", &boolVariable))
+      int old_id = viewer.data().id;
+      if (viewer.erase_mesh(viewer.selected_data_index))
       {
-        // do something
-        std::cout << "boolVariable: " << std::boolalpha << boolVariable << std::endl;
+        colors.erase(old_id);
+        last_selected = -1;
       }
-
-      // Expose an enumeration type
-      enum Orientation { Up=0, Down, Left, Right };
-      static Orientation dir = Up;
-      ImGui::Combo("Direction", (int *)(&dir), "Up\0Down\0Left\0Right\0\0");
-
-      // We can also use a std::vector<std::string> defined dynamically
-      static int num_choices = 3;
-      static std::vector<std::string> choices;
-      static int idx_choice = 0;
-      if (ImGui::InputInt("Num letters", &num_choices))
-      {
-        num_choices = std::max(1, std::min(26, num_choices));
-      }
-      if (num_choices != (int) choices.size())
-      {
-        choices.resize(num_choices);
-        for (int i = 0; i < num_choices; ++i)
-          choices[i] = std::string(1, 'A' + i);
-        if (idx_choice >= num_choices)
-          idx_choice = num_choices - 1;
-      }
-      ImGui::Combo("Letter", &idx_choice, choices);
-
-      // Add a button
-      if (ImGui::Button("Print Hello", ImVec2(-1,0)))
-      {
-        std::cout << "Hello\n";
-      }
+      return true;
     }
+    return false;
   };
 
-  // Draw additional windows
-  menu.callback_draw_custom_window = [&]()
+  // Refresh selected mesh colors
+  viewer.callback_pre_draw =
+    [&](igl::opengl::glfw::Viewer &)
   {
-    // Define next window position + size
-    ImGui::SetNextWindowPos(ImVec2(180.f * menu.menu_scaling(), 10), ImGuiCond_FirstUseEver);
-    ImGui::SetNextWindowSize(ImVec2(200, 160), ImGuiCond_FirstUseEver);
-    ImGui::Begin(
-        "New Window", nullptr,
-        ImGuiWindowFlags_NoSavedSettings
-    );
-
-    // Expose the same variable directly ...
-    ImGui::PushItemWidth(-80);
-    ImGui::DragScalar("double", ImGuiDataType_Double, &doubleVariable, 0.1, 0, 0, "%.4f");
-    ImGui::PopItemWidth();
-
-    static std::string str = "bunny";
-    ImGui::InputText("Name", str);
-
-    ImGui::End();
+    if (last_selected != viewer.selected_data_index)
+    {
+      for (auto &data : viewer.data_list)
+      {
+        data.set_colors(colors[data.id]);
+      }
+      viewer.data_list[viewer.selected_data_index].set_colors(Eigen::RowVector3d(0.9,0.1,0.1));
+      last_selected = viewer.selected_data_index;
+    }
+    return false;
   };
 
-  // Plot the mesh
-  viewer.data().set_mesh(V, F);
-  viewer.data().add_label(viewer.data().V.row(0) + viewer.data().V_normals.row(0).normalized()*0.005, "Hello World!");
   viewer.launch();
+  return EXIT_SUCCESS;
 }
