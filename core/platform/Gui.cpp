@@ -86,7 +86,7 @@ void Gui::start() {
 
 void Gui::resetSimulation() {
     p_simulator->reset();
-    m_timeAverage = 0.0;
+    m_timerAverage = 0.0;
 }
 
 #pragma region ArrowInterface
@@ -339,8 +339,8 @@ void Gui::drawMenuWindow(igl::opengl::glfw::imgui::ImGuiMenu &menu) {
     float menu_width = 220.f * menu.menu_scaling();
 
     // Controls 
-    ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f), ImGuiSetCond_FirstUseEver);
-	ImGui::SetNextWindowSize(ImVec2(0.0f, 0.0f), ImGuiSetCond_FirstUseEver);
+    ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f), ImGuiCond_FirstUseEver);
+	ImGui::SetNextWindowSize(ImVec2(0.0f, 0.0f), ImGuiCond_FirstUseEver);
 
     bool _viewer_menu_visible = true;
     ImGui::Begin(
@@ -353,9 +353,77 @@ void Gui::drawMenuWindow(igl::opengl::glfw::imgui::ImGuiMenu &menu) {
     ImGui::End();
 
     // Clicking
+    // When click at a vertex, Gui will show the vertex's position and arrow
     if (m_clickedVertex >= 0) {
-        
+        ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_FirstUseEver);
+		ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize,
+			ImGuiCond_FirstUseEver);
+		bool visible = true;
+		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0, 0, 0, 0));
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
+		ImGui::Begin(
+			"ViewerLabels", &visible,
+			ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
+			ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar |
+			ImGuiWindowFlags_NoScrollWithMouse |
+			ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings |
+			ImGuiWindowFlags_NoInputs);
+
+		Eigen::Vector3d pos =
+			m_viewer.data_list[m_clickedObject].V.row(m_clickedVertex);
+		Eigen::Vector3d norm =
+			m_viewer.data_list[m_clickedObject].V_normals.row(m_clickedVertex);
+		std::string text = "(" + std::to_string(pos(0)) + ", " +
+			std::to_string(pos(1)) + ", " +
+			std::to_string(pos(2)) + ")";
+
+		ImDrawList *drawList = ImGui::GetWindowDrawList();
+		Eigen::Vector3f c0 = igl::project(
+			Eigen::Vector3f((pos + 0.1 * norm).cast<float>()),
+			m_viewer.core().view, m_viewer.core().proj, m_viewer.core().viewport);
+		drawList->AddText(ImGui::GetFont(), ImGui::GetFontSize() * 1.2,
+			ImVec2(c0(0), m_viewer.core().viewport[3] - c0(1)),
+			ImGui::GetColorU32(ImVec4(0, 0, 10, 255)), &text[0],
+			&text[0] + text.size());
+
+		ImGui::End();
+		ImGui::PopStyleColor();
+		ImGui::PopStyleVar();
+
+		showVertexArrow();
     }
+
+    // Stats
+    if (m_showStats) {
+		int width, height;
+		glfwGetWindowSize(m_viewer.window, &width, &height);
+		ImGui::SetNextWindowPos(ImVec2(width - menu_width, 0.0f),
+			ImGuiCond_FirstUseEver);
+		ImGui::SetNextWindowSize(ImVec2(0.0f, 0.0f), ImGuiCond_FirstUseEver);
+		// ImGui::SetNextWindowSizeConstraints(ImVec2(menu_width, -1.0f),
+		// 	ImVec2(menu_width, -1.0f));
+		ImGui::Begin("Stats", &_viewer_menu_visible,
+			// ImGuiWindowFlags_NoSavedSettings |
+			// ImGuiWindowFlags_AlwaysAutoResize);
+			ImGuiWindowFlags_NoSavedSettings);
+		ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.5f);
+		if (!p_simulator->isPaused()) {
+			if (m_timerAverage > 0.0) {
+				double alpha = 0.95;
+				m_timerAverage = m_timerAverage * alpha +
+					(1.0 - alpha) * p_simulator->getDuration();
+			}
+			else {
+				m_timerAverage = p_simulator->getDuration();
+			}
+		}
+		ImGui::Text("Iteration: %ld", p_simulator->getSimulationStep());
+		ImGui::Text("Average time per iteration: %.2fms", m_timerAverage);
+		ImGui::Text("Current time: %.5f", p_simulator->getSimulationTime());
+		drawSimulationStats();
+		ImGui::PopItemWidth();
+		ImGui::End();
+	}
 } 
 
 }
