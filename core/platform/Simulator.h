@@ -250,7 +250,7 @@ protected:
 
     std::thread *p_simulator_thread;
     Simulation *p_simulation;
-    duration<double> m_duration;
+    duration<double> m_duration;    // one step duration, not the whole time
     bool m_please_pause;
     bool m_please_die;
     bool m_running;

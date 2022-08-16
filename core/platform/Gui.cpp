@@ -333,6 +333,11 @@ bool Gui::mouseCallback(igl::opengl::glfw::Viewer &viewer,
 	return false;
 }
 
+/**
+ * @brief Menu control: 1) print position when click at a vertex, 2) update the time state
+ * 
+ * @param menu 
+ */
 void Gui::drawMenuWindow(igl::opengl::glfw::imgui::ImGuiMenu &menu) {
     glfwSetWindowTitle(m_viewer.window, "Ryao Simulator");
 
@@ -425,5 +430,9 @@ void Gui::drawMenuWindow(igl::opengl::glfw::imgui::ImGuiMenu &menu) {
 		ImGui::End();
 	}
 } 
+
+inline std::string getFilename(int total_numObj, int obj, int total_steps, int step) {
+    
+}
 
 }
