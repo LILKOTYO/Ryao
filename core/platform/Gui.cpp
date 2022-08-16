@@ -209,6 +209,15 @@ void Gui::clearScreen() {
     clearSimulation();
 }
 
+/**
+ * @brief Define all the shortcut keys
+ * 
+ * @param viewer 
+ * @param key 
+ * @param modifiers 
+ * @return true 
+ * @return false 
+ */
 bool Gui::keyCallback(igl::opengl::glfw::Viewer &viewer, unsigned int key, int modifiers) {
     switch (key) {
     case 'I':
@@ -279,6 +288,16 @@ bool Gui::keyCallback(igl::opengl::glfw::Viewer &viewer, unsigned int key, int m
     return false;
 } 
 
+/**
+ * @brief Get the closest (to hit position) vertex, and show the arrow of this vertex
+ * 
+ * @param viewer 
+ * @param menu 
+ * @param button 
+ * @param modifier 
+ * @return true 
+ * @return false 
+ */
 bool Gui::mouseCallback(igl::opengl::glfw::Viewer &viewer,
     igl::opengl::glfw::imgui::ImGuiMenu &menu, int button, int modifier) {
     // get vertices, project them onto screen and find closest vertex to mouse
@@ -313,5 +332,30 @@ bool Gui::mouseCallback(igl::opengl::glfw::Viewer &viewer,
 	}
 	return false;
 }
+
+void Gui::drawMenuWindow(igl::opengl::glfw::imgui::ImGuiMenu &menu) {
+    glfwSetWindowTitle(m_viewer.window, "Ryao Simulator");
+
+    float menu_width = 220.f * menu.menu_scaling();
+
+    // Controls 
+    ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f), ImGuiSetCond_FirstUseEver);
+	ImGui::SetNextWindowSize(ImVec2(0.0f, 0.0f), ImGuiSetCond_FirstUseEver);
+
+    bool _viewer_menu_visible = true;
+    ImGui::Begin(
+        "Viewer", &_viewer_menu_visible,
+        ImGuiWindowFlags_NoSavedSettings
+    );
+    ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.5f);
+    drawMenu(m_viewer, menu);
+    ImGui::PopItemWidth();
+    ImGui::End();
+
+    // Clicking
+    if (m_clickedVertex >= 0) {
+        
+    }
+} 
 
 }
