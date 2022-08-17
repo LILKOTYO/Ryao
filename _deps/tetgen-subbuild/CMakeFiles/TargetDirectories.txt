@@ -1,3 +1,0 @@
-/home/liao/selfcppdev/Ryao/_deps/tetgen-subbuild/CMakeFiles/tetgen-populate.dir
-/home/liao/selfcppdev/Ryao/_deps/tetgen-subbuild/CMakeFiles/edit_cache.dir
-/home/liao/selfcppdev/Ryao/_deps/tetgen-subbuild/CMakeFiles/rebuild_cache.dir
