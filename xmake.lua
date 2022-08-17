@@ -1,4 +1,4 @@
-add_rules("mode.debug", "mode.release")
+add_rules("mode.release")
 
 add_requires("spdlog", "glfw", "glad", "stb", "glm")
 add_requires("libigl", {configs = {cgal = true, imgui = true}})
@@ -11,12 +11,13 @@ target("libiglxmake")
     set_kind("binary")
     add_files("src/*.cpp")
     add_files("core/platform/*.cpp")
+    add_headerfiles("src/*.h")
     
     add_includedirs("core/platform", "external/imgui", "external/libigl-imgui")
     
     add_packages("spdlog", "glfw", "glad", "stb", "glm", "libigl")
 
-    set_symbols("debug")
+    set_symbols("release")
     if is_os("linux") then
         add_syslinks("OpenGL")
         add_syslinks("pthread")
@@ -33,10 +34,11 @@ target_end()
 target("cpptest")
     set_kind("binary")
     add_files("test/*.cpp")
+    add_files("core/platform/*.cpp")
     add_includedirs("core/platform", "external/imgui", "external/libigl-imgui")
 
     add_packages("spdlog", "glfw", "glad", "stb", "glm", "libigl")
-    set_symbols("debug")
+    set_symbols("release")
     if is_os("linux") then
         add_syslinks("OpenGL")
         add_syslinks("pthread")

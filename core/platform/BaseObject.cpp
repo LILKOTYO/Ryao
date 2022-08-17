@@ -1,5 +1,4 @@
 #include "BaseObject.h"
-
 namespace Ryao {
 
 bool BaseObject::loadMesh(const std::string& path) {
@@ -40,7 +39,7 @@ bool BaseObject::loadMesh(const std::string& path) {
 void BaseObject::reset() {
     setPosition(Eigen::Vector3d::Zero());
     setRotation(Eigen::Matrix3d::Identity());
-    resetMembers();
+    // resetMembers();
 }
 
 void BaseObject::recomputeCOM() {

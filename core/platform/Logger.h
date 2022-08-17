@@ -21,7 +21,7 @@ namespace Ryao {
 #define RYAO_DEBUG(...)	    Ryao::Logger::GetLogger()->debug(__VA_ARGS__)
 #define RYAO_INFO(...)	    Ryao::Logger::GetLogger()->info(__VA_ARGS__)
 #define RYAO_WARN(...)	    Ryao::Logger::GetLogger()->warn(__VA_ARGS__)
-#define RYYAO_ERROR(...)	Ryao::Logger::GetLogger()->error(__VA_ARGS__)
+#define RYAO_ERROR(...)	Ryao::Logger::GetLogger()->error(__VA_ARGS__)
 
 // // For Internal Debug
 // #define RYAO_TRACE_IN(...)	    Logger::GetLogger()->trace(__VA_ARGS__)
