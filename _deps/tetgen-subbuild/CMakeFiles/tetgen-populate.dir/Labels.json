@@ -1,0 +1,46 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/home/liao/selfcppdev/Ryao/_deps/tetgen-subbuild/CMakeFiles/tetgen-populate"
+		},
+		{
+			"file" : "/home/liao/selfcppdev/Ryao/_deps/tetgen-subbuild/CMakeFiles/tetgen-populate.rule"
+		},
+		{
+			"file" : "/home/liao/selfcppdev/Ryao/_deps/tetgen-subbuild/CMakeFiles/tetgen-populate-complete.rule"
+		},
+		{
+			"file" : "/home/liao/selfcppdev/Ryao/_deps/tetgen-subbuild/tetgen-populate-prefix/src/tetgen-populate-stamp/tetgen-populate-build.rule"
+		},
+		{
+			"file" : "/home/liao/selfcppdev/Ryao/_deps/tetgen-subbuild/tetgen-populate-prefix/src/tetgen-populate-stamp/tetgen-populate-configure.rule"
+		},
+		{
+			"file" : "/home/liao/selfcppdev/Ryao/_deps/tetgen-subbuild/tetgen-populate-prefix/src/tetgen-populate-stamp/tetgen-populate-download.rule"
+		},
+		{
+			"file" : "/home/liao/selfcppdev/Ryao/_deps/tetgen-subbuild/tetgen-populate-prefix/src/tetgen-populate-stamp/tetgen-populate-install.rule"
+		},
+		{
+			"file" : "/home/liao/selfcppdev/Ryao/_deps/tetgen-subbuild/tetgen-populate-prefix/src/tetgen-populate-stamp/tetgen-populate-mkdir.rule"
+		},
+		{
+			"file" : "/home/liao/selfcppdev/Ryao/_deps/tetgen-subbuild/tetgen-populate-prefix/src/tetgen-populate-stamp/tetgen-populate-patch.rule"
+		},
+		{
+			"file" : "/home/liao/selfcppdev/Ryao/_deps/tetgen-subbuild/tetgen-populate-prefix/src/tetgen-populate-stamp/tetgen-populate-test.rule"
+		},
+		{
+			"file" : "/home/liao/selfcppdev/Ryao/_deps/tetgen-subbuild/tetgen-populate-prefix/src/tetgen-populate-stamp/tetgen-populate-update.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"tetgen-populate"
+		],
+		"name" : "tetgen-populate"
+	}
+}

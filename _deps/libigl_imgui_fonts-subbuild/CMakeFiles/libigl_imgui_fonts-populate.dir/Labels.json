@@ -1,0 +1,46 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/home/liao/selfcppdev/Ryao/_deps/libigl_imgui_fonts-subbuild/CMakeFiles/libigl_imgui_fonts-populate"
+		},
+		{
+			"file" : "/home/liao/selfcppdev/Ryao/_deps/libigl_imgui_fonts-subbuild/CMakeFiles/libigl_imgui_fonts-populate.rule"
+		},
+		{
+			"file" : "/home/liao/selfcppdev/Ryao/_deps/libigl_imgui_fonts-subbuild/CMakeFiles/libigl_imgui_fonts-populate-complete.rule"
+		},
+		{
+			"file" : "/home/liao/selfcppdev/Ryao/_deps/libigl_imgui_fonts-subbuild/libigl_imgui_fonts-populate-prefix/src/libigl_imgui_fonts-populate-stamp/libigl_imgui_fonts-populate-build.rule"
+		},
+		{
+			"file" : "/home/liao/selfcppdev/Ryao/_deps/libigl_imgui_fonts-subbuild/libigl_imgui_fonts-populate-prefix/src/libigl_imgui_fonts-populate-stamp/libigl_imgui_fonts-populate-configure.rule"
+		},
+		{
+			"file" : "/home/liao/selfcppdev/Ryao/_deps/libigl_imgui_fonts-subbuild/libigl_imgui_fonts-populate-prefix/src/libigl_imgui_fonts-populate-stamp/libigl_imgui_fonts-populate-download.rule"
+		},
+		{
+			"file" : "/home/liao/selfcppdev/Ryao/_deps/libigl_imgui_fonts-subbuild/libigl_imgui_fonts-populate-prefix/src/libigl_imgui_fonts-populate-stamp/libigl_imgui_fonts-populate-install.rule"
+		},
+		{
+			"file" : "/home/liao/selfcppdev/Ryao/_deps/libigl_imgui_fonts-subbuild/libigl_imgui_fonts-populate-prefix/src/libigl_imgui_fonts-populate-stamp/libigl_imgui_fonts-populate-mkdir.rule"
+		},
+		{
+			"file" : "/home/liao/selfcppdev/Ryao/_deps/libigl_imgui_fonts-subbuild/libigl_imgui_fonts-populate-prefix/src/libigl_imgui_fonts-populate-stamp/libigl_imgui_fonts-populate-patch.rule"
+		},
+		{
+			"file" : "/home/liao/selfcppdev/Ryao/_deps/libigl_imgui_fonts-subbuild/libigl_imgui_fonts-populate-prefix/src/libigl_imgui_fonts-populate-stamp/libigl_imgui_fonts-populate-test.rule"
+		},
+		{
+			"file" : "/home/liao/selfcppdev/Ryao/_deps/libigl_imgui_fonts-subbuild/libigl_imgui_fonts-populate-prefix/src/libigl_imgui_fonts-populate-stamp/libigl_imgui_fonts-populate-update.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"libigl_imgui_fonts-populate"
+		],
+		"name" : "libigl_imgui_fonts-populate"
+	}
+}

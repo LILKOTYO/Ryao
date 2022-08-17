@@ -242,12 +242,12 @@ bool Gui::keyCallback(igl::opengl::glfw::Viewer &viewer, unsigned int key, int m
         return true;
     case ';':
         for (auto &d : viewer.data_list) {
-            d.show_vertex_labels = !d.show_vertex_labels;
+            d.show_vertex_labels = d.show_vertex_labels == 0 ? 1 : 0;
         }
         return true;
     case ':':
         for (auto &d : viewer.data_list) {
-            d.show_face_labels = !d.show_face_labels;
+            d.show_face_labels = d.show_face_labels == 0 ? 1 : 0;
         }
         return true;
     case ' ':
@@ -432,7 +432,160 @@ void Gui::drawMenuWindow(igl::opengl::glfw::imgui::ImGuiMenu &menu) {
 } 
 
 inline std::string getFilename(int total_numObj, int obj, int total_steps, int step) {
-    
+    std::stringstream ss;
+    ss << "_object" << std::setw(std::log10(total_numObj)) << std::setfill('0')
+		<< obj << "_" << std::setw(std::log10(total_steps)) << step << ".obj";
+	return ss.str();
+}
+
+/**
+ * @brief write recording into files
+ * 
+ */
+void Gui::exportRecording() {
+    std::string path = igl::file_dialog_save();
+    size_t finddot = path.find_last_of(".");
+    path = path.substr(0, finddot);
+    RYAO_INFO("Exporting Recording to {} _objectxxx_xxx.obj", path);
+    auto rec = p_simulator->getRecords();
+    int steps = rec[0].size();
+    for (size_t i = 0; i < rec.size(); i++) {
+        int j = 0;
+        while (rec[i].size() > 0) {
+            std::string filename = path + getFilename(rec.size(), i, steps, j++);
+            auto p = rec[i].front();
+            rec[i].pop();
+            bool succ = igl::writeOBJ(filename, p.first, p.second);
+            if (!succ) {
+                RYAO_ERROR("Failed to write recording!");
+            }
+        }
+    }
+}
+/**
+ * @brief @author Liao Draw the Menu. Tips:show_face_lables and show_vertex_labels may not work
+ * 
+ * @param viewer 
+ * @param menu 
+ * @return true 
+ * @return false 
+ */
+bool Gui::drawMenu(igl::opengl::glfw::Viewer &viewer, igl::opengl::glfw::imgui::ImGuiMenu &menu) {
+    if (ImGui::CollapsingHeader("Simulation Control", ImGuiTreeNodeFlags_DefaultOpen)) {
+        // Control Pause
+        if (ImGui::Button(p_simulator->isPaused() ? "Run Simulation" : "Pause Simulation", ImVec2(-1, 0))) {
+            toggleSimulation();
+        }
+        // Single step
+        if (ImGui::Button("Single Step", ImVec2(-1, 0))) {
+            singleStep();
+        }
+        if (ImGui::Button("Reset Simulation", ImVec2(-1, 0))) {
+			resetSimulation();
+		}
+		if (ImGui::Button("Clear Screen", ImVec2(-1, 0))) {
+			clearScreen();
+		}
+        if (ImGui::SliderInt("Steps/Second", &m_simSpeed, 1, 240)) {
+            p_simulator->setSimulationSpeed(m_simSpeed);
+        }
+        if (ImGui::InputInt("Max Steps", &m_maxSteps, -1, -1)) {
+            p_simulator->setMaxSteps(m_maxSteps);
+        }
+    }
+
+    if (ImGui::CollapsingHeader("Overlays", ImGuiTreeNodeFlags_DefaultOpen)) {
+        if (ImGui::CheckboxFlags("Wireframe", &(viewer.data().show_lines), 1)) {
+            for (size_t i = 0; i < viewer.data_list.size(); i++) {
+                viewer.data_list[i].show_lines = viewer.data().show_lines;
+            }
+        }
+        if (ImGui::CheckboxFlags("Fill", &(viewer.data().show_faces), 1)) {
+			for (size_t i = 0; i < viewer.data_list.size(); i++) {
+				viewer.data_list[i].show_faces = viewer.data().show_faces;
+			}
+		}
+        bool show_vertid = viewer.data().show_vertex_labels == 0 ? false : true;
+        bool show_faceid = viewer.data().show_face_labels == 0 ? false : true;
+		if (ImGui::Checkbox("Show vertex labels",
+			&show_vertid)) {
+			for (size_t i = 0; i < viewer.data_list.size(); i++) {
+				viewer.data_list[i].show_vertex_labels = viewer.data().show_vertex_labels;
+			}
+		}
+		if (ImGui::Checkbox("Show faces labels", &show_faceid)) {
+			for (size_t i = 0; i < viewer.data_list.size(); i++) {
+				viewer.data_list[i].show_face_labels = viewer.data().show_face_labels;
+			}
+		}
+		ImGui::Checkbox("Show stats", &m_showStats);
+		if (ImGui::Checkbox("Show axes", &m_showAxes)) {
+			showAxes(m_showAxes);
+		}
+		if (ImGui::Checkbox("Show reference plane", &m_showReferencePlane)) {
+		    ;
+		}
+    }
+    if (ImGui::CollapsingHeader("Simulation Parameters",
+		ImGuiTreeNodeFlags_DefaultOpen)) {
+		drawSimulationParameterMenu();
+	}
+    if (ImGui::CollapsingHeader("Recording")) {
+		bool hasRecords = p_simulator->getRecords().size() > 0 &&
+			p_simulator->getRecords()[0].size() > 0;
+		if (!hasRecords) {
+			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0, 0, 0, 0));
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0, 0, 0, 0));
+		}
+		if (ImGui::Button("Export Recording", ImVec2(-1, 0))) {
+			if (hasRecords) {
+				exportRecording();
+			}
+		}
+		if (!hasRecords) {
+			ImGui::PopStyleColor();
+			ImGui::PopStyleColor();
+			ImGui::PopStyleColor();
+		}
+		if (ImGui::InputInt("Steps in Recording to keep", &m_numRecords, 0,
+			0)) {
+			p_simulator->setNumRecords(m_numRecords);
+		}
+		bool isRecording = p_simulator->isRecording();
+		ImGui::PushStyleColor(ImGuiCol_Button,
+			isRecording ? ImVec4(0.98f, 0.26f, 0.26f, 0.40f)
+			: ImVec4(0.26f, 0.98f, 0.40f, 0.40f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered,
+			isRecording ? ImVec4(0.98f, 0.26f, 0.26f, 1.0f)
+			: ImVec4(0.26f, 0.98f, 0.40f, 1.0f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive,
+			isRecording ? ImVec4(0.98f, 0.26f, 0.00f, 0.9f)
+			: ImVec4(0.00f, 0.98f, 0.40f, 0.9f));
+		if (ImGui::Button(isRecording ? "Stop Recording" : "Start Recording",
+			ImVec2(-1, 0))) {
+			p_simulator->setRecording(!isRecording);
+		}
+		ImGui::PopStyleColor();
+		ImGui::PopStyleColor();
+		ImGui::PopStyleColor();
+	}
+    return false;
+}
+
+void Gui::showAxes(bool show_axes) {
+    if (show_axes && m_axesID < 0) {
+        Eigen::RowVector3d origin = Eigen::Vector3d::Zero();
+        m_axesID = addArrow(origin, Eigen::Vector3d(1, 0, 0), Eigen::Vector3d(1, 0, 0));
+        addArrow(origin, Eigen::Vector3d(0, 1, 0), Eigen::Vector3d(0, 1, 0));
+		addArrow(origin, Eigen::Vector3d(0, 0, 1), Eigen::Vector3d(0, 0, 1));
+    }
+    if (!show_axes && m_axesID >= 0) {
+        removeArrow(m_axesID);
+        removeArrow(m_axesID + 1);
+        removeArrow(m_axesID + 2);
+        m_axesID = -1;
+    }
 }
 
 }
