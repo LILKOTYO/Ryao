@@ -6,5 +6,6 @@ build/
 *.log
 *.gz
 *.out
+_deps/
 
 (old)*
