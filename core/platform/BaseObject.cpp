@@ -37,6 +37,15 @@ bool BaseObject::loadMesh(const std::string& path) {
     return succ;
 }
 
+void BaseObject::findAndLoadMesh(const std::string& file) {
+	if (loadMesh(file)) return;
+	if (loadMesh("data/" + file)) return;
+	if (loadMesh("../data/" + file)) return;
+	if (loadMesh("../../data/" + file)) return;
+	if (loadMesh("../../../data/" + file)) return;
+	std::cerr << "Failed to find " << file << std::endl;
+}
+
 void BaseObject::reset() {
     setPosition(Eigen::Vector3d::Zero());
     setRotation(Eigen::Matrix3d::Identity());
