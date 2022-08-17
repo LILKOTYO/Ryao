@@ -33,3 +33,12 @@ cd build
 cmake ..
 make -j8
 ```
+## ChangeLog
+### 2022.08.17
+cmake bug:
+```
+if given arguments: 
+    "OVERRIDE_FIND_PACKAGE" "IN_LIST" "ARGN" "AND" "FIND_PACKAGE_ARGS" "IN_LIST" "ARGN"
+Unknown arguments specified
+```
+The cmake version declared in the `CMakeLists.txt` is too old, change it to your cmake's version.
