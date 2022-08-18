@@ -119,7 +119,7 @@ protected:
 
     void toggleSimulation();
 
-    void singleStep();
+    void singleStep(); 
 
     void resetSimulation();
 

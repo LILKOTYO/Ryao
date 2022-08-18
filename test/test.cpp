@@ -1,54 +1,37 @@
-#include <igl/opengl/glfw/Viewer.h>
-#include <GLFW/glfw3.h>
-#include <string>
-#include <iostream>
-#include <map>
+#include "test.h"
+#include <Gui.h>
+#include <Logger.h>
+using namespace Ryao;
 
-int main(int argc, char * argv[])
-{
-  igl::opengl::glfw::Viewer viewer;
-  const auto names = {"sphere.obj", "dragon.obj"};
-    //{"dragon.obj","sphere.obj","bunny.obj"};
-  std::map<int, Eigen::RowVector3d> colors;
-  int last_selected = -1;
-  for(const auto & name : names)
-  {
-    viewer.load_mesh_from_file( "./resources/obj/" + std::string(name));
-    colors.emplace(viewer.data().id, 0.5*Eigen::RowVector3d::Random().array() + 0.5);
-  }
+class EarthGui : public Gui {
+public:
+    float m_dt = 1e-2;
+    float m_radius = 10.0;
 
-  viewer.callback_key_down =
-    [&](igl::opengl::glfw::Viewer &, unsigned int key, int mod)
-  {
-    if(key == GLFW_KEY_BACKSPACE)
-    {
-      int old_id = viewer.data().id;
-      if (viewer.erase_mesh(viewer.selected_data_index))
-      {
-        colors.erase(old_id);
-        last_selected = -1;
-      }
-      return true;
+    EarthSim *p_EarthSim = NULL;
+
+    EarthGui() {
+      	// create a new Earth Simulation, set it in ther GUI, and start the GUI
+      	p_EarthSim = new EarthSim();
+      	setSimulation(p_EarthSim);
+
+     	 start();
     }
-    return false;
-  };
 
-  // Refresh selected mesh colors
-  viewer.callback_pre_draw =
-    [&](igl::opengl::glfw::Viewer &)
-  {
-    if (last_selected != viewer.selected_data_index)
-    {
-      for (auto &data : viewer.data_list)
-      {
-        data.set_colors(colors[data.id]);
-      }
-      viewer.data_list[viewer.selected_data_index].set_colors(Eigen::RowVector3d(0.9,0.1,0.1));
-      last_selected = viewer.selected_data_index;
+    virtual void updateSimulationParameters() override {
+    	p_EarthSim->setTimestep(m_dt);
+    	p_EarthSim->setRadius(m_radius);
     }
-    return false;
-  };
 
-  viewer.launch();
-  return EXIT_SUCCESS;
+	virtual void drawSimulationParameterMenu() override {
+		ImGui::InputFloat("Radius", &m_radius, 0, 0);
+		ImGui::InputFloat("dt", &m_dt, 0, 0);
+	}
+};
+
+int main() {
+	Logger::Init();
+	new EarthGui();
+
+	return 0;
 }

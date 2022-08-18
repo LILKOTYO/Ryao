@@ -32,6 +32,9 @@ namespace Ryao {
 
 class BaseObject {
 public:
+    BaseObject() {}
+    BaseObject(const std::string& mesh_path, const ObjType t = ObjType::DYNAMIC);
+
     // Load Mesh
     //---------------------------------------------------------------
     bool loadMesh(const std::string& path);
@@ -72,7 +75,7 @@ protected:
 	 * Reset class variables specific to a certain object. Is called by
 	 * BaseObject::reset().
 	 */
-    virtual void resetMembers() = 0;
+    // virtual void resetMembers() = 0;
 
     int m_id = -1;
     Mesh m_mesh;

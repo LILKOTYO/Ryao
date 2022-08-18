@@ -2,6 +2,13 @@
 
 namespace Ryao {
 
+BaseObject::BaseObject(const std::string& mesh_path, const ObjType t) {
+	loadMesh(mesh_path);
+	setType(t);
+	
+	reset();
+}
+
 bool BaseObject::loadMesh(const std::string& path) {
     bool succ = false;
 
@@ -49,7 +56,7 @@ void BaseObject::findAndLoadMesh(const std::string& file) {
 void BaseObject::reset() {
     setPosition(Eigen::Vector3d::Zero());
     setRotation(Eigen::Matrix3d::Identity());
-    resetMembers();
+    // resetMembers();
 }
 
 void BaseObject::recomputeCOM() {
