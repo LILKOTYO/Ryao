@@ -13,7 +13,7 @@ This branch is the `cmake` version of Ryao, and I am also trying to develop the 
 Except for spdlog, all other dependencies can be automatically downloaded by cmake.
 
 To install spdlog:
-```
+```shell
 $ git clone https://github.com/gabime/spdlog.git
 $ cd spdlog && mkdir build && cd build
 $ cmake .. && make -j
@@ -25,7 +25,7 @@ vcpkg install spdlog
 ```
 Or you can also use head-only version, however it is not recommended as it is much slower while compiling.
 ## Quick Start
-```
+```shell
 git clone git@github.com:LILKOTYO/Ryao.git
 git checkout cmake_version
 mkdir build
@@ -42,3 +42,28 @@ if given arguments:
 Unknown arguments specified
 ```
 The cmake version declared in the `CMakeLists.txt` is too old, change it to your cmake's version.
+### 2022.08.18
+find a bug(maybe not a bug): Sometimes this error may occur:
+```
+segmentation fault (core dumped)
+```
+The reason may be that the Logger is not initialized in the main function, while in **Ryao**, spdlog is used by default (eg in GUI).
+So make sure the following code exists in `main.cpp`:
+```c++
+#include <Logger.h>
+...
+using namespace Ryao;
+int main() {
+    ...
+    Logger::Init();
+    ...
+}
+```
+
+Try to implement Earth-Moon Simulation and succeed.
+
+Get some model files from libigl XD.
+
+TODO: 
+- Combine `RigidObject` class and `BaseObject`.
+- Try to find way to implement softbody (particle).
