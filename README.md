@@ -10,6 +10,11 @@ This branch is the `cmake` version of Ryao, and I am also trying to develop the 
 - glad
 - glfw
 
+On Ubuntu, you need to install the following packages:
+```shell
+sudo apt-get install build-essential libx11-dev mesa-common-dev libgl1-mesa-dev libglu1-mesa-dev libxrandr-dev libxi-dev libxmu-dev libblas-dev libxinerama-dev libxcursor-dev
+```
+
 Except for spdlog, all other dependencies can be automatically downloaded by cmake.
 
 To install spdlog:
