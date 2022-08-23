@@ -97,7 +97,7 @@ void BaseObject::setColors(const Eigen::MatrixXd& C) { m_mesh.C = C; }
 
 void BaseObject::setMass(double m) {
 	if (m_type != ObjType::DYNAMIC) {
-		RYAO_ERROR("Only Dynamics Object's mass can be set!");
+		RYAO_ERROR("Only Dynamic Object's mass can be set!");
 		return;
 	}
 	m_mass = m;
@@ -106,7 +106,7 @@ void BaseObject::setMass(double m) {
 
 void BaseObject::setInertia(const Eigen::Matrix3d &I) {
 	if (m_type != ObjType::DYNAMIC) {
-		RYAO_ERROR("Only Dynamics Object's inertia can be set!");
+		RYAO_ERROR("Only Dynamic Object's inertia can be set!");
 		return;
 	}
 	m_inertia = I;
@@ -115,7 +115,7 @@ void BaseObject::setInertia(const Eigen::Matrix3d &I) {
 
 void BaseObject::setLinearMomentum(const Eigen::Vector3d &p) {
 	if (m_type != ObjType::DYNAMIC) {
-		RYAO_ERROR("Only Dynamics Object's linear momentum can be set!");
+		RYAO_ERROR("Only Dynamic Object's linear momentum can be set!");
 		return;
 	}
 	m_v = m_massInv * p;
@@ -123,7 +123,7 @@ void BaseObject::setLinearMomentum(const Eigen::Vector3d &p) {
 
 void BaseObject::setAngularMomentum(const Eigen::Vector3d &l) {
 	if (m_type != ObjType::DYNAMIC) {
-		RYAO_ERROR("Only Dynamics Object's angular momentum can be set!");
+		RYAO_ERROR("Only Dynamic Object's angular momentum can be set!");
 		return;
 	}
 	m_w = getInertiaInvWorld() * l;
@@ -131,10 +131,34 @@ void BaseObject::setAngularMomentum(const Eigen::Vector3d &l) {
 
 void BaseObject::setLinearVelocity(const Eigen::Vector3d &v) {
 	if (m_type != ObjType::DYNAMIC) {
-		RYAO_ERROR("Only Dynamics Object's linear velocity can be set!");
+		RYAO_ERROR("Only Dynamic Object's linear velocity can be set!");
 		return;
 	}
 	m_v = v;
+}
+
+void BaseObject::setAngularVelocity(const Eigen::Vector3d &w) {
+	if (m_type != ObjType::DYNAMIC) {
+		RYAO_ERROR("Only Dynamic Object's angular velocity can be set!");
+		return;
+	}
+	m_w = w;
+}
+
+void BaseObject::setForce(const Eigen::Vector3d &f) {
+	if (m_type != ObjType::DYNAMIC) {
+		RYAO_ERROR("You can not add a force onto a object that is not Dynamic");
+		return;
+	}
+	m_force = f;
+}
+
+void BaseObject::setTorque(const Eigen::Vector3d &t) {
+	if (m_type != ObjType::DYNAMIC) {
+		RYAO_ERROR("You can not add a torque onto a object that is not Dynamic");
+		return;
+	}
+	m_torque = t;
 }
 
 double BaseObject::getScale() const { return m_scale; }
