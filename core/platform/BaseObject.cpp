@@ -5,8 +5,18 @@ namespace Ryao {
 BaseObject::BaseObject(const std::string& mesh_path, const ObjType t) {
 	loadMesh(mesh_path);
 	setType(t);
-	
+	setMass(1.0);
+
+	// initialize as a cube (inertia)
+	setInertia(getMass() * 2.0 / 6.0 * Eigen::Matrix3d::Identity());
 	reset();
+}
+
+void BaseObject::resetMembers() {
+	setLinearMomentum(Eigen::Vector3d::Zero());
+	setAngularMomentum(Eigen::Vector3d::Zero());
+	resetForce();
+	resetTorque();
 }
 
 bool BaseObject::loadMesh(const std::string& path) {
@@ -64,6 +74,7 @@ void BaseObject::recomputeCOM() {
     m_mesh.V = m_mesh.V.rowwise() - COM.transpose();
 }
 
+#pragma region GettersAndSetters
 void BaseObject::setScale(double s) { m_scale = s; }
 
 void BaseObject::setID(int id) { m_id = id; }
@@ -160,6 +171,45 @@ void BaseObject::setTorque(const Eigen::Vector3d &t) {
 	}
 	m_torque = t;
 }
+
+void BaseObject::resetForce() { m_force.setZero(); }
+
+void BaseObject::resetTorque() { m_torque.setZero(); }
+
+double BaseObject::getMass() const { return m_mass; }
+
+double BaseObject::getMassInv() const { return m_massInv; }
+
+Eigen::Matrix3d BaseObject::getInertia() const { return m_inertia; }
+
+Eigen::Matrix3d BaseObject::getInertiaInv() const { return m_inertiaInv; }
+
+Eigen::Matrix3d BaseObject::getInertiaInvWorld() const {
+	return m_quat * m_inertiaInv * m_quat.inverse();
+}
+
+Eigen::Matrix3d BaseObject::getInertiaWorld() const {
+	return m_quat * m_inertia * m_quat.inverse();
+}
+
+Eigen::Vector3d BaseObject::getLinearMomentum() const { return m_v * m_mass; }
+
+Eigen::Vector3d BaseObject::getAngularMomentum() const {
+	return getInertiaWorld() * m_v;
+}
+
+Eigen::Vector3d BaseObject::getLinearVelocity() const { return m_v; }
+
+Eigen::Vector3d BaseObject::getVelocity(const Eigen::Vector3d &point) const {
+	return getLinearVelocity() + getAngularVelocity().cross(point - getPosition());
+}
+
+Eigen::Vector3d BaseObject::getAngularVelocity() const { return m_w; }
+
+Eigen::Vector3d BaseObject::getForce() const { return m_force; }
+
+Eigen::Vector3d BaseObject::getTorque() const { return m_torque; }
+#pragma endregion GettersAndSetters
 
 double BaseObject::getScale() const { return m_scale; }
 

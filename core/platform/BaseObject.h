@@ -105,14 +105,14 @@ public:
 	void getMesh(Eigen::MatrixXd& V, Eigen::MatrixXi& F) const;
 	void getColors(Eigen::MatrixXd& C) const;
 
-    virtual ~BaseObject() {}
+    ~BaseObject() {}
 
 private:
     /*
 	 * Reset class variables specific to a certain object. Is called by
 	 * BaseObject::reset().
 	 */
-    virtual void resetMembers();
+    void resetMembers();
 
     // mesh param
     // -----------------------------------------------------------------
