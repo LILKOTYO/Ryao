@@ -91,8 +91,8 @@ void Gui::resetSimulation() {
 
 #pragma region ArrowInterface
 
-int Gui::addArrow(const Eigen::Vector3d &start, const Eigen::Vector3d &end,
-    const Eigen::Vector3d &color) {
+int Gui::addArrow(const VECTOR3 &start, const VECTOR3 &end,
+    const VECTOR3 &color) {
     m_arrows.push_back(Arrow(start, end, color));
     m_arrows.back().id = m_numArrows++;
     return m_arrows.back().id;
@@ -136,8 +136,8 @@ void Gui::showVertexArrow() {
         m_clickedArrow = -1;
     }
     if (m_clickedVertex >= 0) {
-        Eigen::Vector3d pos;
-        Eigen::Vector3d norm;
+        VECTOR3 pos;
+        VECTOR3 norm;
         if (callback_clicked_vertex) {
             callback_clicked_vertex(m_clickedVertex, m_clickedObject, pos, norm);
         }
@@ -146,7 +146,7 @@ void Gui::showVertexArrow() {
             norm = m_viewer.data_list[m_clickedObject].V_normals.row(m_clickedVertex);
         }
         m_clickedArrow =
-			addArrow(pos, pos + norm, Eigen::RowVector3d(1.0, 0, 0));
+			addArrow(pos, pos + norm, ROWVECTOR3(1.0, 0, 0));
     }
 }
 
@@ -305,15 +305,15 @@ bool Gui::mouseCallback(igl::opengl::glfw::Viewer &viewer,
 	int vertex = -1;
 	int object = -1;
 	for (size_t i = 0; i < viewer.data_list.size(); i++) {
-		Eigen::MatrixXf Vf = viewer.data_list[i].V.cast<float>();
-		Eigen::MatrixXf projections;
+		MATRIXF Vf = viewer.data_list[i].V.cast<float>();
+		MATRIXF projections;
 		igl::project(Vf, viewer.core().view, viewer.core().proj,
 			viewer.core().viewport, projections);
 
-		Eigen::VectorXf x = projections.col(0).array() - viewer.current_mouse_x;
-		Eigen::VectorXf y = -projections.col(1).array() +
+		VECTORF x = projections.col(0).array() - viewer.current_mouse_x;
+		VECTORF y = -projections.col(1).array() +
 			viewer.core().viewport(3) - viewer.current_mouse_y;
-		Eigen::VectorXf distances =
+		VECTORF distances =
 			(x.array().square() + y.array().square()).matrix().cwiseSqrt();
 
 		int vi = -1;
@@ -374,17 +374,17 @@ void Gui::drawMenuWindow(igl::opengl::glfw::imgui::ImGuiMenu &menu) {
 			ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings |
 			ImGuiWindowFlags_NoInputs);
 
-		Eigen::Vector3d pos =
+		VECTOR3 pos =
 			m_viewer.data_list[m_clickedObject].V.row(m_clickedVertex);
-		Eigen::Vector3d norm =
+		VECTOR3 norm =
 			m_viewer.data_list[m_clickedObject].V_normals.row(m_clickedVertex);
 		std::string text = "(" + std::to_string(pos(0)) + ", " +
 			std::to_string(pos(1)) + ", " +
 			std::to_string(pos(2)) + ")";
 
 		ImDrawList *drawList = ImGui::GetWindowDrawList();
-		Eigen::Vector3f c0 = igl::project(
-			Eigen::Vector3f((pos + 0.1 * norm).cast<float>()),
+		VECTOR3F c0 = igl::project(
+			VECTOR3F((pos + 0.1 * norm).cast<float>()),
 			m_viewer.core().view, m_viewer.core().proj, m_viewer.core().viewport);
 		drawList->AddText(ImGui::GetFont(), ImGui::GetFontSize() * 1.2,
 			ImVec2(c0(0), m_viewer.core().viewport[3] - c0(1)),
@@ -575,10 +575,10 @@ bool Gui::drawMenu(igl::opengl::glfw::Viewer &viewer, igl::opengl::glfw::imgui::
 
 void Gui::showAxes(bool show_axes) {
     if (show_axes && m_axesID < 0) {
-        Eigen::RowVector3d origin = Eigen::Vector3d::Zero();
-        m_axesID = addArrow(origin, Eigen::Vector3d(1, 0, 0), Eigen::Vector3d(1, 0, 0));
-        addArrow(origin, Eigen::Vector3d(0, 1, 0), Eigen::Vector3d(0, 1, 0));
-		addArrow(origin, Eigen::Vector3d(0, 0, 1), Eigen::Vector3d(0, 0, 1));
+        ROWVECTOR3 origin = VECTOR3::Zero();
+        m_axesID = addArrow(origin, VECTOR3(1, 0, 0), VECTOR3(1, 0, 0));
+        addArrow(origin, VECTOR3(0, 1, 0), VECTOR3(0, 1, 0));
+		addArrow(origin, VECTOR3(0, 0, 1), VECTOR3(0, 0, 1));
     }
     if (!show_axes && m_axesID >= 0) {
         removeArrow(m_axesID);

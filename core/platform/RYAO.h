@@ -17,13 +17,21 @@ typedef Eigen::Matrix<REAL, 9,  1>  VECTOR9;
 typedef Eigen::Matrix<REAL, 12, 1>  VECTOR12;
 typedef Eigen::Matrix<REAL, 1, 3>   ROWVECTOR3;
 
+typedef Eigen::Matrix<float, 3,  1>  VECTOR3F;
+
 typedef Eigen::Matrix<int, 2, 1> VECTOR2I;
 typedef Eigen::Matrix<int, 3, 1> VECTOR3I;
 typedef Eigen::Matrix<int, 4, 1> VECTOR4I;
 
 typedef Eigen::Matrix<REAL, Eigen::Dynamic, 1> VECTOR;
 typedef Eigen::Matrix<REAL, Eigen::Dynamic, Eigen::Dynamic> MATRIX;
+
+typedef Eigen::Matrix<float, Eigen::Dynamic, 1> VECTORF;
+typedef Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic> MATRIXF;
+
+typedef Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> MATRIXI;
 typedef Eigen::SparseMatrix<REAL> SPARSE_MATRIX;
 
+typedef Eigen::Quaterniond QUATERNIOND;
 
 #endif

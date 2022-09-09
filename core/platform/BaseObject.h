@@ -5,26 +5,26 @@
 #include <igl/per_vertex_normals.h>
 #include <igl/readOBJ.h>
 #include <igl/readOFF.h>
-#include <Eigen/Core>
+#include <RYAO.h>
 #include <Logger.h>
 
 struct Mesh {
     // vertices matrix
-    Eigen::MatrixXd V;
+    MATRIX V;
     // indices matrix
-    Eigen::MatrixXi F;
+    MATRIXI F;
     // color matrix ?
-    Eigen::MatrixXd C;
+    MATRIX C;
 
     // Per face attributes
-    Eigen::MatrixXd F_normals; // one normal per face
+    MATRIX F_normals; // one normal per face
 
     // Per vertex attributes
-    Eigen::MatrixXd V_normals;  // one normal per vertex
+    MATRIX V_normals;  // one normal per vertex
 
     // UV parametrization
-    // Eigen::MatrixXd V_uv;   // UV vertices
-    // Eigen::MatrixXi F_uv;   // optional faces for UVs
+    // MATRIX V_uv;   // UV vertices
+    // MATRIXI F_uv;   // optional faces for UVs
 };
 
 enum class ObjType { STATIC, DYNAMIC};
@@ -39,7 +39,7 @@ public:
     // Load Mesh
     //---------------------------------------------------------------
     bool loadMesh(const std::string& path);
-    void setMesh(const Eigen::MatrixXd& V, const Eigen::MatrixXi& F);
+    void setMesh(const MATRIX& V, const MATRIXI& F);
     void findAndLoadMesh(const std::string& file);
     
     // reset, COM: center of mass
@@ -57,53 +57,53 @@ public:
     void setScale(double s);
     void setID(int id);
     void setType(ObjType t);
-    void setPosition(const Eigen::Vector3d& p);
-	void setRotation(const Eigen::Quaterniond& q);
-	void setRotation(const Eigen::Matrix3d& R);
-	void setColors(const Eigen::MatrixXd& C);
+    void setPosition(const VECTOR3& p);
+	void setRotation(const QUATERNIOND& q);
+	void setRotation(const MATRIX3& R);
+	void setColors(const MATRIX& C);
     void setMass(double m);
-    void setInertia(const Eigen::Matrix3d& I);
-    void setLinearMomentum(const Eigen::Vector3d& p);
-    void setAngularMomentum(const Eigen::Vector3d& l);
-    void setLinearVelocity(const Eigen::Vector3d& v);
-	void setAngularVelocity(const Eigen::Vector3d& w);
-    void setForce(const Eigen::Vector3d& f);
-    void setTorque(const Eigen::Vector3d& t);
+    void setInertia(const MATRIX3& I);
+    void setLinearMomentum(const VECTOR3& p);
+    void setAngularMomentum(const VECTOR3& l);
+    void setLinearVelocity(const VECTOR3& v);
+	void setAngularVelocity(const VECTOR3& w);
+    void setForce(const VECTOR3& f);
+    void setTorque(const VECTOR3& t);
     void resetForce();
     void resetTorque();
 
     double getMass() const;
     double getMassInv() const;
-    Eigen::Matrix3d getInertia() const;
-    Eigen::Matrix3d getInertiaInv() const;
-    Eigen::Matrix3d getInertiaInvWorld() const;
-    Eigen::Matrix3d getInertiaWorld() const;
-    Eigen::Vector3d getLinearMomentum() const;
-    Eigen::Vector3d getAngularMomentum() const;
-    Eigen::Vector3d getLinearVelocity() const;
-    Eigen::Vector3d getVelocity(const Eigen::Vector3d& point) const;
-    Eigen::Vector3d getAngularVelocity() const;
-    Eigen::Vector3d getForce() const;
-    Eigen::Vector3d getTorque() const;
+    MATRIX3 getInertia() const;
+    MATRIX3 getInertiaInv() const;
+    MATRIX3 getInertiaInvWorld() const;
+    MATRIX3 getInertiaWorld() const;
+    VECTOR3 getLinearMomentum() const;
+    VECTOR3 getAngularMomentum() const;
+    VECTOR3 getLinearVelocity() const;
+    VECTOR3 getVelocity(const VECTOR3& point) const;
+    VECTOR3 getAngularVelocity() const;
+    VECTOR3 getForce() const;
+    VECTOR3 getTorque() const;
 #pragma endregion GettersAndSetters
 
     // Apply force f
     // -------------------------------------------------------------
-    void applyForceToCOM(const Eigen::Vector3d& f);
-    void applyForce(const Eigen::Vector3d& f, const Eigen::Vector3d& p);
-    void applyTorque(const Eigen::Vector3d& t);
+    void applyForceToCOM(const VECTOR3& f);
+    void applyForce(const VECTOR3& f, const VECTOR3& p);
+    void applyTorque(const VECTOR3& t);
 
     // Get State
     //--------------------------------------------------------------
     double getScale() const;
 	int getID() const;
 	ObjType getType() const;
-	Eigen::Vector3d getPosition() const;
-	Eigen::Quaterniond getRotation() const;
-	Eigen::Matrix3d getRotationMatrix() const;
-	Eigen::Vector3d getVertexPosition(int vertexIndex) const;
-	void getMesh(Eigen::MatrixXd& V, Eigen::MatrixXi& F) const;
-	void getColors(Eigen::MatrixXd& C) const;
+	VECTOR3 getPosition() const;
+	QUATERNIOND getRotation() const;
+	MATRIX3 getRotationMatrix() const;
+	VECTOR3 getVertexPosition(int vertexIndex) const;
+	void getMesh(MATRIX& V, MATRIXI& F) const;
+	void getColors(MATRIX& C) const;
 
     ~BaseObject() {}
 
@@ -125,18 +125,18 @@ private:
     // -----------------------------------------------------------------
     double m_mass;                  // Body mass
     double m_massInv;               // Inverted mass
-    Eigen::Matrix3d m_inertia;      // Intertial Tensor (Initially set to cube)
-    Eigen::Matrix3d m_inertiaInv;   // Inverse 
+    MATRIX3 m_inertia;      // Intertial Tensor (Initially set to cube)
+    MATRIX3 m_inertiaInv;   // Inverse 
 
-    Eigen::Vector3d m_v;        // Linear velocity
-    Eigen::Vector3d m_w;        // Angular velocity
+    VECTOR3 m_v;        // Linear velocity
+    VECTOR3 m_w;        // Angular velocity
 
-    Eigen::Vector3d m_force;    // Force on body 
-    Eigen::Vector3d m_torque;   // Torque on body 
+    VECTOR3 m_force;    // Force on body 
+    VECTOR3 m_torque;   // Torque on body 
 
-    Eigen::Vector3d m_position; // Position of the center of mass
-    Eigen::Quaterniond m_quat;  // Rotation (quaternion)
-    Eigen::Matrix3d m_rot;      // Rotation (matrix)
+    VECTOR3 m_position; // Position of the center of mass
+    QUATERNIOND m_quat;  // Rotation (quaternion)
+    MATRIX3 m_rot;      // Rotation (matrix)
 };
 
 }

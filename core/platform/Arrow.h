@@ -3,8 +3,7 @@
 
 // #define RYAO_ARROW_DEBUG
 
-#include <Eigen/Core>
-#include <Eigen/Dense>
+#include <RYAO.h>
 #include <vector>
 
 #if defined(RYAO_DEBUG) || defined(RYAO_ARROW_DEBUG)
@@ -17,25 +16,25 @@ namespace Ryao {
 
 class Arrow {
 public:
-    Arrow(const Eigen::RowVector3d& s, const Eigen::RowVector3d& e) {
+    Arrow(const ROWVECTOR3& s, const ROWVECTOR3& e) {
         // The default color is red (RGB:1.0, 0.0, 0.0)
-        Arrow(s, e, Eigen::RowVector3d(1.0, 0, 0));
+        Arrow(s, e, ROWVECTOR3(1.0, 0, 0));
     }    
 
-    Arrow(const Eigen::RowVector3d& s, const Eigen::RowVector3d e,
-        const Eigen::RowVector3d& c)
+    Arrow(const ROWVECTOR3& s, const ROWVECTOR3 e,
+        const ROWVECTOR3& c)
         : start(s), end(e), color(c) {
         direction = (end - start).normalized();
 
-        Eigen::RowVector3d per1 = direction.cross(Eigen::Vector3d(1, 0, 0)).normalized() * 0.5;
+        ROWVECTOR3 per1 = direction.cross(VECTOR3(1, 0, 0)).normalized() * 0.5;
 
         // used to be std::isnan(per1.sum())
         if (per1.norm() == 0.0f) {
             // once the element in per1 is NaN, construct the axis-system using (0, 1, 0)
-            per1 = direction.cross(Eigen::Vector3d(0, 1, 0)).normalized() * 0.5;
+            per1 = direction.cross(VECTOR3(0, 1, 0)).normalized() * 0.5;
         }
 
-        Eigen::RowVector3d per2 = direction.cross(per1.normalized()).normalized() * 0.5;
+        ROWVECTOR3 per2 = direction.cross(per1.normalized()).normalized() * 0.5;
         
         head.resize(4);
         head[0] = end - 0.1 * (direction + per1);
@@ -57,13 +56,13 @@ public:
         #endif
     }
 
-    Eigen::RowVector3d start;
-    Eigen::RowVector3d end;
+    ROWVECTOR3 start;
+    ROWVECTOR3 end;
 
-    Eigen::RowVector3d direction;
-    std::vector<Eigen::RowVector3d> head;
+    ROWVECTOR3 direction;
+    std::vector<ROWVECTOR3> head;
 
-    Eigen::RowVector3d color;
+    ROWVECTOR3 color;
     size_t id;
 
 };

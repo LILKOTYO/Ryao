@@ -1,4 +1,5 @@
 build/
+debug/
 .DS_Store
 .vscode
 .clang-format
