@@ -3,6 +3,7 @@
 
 #include "Simulation.h"
 #include "Logger.h"
+#include <RYAO.h>
 #include <chrono>
 #include <igl/opengl/glfw/Viewer.h>
 #include <igl/opengl/glfw/imgui/ImGuiMenu.h>
@@ -142,7 +143,7 @@ public:
 
     void clearRecords() {
         for (size_t i =0; i < m_record.size(); i++) {
-            m_record[i] = std::queue<std::pair<Eigen::MatrixXd, Eigen::MatrixXi>>();
+            m_record[i] = std::queue<std::pair<MATRIX, MATRIXI>>();
         }
     }
 
@@ -152,7 +153,7 @@ public:
 
     void setNumRecords(int n) { m_numRecords = n; }
 
-    std::vector<std::queue<std::pair<Eigen::MatrixXd, Eigen::MatrixXi>>>& getRecords() {
+    std::vector<std::queue<std::pair<MATRIX, MATRIXI>>>& getRecords() {
         return m_record;
     }
 
@@ -162,8 +163,8 @@ protected:
 
     // void storeRecord() {
 	// 	auto os = p_simulation->getObjects();
-	// 	Eigen::MatrixXd V;
-	// 	Eigen::MatrixXi F;
+	// 	MATRIX V;
+	// 	MATRIXI F;
 	// 	for (size_t i = 0; i < os.size(); i++) {
 	// 		os[i].getMesh(V, F);
 	// 		m_record[i].push(std::make_pair(V, F));
@@ -264,7 +265,7 @@ protected:
 
     bool m_recording;
     int m_numRecords;
-    std::vector<std::queue<std::pair<Eigen::MatrixXd, Eigen::MatrixXi>>>
+    std::vector<std::queue<std::pair<MATRIX, MATRIXI>>>
         m_record;   // one queue of (vertices, faces)-pairs for every object
 
 };
