@@ -3,6 +3,7 @@
 
 #include <igl/opengl/glfw/Viewer.h>
 #include <igl/opengl/glfw/imgui/ImGuiMenu.h>
+#include <RYAO.h>
 #include "Arrow.h"
 #include "ReferencePlane.h"
 #include "Simulator.h"
@@ -81,8 +82,8 @@ public:
      * @param color -the color of the arrow, default = red
      * @return int -the index of the arrow
      */
-    int addArrow(const Eigen::Vector3d &start, const Eigen::Vector3d &end,
-        const Eigen::Vector3d &color = Eigen::RowVector3d(1, 0, 0));
+    int addArrow(const VECTOR3 &start, const VECTOR3 &end,
+        const VECTOR3 &color = ROWVECTOR3(1, 0, 0));
 
     /**
      * @brief Delete arrow at given index
@@ -105,7 +106,7 @@ public:
      * 
      */
     std::function<void(int clickedVertexIndex, int clickedObjectIndex,
-        Eigen::Vector3d &pos, Eigen::Vector3d &dir)> 
+        VECTOR3 &pos, VECTOR3 &dir)> 
         callback_clicked_vertex = nullptr;
 
     void turnOffLight() { m_viewer.core().lighting_factor = 0; }
