@@ -5,6 +5,7 @@ This branch is the `cmake` version of Ryao, and I am also trying to develop the 
 ## Dependencies
 - libigl
 - **spdlog**
+- **spectra**(TODO)
 - Eigen
 - imgui
 - glad
