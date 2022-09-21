@@ -28,9 +28,11 @@ if(NOT TARGET spdlog)
 endif()
 
 # Add default project files
-file(GLOB LIBFILES ${PROJECT_SOURCE_DIR}/../core/platform/*.*)
+file(GLOB LIBFILES ${PROJECT_SOURCE_DIR}/../core/Platform/*.*)
 source_group("Library Files" FILES ${LIBFILES})
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../core/platform)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../core/Platform)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../external/spectra/include)
+
 
 # Add your project files
 file(GLOB SRCFILES *.cpp)
