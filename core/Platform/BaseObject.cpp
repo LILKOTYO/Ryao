@@ -75,7 +75,7 @@ void BaseObject::recomputeCOM() {
 }
 
 #pragma region GettersAndSetters
-void BaseObject::setScale(double s) { m_scale = s; }
+void BaseObject::setScale(REAL s) { m_scale = s; }
 
 void BaseObject::setID(int id) { m_id = id; }
 
@@ -83,7 +83,7 @@ void BaseObject::setType(ObjType t) {
 	m_type = t; 
 
 	if (m_type == ObjType::STATIC) {
-		m_mass = std::numeric_limits<double>::infinity();
+		m_mass = std::numeric_limits<REAL>::infinity();
 		m_massInv = 0.0f;
 		m_inertia.setZero();
 		m_inertiaInv.setZero();
@@ -106,7 +106,7 @@ void BaseObject::setRotation(const MATRIX3& R) {
 
 void BaseObject::setColors(const MATRIX& C) { m_mesh.C = C; }
 
-void BaseObject::setMass(double m) {
+void BaseObject::setMass(REAL m) {
 	if (m_type != ObjType::DYNAMIC) {
 		RYAO_ERROR("Only Dynamic Object's mass can be set!");
 		return;
@@ -176,9 +176,9 @@ void BaseObject::resetForce() { m_force.setZero(); }
 
 void BaseObject::resetTorque() { m_torque.setZero(); }
 
-double BaseObject::getMass() const { return m_mass; }
+REAL BaseObject::getMass() const { return m_mass; }
 
-double BaseObject::getMassInv() const { return m_massInv; }
+REAL BaseObject::getMassInv() const { return m_massInv; }
 
 MATRIX3 BaseObject::getInertia() const { return m_inertia; }
 
@@ -211,7 +211,7 @@ VECTOR3 BaseObject::getForce() const { return m_force; }
 VECTOR3 BaseObject::getTorque() const { return m_torque; }
 #pragma endregion GettersAndSetters
 
-double BaseObject::getScale() const { return m_scale; }
+REAL BaseObject::getScale() const { return m_scale; }
 
 int BaseObject::getID() const { return m_id; }
 

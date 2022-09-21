@@ -164,7 +164,7 @@ protected:
     bool m_showReferencePlane = true;
 
     bool m_showStats = true;
-    double m_timerAverage = 0;        // average of execution time of one iteration of the simulation
+    REAL m_timerAverage = 0;        // average of execution time of one iteration of the simulation
     
     int m_maxSteps = -1;
 

@@ -54,14 +54,14 @@ public:
     // Getters and Setters
     // -------------------------------------------------------------
 #pragma region GettersAndSetters
-    void setScale(double s);
+    void setScale(REAL s);
     void setID(int id);
     void setType(ObjType t);
     void setPosition(const VECTOR3& p);
 	void setRotation(const QUATERNIOND& q);
 	void setRotation(const MATRIX3& R);
 	void setColors(const MATRIX& C);
-    void setMass(double m);
+    void setMass(REAL m);
     void setInertia(const MATRIX3& I);
     void setLinearMomentum(const VECTOR3& p);
     void setAngularMomentum(const VECTOR3& l);
@@ -72,8 +72,8 @@ public:
     void resetForce();
     void resetTorque();
 
-    double getMass() const;
-    double getMassInv() const;
+    REAL getMass() const;
+    REAL getMassInv() const;
     MATRIX3 getInertia() const;
     MATRIX3 getInertiaInv() const;
     MATRIX3 getInertiaInvWorld() const;
@@ -95,7 +95,7 @@ public:
 
     // Get State
     //--------------------------------------------------------------
-    double getScale() const;
+    REAL getScale() const;
 	int getID() const;
 	ObjType getType() const;
 	VECTOR3 getPosition() const;
@@ -119,14 +119,14 @@ private:
     int m_id = -1;
     Mesh m_mesh;
     ObjType m_type;
-    double m_scale = 1.0;
+    REAL m_scale = 1.0;
 
     // physics param
     // -----------------------------------------------------------------
-    double m_mass;                  // Body mass
-    double m_massInv;               // Inverted mass
-    MATRIX3 m_inertia;      // Intertial Tensor (Initially set to cube)
-    MATRIX3 m_inertiaInv;   // Inverse 
+    REAL m_mass;                  // Body mass
+    REAL m_massInv;               // Inverted mass
+    MATRIX3 m_inertia;              // Intertial Tensor (Initially set to cube)
+    MATRIX3 m_inertiaInv;           // Inverse 
 
     VECTOR3 m_v;        // Linear velocity
     VECTOR3 m_w;        // Angular velocity
