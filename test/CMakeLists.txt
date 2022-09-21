@@ -31,6 +31,7 @@ endif()
 file(GLOB LIBFILES ${PROJECT_SOURCE_DIR}/../core/Platform/*.*)
 source_group("Library Files" FILES ${LIBFILES})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../core/Platform)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../core/Hyperelastic)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../external/spectra/include)
 
 
