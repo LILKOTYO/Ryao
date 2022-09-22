@@ -71,6 +71,7 @@ void polarDecomposition(const MATRIX3& A, MATRIX3& R, MATRIX3& S)
 ///////////////////////////////////////////////////////////////////////
 // rotation variant of the SVD where the reflections are loaded into
 // Sigma and not U and V
+// so that U and V are pure rotational matrix
 ///////////////////////////////////////////////////////////////////////
 void svd_rv(const MATRIX3& F, MATRIX3& U, VECTOR3& Sigma, MATRIX3& V)
 {
