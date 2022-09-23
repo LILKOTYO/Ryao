@@ -2,7 +2,7 @@
 #define NEO_HOOKEAN_BW_H
 
 #include <HYPERELASTIC.h>
-// ddddd
+
 namespace Ryao {
 namespace VOLUME {
 // Bonet and Wood-style Neo-Hookean energy
