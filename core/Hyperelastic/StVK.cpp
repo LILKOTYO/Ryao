@@ -41,7 +41,7 @@ MATRIX3 StVK::PK1(const MATRIX3 &F) const {
 }
 
 /**
- * @brief build out the eigen system
+ * @brief build out the eigen system of the energy hessian
  *          reference: Dynamic Deformables p101 eq7.23-7.28
  * 
  * @param U 
@@ -98,9 +98,47 @@ void StVK::buildEigenSystem(const MATRIX3& U, const VECTOR3& Sigma, const MATRIX
     buildScalingEigenvectors(U, Q, V, eigenvectors); 
 }
 
+/**
+ * @brief build derivative of PK1 w.r.t. F, using the eigen system.
+ * 
+ * @param F 
+ * @return MATRIX9 
+ */
 MATRIX9 StVK::hessian(const MATRIX3 &F) const {
+    MATRIX3 U, V;
+    VECTOR3 Sigma;
+    svd_rv(F, U, Sigma, V);
 
+    VECTOR9 eigenvalues;
+    MATRIX9 eigenvectors;
+    buildEigenSystem(U, Sigma, V, eigenvalues, eigenvectors);
+
+    return eigenvectors * eigenvalues.asDiagonal() * eigenvectors.transpose();
 }
 
+MATRIX9 StVK::clampedHessian(const MATRIX3 &F) const {
+    MATRIX3 U, V;
+    VECTOR3 Sigma;
+    svd_rv(F, U, Sigma, V);
+
+    VECTOR9 eigenvalues;
+    MATRIX9 eigenvectors;
+    buildEigenSystem(U, Sigma, V, eigenvalues, eigenvectors);
+
+    for (int i = 0; i < 9; i++) {
+        eigenvalues[i] = (eigenvalues[i] >= 0.0) ? eigenvalues[i] : 0.0;
+    }
+
+    return eigenvectors * eigenvalues.asDiagonal() * eigenvectors.transpose();
 }
+
+bool StVK::energyNeedsSVD() const {
+    return false;
 }
+
+bool StVK::PK1NeedsSVD() const {
+    return false;
+}
+
+} // VOLUME
+} // Ryao
