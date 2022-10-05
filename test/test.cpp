@@ -1,6 +1,7 @@
 #include "test.h"
 #include <Gui.h>
 #include <Logger.h>
+#include "Collision_Utils.h"
 using namespace Ryao;
 
 class EarthGui : public Gui {
@@ -32,6 +33,23 @@ public:
 int main() {
 	Logger::Init();
 	new EarthGui();
+	VECTOR3 a = VECTOR3(0.0, 2.0, 0.0);
+	VECTOR3 b = VECTOR3(0.0, 0.0, -3.0);
+	VECTOR3 c = VECTOR3(1.0, 0.0, 0.0);
+	VECTOR3 o = VECTOR3(-2.0, 0.0, 0.0);
+	VECTOR3 e = VECTOR3(2.0, 1.0, -1.0);
+	std::vector<VECTOR3> triangle;
+	triangle.push_back(a);
+	triangle.push_back(b);
+	triangle.push_back(c);
+
+	std::vector<VECTOR3> edge;
+	edge.push_back(o);
+	edge.push_back(e);
+	if (faceEdgeIntersection(triangle, edge)) {
+		std::cout << "yes";
+	}
+
 
 	return 0;
 }

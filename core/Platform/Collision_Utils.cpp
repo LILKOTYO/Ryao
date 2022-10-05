@@ -1,4 +1,5 @@
 #include <Collision_Utils.h>
+#include <iostream>
 
 namespace Ryao {
 
@@ -122,7 +123,7 @@ MATRIX3x12 normalGradientEE(const std::vector<VECTOR3>& e)
 }
 
 /**
- * @brief one entry of the rank-3 hessian of the cross product used to compute the triangle normal, vertex-face case
+ * @brief one entry of the rank-3 hessian of the cross product used to compute the triangle normal hessian, vertex-face case
  * 
  * @param iIn 
  * @param jIn 
@@ -162,7 +163,7 @@ VECTOR3 crossHessianVF(const int iIn, const int jIn)
 }
 
 /**
- * @brief 
+ * @brief one entry of the rank-3 hessian of the cross product used to compute the normal hessian, edge-edge case
  * 
  * @param iIn 
  * @param jIn 
@@ -199,6 +200,333 @@ VECTOR3 crossHessianEE(const int iIn, const int jIn)
         return VECTOR3(0, 0, -1);
 
     return VECTOR3(0, 0, 0);
+}
+
+/**
+ * @brief hessian of the triangle normal, vertex-face case
+ *        use a vector of Matrix12 (length = 3) to represent a 3x1x12x12-order tensor
+ *        res[k](i,j)=d^2n_k/dx_idx_j
+ * 
+ * @param e 
+ * @return std::vector<MATRIX12> 
+ */
+std::vector<MATRIX12> normalHessianVF(const std::vector<VECTOR3>& e)
+{
+    using namespace std;
+
+    vector<MATRIX12> H(3);
+    for (int i = 0; i < 3; i++)
+        H[i].setZero();
+
+    VECTOR3 crossed = e[2].cross(e[0]);
+    MATRIX3x12 crossGrad = crossGradientVF(e);
+    const VECTOR3& z = crossed;
+    
+    //denom15 = (z' * z) ^ (1.5);
+    //denom25 = (z' * z) ^ (2.5)
+    REAL denom15 = pow(crossed.dot(crossed), 1.5);
+    REAL denom25 = pow(crossed.dot(crossed), 2.5);
+
+    for (int j = 0; j < 12; j++)
+        for (int i = 0; i < 12; i++)
+        {
+        VECTOR3 zGradi = crossGrad.col(i);
+        VECTOR3 zGradj = crossGrad.col(j);
+        VECTOR3 zHessianij = crossHessianVF(i,j);
+
+        // z = cross(e2, e0);
+        // zGrad = crossGradientVF(:,i);
+        // alpha= (z' * zGrad) / (z' * z) ^ (1.5);
+        REAL a = z.dot(crossGrad.col(i)) / denom15;
+
+        // final = (zGradj' * zGradi) / denom15 + (z' * cross_hessian(i,j)) / denom15;
+        // final = final - 3 * ((z' * zGradi) / denom25) * (zGradj' * z);
+        REAL aGrad = (zGradj.dot(zGradi)) / denom15 + z.dot(crossHessianVF(i,j)) / denom15;
+        aGrad -= 3.0 * (z.dot(zGradi) / denom25) * zGradj.dot(z);
+        
+        //entry = -((zGradj' * z) / denom15) * zGradi + 1 / norm(z) * zHessianij - alpha * zGradj - alphaGradj * z;
+        VECTOR3 entry = -((zGradj.dot(z)) / denom15) * zGradi + 1.0 / z.norm() * zHessianij - a * zGradj - aGrad * z;
+
+        H[0](i,j) = entry[0];
+        H[1](i,j) = entry[1];
+        H[2](i,j) = entry[2];
+        }
+    return H;
+}
+
+/**
+ * @brief hessian of the normal, edge-edge case
+ *        use a vector of Matrix12 (length = 3) to represent a 3x1x12x12-order tensor
+ *        res[k](i,j)=d^2n_k/dx_idx_j
+ * 
+ * @param e 
+ * @return std::vector<MATRIX12> 
+ */
+std::vector<MATRIX12> normalHessianEE(const std::vector<VECTOR3>& e)
+{
+    using namespace std;
+
+    vector<MATRIX12> H(3);
+    for (int i = 0; i < 3; i++)
+        H[i].setZero();
+
+    VECTOR3 crossed = e[1].cross(e[0]);
+    MATRIX3x12 crossGrad = crossGradientEE(e);
+    const VECTOR3& z = crossed;
+    
+    //denom15 = (z' * z) ^ (1.5);
+    REAL denom15 = pow(crossed.dot(crossed), 1.5);
+    REAL denom25 = pow(crossed.dot(crossed), 2.5);
+
+    for (int j = 0; j < 12; j++)
+        for (int i = 0; i < 12; i++)
+        {
+        VECTOR3 zGradi = crossGrad.col(i);
+        VECTOR3 zGradj = crossGrad.col(j);
+        VECTOR3 zHessianij = crossHessianEE(i,j);
+
+        // z = cross(e2, e0);
+        // zGrad = crossGradientVF(:,i);
+        // alpha= (z' * zGrad) / (z' * z) ^ (1.5);
+        REAL a = z.dot(crossGrad.col(i)) / denom15;
+
+        // final = (zGradj' * zGradi) / denom15 + (z' * cross_hessian(i,j)) / denom15;
+        // final = final - 3 * ((z' * zGradi) / denom25) * (zGradj' * z);
+        REAL aGrad = (zGradj.dot(zGradi)) / denom15 + 
+                    z.dot(crossHessianEE(i,j)) / denom15;
+        aGrad -= 3.0 * (z.dot(zGradi) / denom25) * zGradj.dot(z);
+        
+        //entry = -((zGradj' * z) / denom15) * zGradi + 
+        //          1 / norm(z) * zHessianij - 
+        //          alpha * zGradj - alphaGradj * z;
+        VECTOR3 entry = -((zGradj.dot(z)) / denom15) * zGradi + 
+                            1.0 / z.norm() * zHessianij - 
+                            a * zGradj - aGrad * z;
+
+        H[0](i,j) = entry[0];
+        H[1](i,j) = entry[1];
+        H[2](i,j) = entry[2];
+        }
+    return H;
+}
+
+/**
+ * @brief Get the Barycentric Coordinates of the projection of v[0] onto the triangle
+ *        formed by v[1], v[2], v[3].
+ * 
+ * @param vertices 
+ * @return VECTOR3 
+ */
+VECTOR3 getBarycentricCoordinates(const std::vector<VECTOR3>& vertices)
+{
+    const VECTOR3 v0 = vertices[1];
+    const VECTOR3 v1 = vertices[2];
+    const VECTOR3 v2 = vertices[3];
+        
+    const VECTOR3 e1 = v1 - v0;
+    const VECTOR3 e2 = v2 - v0;
+    const VECTOR3 n = e1.cross(e2);
+    const VECTOR3 nHat = n / n.norm();
+    // the projection point on the triangle
+    const VECTOR3 v = vertices[0] - (nHat.dot(vertices[0] - v0)) * nHat;
+
+    // get the barycentric coordinates
+    const VECTOR3 na = (v2 - v1).cross(v - v1);
+    const VECTOR3 nb = (v0 - v2).cross(v - v2);
+    const VECTOR3 nc = (v1 - v0).cross(v - v0);
+    const VECTOR3 barycentric(n.dot(na) / n.squaredNorm(),
+                                n.dot(nb) / n.squaredNorm(),
+                                n.dot(nc) / n.squaredNorm());
+
+    return barycentric;
+}
+
+/**
+ * @brief Get the Barycentric Coordinates point of the projection of v[0] onto the triangle
+ *        formed by v[1], v[2], v[3].
+ * 
+ * @param vertices 
+ * @return VECTOR3 
+ */
+VECTOR3 getBarycentricCoordinates(const VECTOR12& vertices)
+{
+    std::vector<VECTOR3> vs(4);
+    for (int x = 0; x < 4; x++)
+    {
+        vs[x][0] = vertices[3 * x];
+        vs[x][1] = vertices[3 * x + 1];
+        vs[x][2] = vertices[3 * x + 2];
+    }
+    return getBarycentricCoordinates(vs);
+}
+
+/**
+ * @brief find the distance from a line segment (v1, v2) to a point (v0)
+ * 
+ * @param v0 
+ * @param v1 
+ * @param v2 
+ * @return REAL 
+ */
+REAL pointLineDistance(const VECTOR3 v0, const VECTOR3& v1, const VECTOR3& v2)
+{
+    const VECTOR3 e0 = v0 - v1;
+    const VECTOR3 e1 = v2 - v1;
+    const VECTOR3 e1hat = e1 / e1.norm();
+    const REAL projection = e0.dot(e1hat);
+
+    // if it projects onto the line segment, use that length
+    if (projection > 0.0 && projection < e1.norm())
+    {
+        const VECTOR3 normal = e0 - projection * e1hat;
+        return normal.norm();
+    }
+
+    // if it doesn't, find the point-point distances
+    const REAL diff01 = (v0 - v1).norm();
+    const REAL diff02 = (v0 - v2).norm();
+
+    return (diff01 < diff02) ? diff01 : diff02;
+}
+
+/**
+ * @brief get the linear interpolation coordinates from v0 to the line segment between v1 and v2
+ * 
+ * @param v0 
+ * @param v1 
+ * @param v2 
+ * @return VECTOR2 
+ */
+VECTOR2 getLerp(const VECTOR3 v0, const VECTOR3& v1, const VECTOR3& v2)
+{
+    const VECTOR3 e0 = v0 - v1;
+    const VECTOR3 e1 = v2 - v1;
+    const VECTOR3 e1hat = e1 / e1.norm();
+    const REAL projection = e0.dot(e1hat);
+
+    if (projection < 0.0)
+        return VECTOR2(1.0, 0.0);
+
+    if (projection >= e1.norm())
+        return VECTOR2(0.0, 1.0);
+
+    const REAL ratio = projection / e1.norm();
+    return VECTOR2(1.0 - ratio, ratio);
+}
+
+/**
+ * @brief get the barycentric coordinate of the projection of v[0] onto the triangle
+ *        formed by v[1], v[2], v[3]
+ *        but, if the projection is actually outside, project to all of the
+ *        edges and find the closest point that's still inside the triangle
+ * 
+ * @param vertices 
+ * @return VECTOR3 
+ */
+VECTOR3 getInsideBarycentricCoordinates(const std::vector<VECTOR3>& vertices)
+{
+    VECTOR3 barycentric = getBarycentricCoordinates(vertices);
+
+    // if it's already inside, we're all done
+    if (barycentric[0] >= 0.0 &&
+        barycentric[1] >= 0.0 &&
+        barycentric[2] >= 0.0)
+        return barycentric;
+
+    // find distance to all the line segments
+    //
+    // there's lots of redundant computation between here and getLerp,
+    // but let's get it working and see if it fixes the actual
+    // artifact before optimizing
+    REAL distance12 = pointLineDistance(vertices[0], vertices[1], vertices[2]);
+    REAL distance23 = pointLineDistance(vertices[0], vertices[2], vertices[3]);
+    REAL distance31 = pointLineDistance(vertices[0], vertices[3], vertices[1]);
+
+    // less than or equal is important here, otherwise fallthrough breaks
+    if (distance12 <= distance23 && distance12 <= distance31)
+    {
+        VECTOR2 lerp = getLerp(vertices[0], vertices[1], vertices[2]);
+        barycentric[0] = lerp[0];
+        barycentric[1] = lerp[1];
+        barycentric[2] = 0.0;
+        return barycentric;
+    }
+    
+    // less than or equal is important here, otherwise fallthrough breaks
+    if (distance23 <= distance12 && distance23 <= distance31)
+    {
+        VECTOR2 lerp = getLerp(vertices[0], vertices[2], vertices[3]);
+        barycentric[0] = 0.0;
+        barycentric[1] = lerp[0];
+        barycentric[2] = lerp[1];
+        return barycentric;
+    }
+
+    // else it must be the 31 case
+    VECTOR2 lerp = getLerp(vertices[0], vertices[3], vertices[1]);
+    barycentric[0] = lerp[1];
+    barycentric[1] = 0.0;
+    barycentric[2] = lerp[0];
+    return barycentric;
+}
+
+VECTOR12 flattenVertices(const std::vector<VECTOR3>& v)
+{
+    VECTOR12 x;
+    int entry = 0;
+    for (int j = 0; j < 4; j++)
+        for (int i = 0; i < 3; i++, entry++)
+        x[entry] = v[j][i];
+    return x;
+}
+
+/**
+ * @brief does this face and edge intersect?
+ * 
+ * @param triangleVertices 
+ * @param edgeVertices 
+ * @return true 
+ * @return false 
+ */
+bool faceEdgeIntersection(const std::vector<VECTOR3>& triangleVertices, 
+                          const std::vector<VECTOR3>& edgeVertices)
+{
+    assert(triangleVertices.size() == 3);
+    assert(edgeVertices.size() == 2);
+
+    const VECTOR3& a = triangleVertices[0];
+    const VECTOR3& b = triangleVertices[1];
+    const VECTOR3& c = triangleVertices[2];
+
+    const VECTOR3& origin = edgeVertices[0];
+    const VECTOR3& edgeDiff = (edgeVertices[1] - edgeVertices[0]);
+    const VECTOR3& direction = edgeDiff.normalized();
+
+    const VECTOR3 geometricNormal = ((b - a).cross(c - a)).normalized();
+
+    const VECTOR3 diff = a - origin;
+    REAL denom = direction.dot(geometricNormal);
+    // the edge is parallel to the triangle
+    if (fabs(denom) <= 0.0) return false;
+
+    REAL t = diff.dot(geometricNormal) / denom;
+    if (t < 0) return false;
+    // point h is the collision point of the line(not the edge, which is a line segment) and the triangle
+    VECTOR3 h = origin + direction * t;
+
+    // check if the h point is in the triangle
+    VECTOR3 test = (b - a).cross(h - a);
+    if (geometricNormal.dot(test) < 0) return false; 
+    test = (c - b).cross(h - b);
+    if (geometricNormal.dot(test) < 0) return false; 
+    test = (a - c).cross(h - c);
+    if (geometricNormal.dot(test) < 0) return false; 
+
+    // check if the edge can reach the h point
+    if (t < edgeDiff.norm())
+        return true;
+
+    return false;
 }
 
 }

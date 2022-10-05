@@ -43,7 +43,7 @@ namespace Ryao {
     // but, if the projection is actually outside, project to all of the
     // edges and find the closest point that's still inside the triangle
     VECTOR3 getInsideBarycentricCoordinates(const std::vector<VECTOR3>& vertices);
-    VECTOR3 getInsideBarycentricCoordinatesDebug(const std::vector<VECTOR3>& vertices);
+    // VECTOR3 getInsideBarycentricCoordinatesDebug(const std::vector<VECTOR3>& vertices);
 
     // flatten vertices into a vector
     VECTOR12 flattenVertices(const std::vector<VECTOR3>& v);
