@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.24)
 project(CA)
-
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # list(PREPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 # option(LIBIGL_USE_STATIC_LIBRARY        "Use libigl as static library" OFF)
