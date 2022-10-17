@@ -61,4 +61,20 @@ REAL Sphere::signedDistance(const VECTOR3 &point) const {
     return (radius - 1.0) * _scale(0,0);    
 }
 
+/**
+ * @brief get the closest point on the object, as well as the normal at the point. 
+ * 
+ * @param query 
+ * @param closestPointLocal 
+ * @param normalLocal 
+ */
+void Sphere::getClosestPoint(const VECTOR3 &query, 
+                            VECTOR3 &closestPointLocal, 
+                            VECTOR3 &normalLocal) const {
+    const VECTOR3 collisionPoint = worldVertexToLocal(query);
+    closestPointLocal = collisionPoint.normalized();
+
+    // this is the one instance where both of these are the same
+    normalLocal = closestPointLocal;
+}
 }
