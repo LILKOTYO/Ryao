@@ -121,8 +121,8 @@ void Cube::getClosestPoint(const VECTOR3 &query,
     {
         if (diffs[x] < minFound)
         {
-        minFound = diffs[x];
-        minIndex = x;
+            minFound = diffs[x];
+            minIndex = x;
         }
     }
     closestPointLocal = collisionPoint;
@@ -156,7 +156,7 @@ void Cube::getClosestPoint(const VECTOR3 &query,
             closestPointLocal[2] = 0.5;
             normalLocal = VECTOR3(0, 0, 1);
             break;
-  }
+    }
 }
 
 }
