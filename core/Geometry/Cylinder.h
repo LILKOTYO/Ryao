@@ -35,7 +35,7 @@ public:
     // remember that "inside" is negative with signed distance
     virtual REAL signedDistance(const VECTOR3& point) const override;
 
-    // get the closest point on the cube, as well as the normal at the point
+    // get the closest point on the cylinder, as well as the normal at the point
     virtual void getClosestPoint(const VECTOR3& query, 
                                 VECTOR3& closestPointLocal, 
                                 VECTOR3& normalLocal) const override;
