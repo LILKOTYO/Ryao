@@ -34,6 +34,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../core/Platform)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../core/Hyperelastic)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../core/Geometry)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../external/spectra/include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../core/Damping)
 
 
 # Add your project files
