@@ -15,6 +15,244 @@ namespace Ryao {
 using namespace std;
 
 class TET_Mesh {
+public:
+    TET_Mesh() = default;
+    TET_Mesh(const vector<VECTOR3>& restVertices,
+             const vector<VECTOR4I>& tets);
+    virtual ~TET_Mesh();
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//----------------------------------accessors------------------------------------------//
+/////////////////////////////////////////////////////////////////////////////////////////
+    const vector<VECTOR3>& vertices() const         { return _vertices; };
+    vector<VECTOR3>& vertices()                     { return _vertices; };
+    const vector<VECTOR3>& restVertices() const     { return _restVertices; };
+    vector<VECTOR3>& restVertices()                 { return _restVertices; };
+    const vector<VECTOR4I>& tets() const            { return _tets; };
+    vector<VECTOR4I>& tets()                        { return _tets; };
+    const vector<VECTOR4I>& vertexFaceCollisionTets() const     { return _vertexFaceCollisionTets; };
+    vector<VECTOR4I>& vertexFaceCollisionTets()                 { return _vertexFaceCollisionTets; };
+    const vector<REAL>& restOneRingVolumes() const              { return _restOneRingVolumes; };
+    vector<REAL>& restOneRingVolumes()                          { return _restOneRingVolumes; };
+    const VECTOR3& vertex(const int index) const                { return _vertices[index]; };
+    VECTOR3& vertex(const int index)                            { return _vertices[index]; };
+    const REAL& collisionEps() const                            { return _collisionEps; };
+    const VECTOR3& restVertex(const int index) const            { return _restVertices[index]; };
+    const VECTOR4I& tet(const int tetIndex) const               { return _tets[tetIndex]; };
+    const vector<int>& surfaceTets() const                      { return _surfaceTets; };
+    const vector<int>& surfaceVertices() const                  { return _surfaceVertices; };
+    const vector<VECTOR3I>& surfaceTriangles() const            { return _surfaceTriangles; };
+    const vector<VECTOR2I>& surfaceEdges() const                { return _surfaceEdges; };
+    const vector<pair<int,int>>& vertexFaceCollisions() const   { return _vertexFaceCollisions; };
+    const vector<pair<int,int>>& edgeEdgeCollisions() const     { return _edgeEdgeCollisions; };
+    const vector<bool>& edgeEdgeIntersections() const           { return _edgeEdgeIntersections; };
+    const vector<pair<VECTOR2,VECTOR2>>& edgeEdgeCoordinates() const { return _edgeEdgeCoordinates; };
+    const vector<REAL>& surfaceTriangleAreas() const            { return _surfaceTriangleAreas; };
+    const vector<VECTOR3I>& surfaceTriangleNeighbors() const    {return _surfaceTriangleNeighbors; };
+
+    int totalVertices() const { return _vertices.size(); };
+    const int DOFs() const { return _vertices.size() * 3; };
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // get deformation gradient, and its SVD
+    MATRIX3 computeF(const int tetIndex) const;
+    void computeFs();
+    void computeFdots(const VECTOR& velocity);
+    void computeSVDs();
+
+    /**
+     * @brief get volume-weighted global translation
+     * 
+     * @return VECTOR3 
+     */
+    VECTOR3 getTranslation() const;
+
+    /**
+     * @brief get volume-weighted global translation, for the rest state 
+     * 
+     * @return VECTOR3 
+     */
+    VECTOR3 getRestTranslation() const;
+
+    /**
+     * @brief get Procrustes-style global rotation
+     * 
+     * @return MATRIX3 
+     */
+    MATRIX3 getRotation() const;
+
+    /**
+     * @brief get the current displacement in vector form
+     * 
+     * @return VECTOR 
+     */
+    VECTOR getDisplacement() const;
+
+    /**
+     * @brief set the vertex displacements to these values exactly
+     * 
+     * @param delta 
+     */
+    void setDisplacement(const VECTOR& delta);  
+
+    /**
+     * @brief set the vertex positions directly exactly
+     * 
+     * @param positions 
+     */
+    void setPositions(const VECTOR& positions);
+
+    /**
+     * @brief add the followingdeltas to the positions
+     * 
+     * @param delta 
+     */
+    void addDisplacement(const VECTOR& delta);
+
+    // set collision eps to something new 
+    void setCollisionEps(const REAL& eps);
+    void setCollisionStiffness(const REAL& stiffness);
+
+    /**
+     * @brief set collision pairs, for replays
+     * 
+     * @param vertexFace 
+     * @param edgeEdge 
+     */
+    void setCollisionPairs(const vector<pair<int,int>>& vertexFace, const vector<pair<int,int>>& edgeEdge);
+
+    // compute hyperelastic quantities
+    REAL computeHyperelasticEnergy(const VOLUME::HYPERELASTIC& hyperelastic) const;
+    VECTOR computeHyperelasticForces(const VOLUME::HYPERELASTIC& hyperelastic) const;
+    virtual SPARSE_MATRIX computeHyperelasticClampedHessian(const VOLUME::HYPERELASTIC& hyperelastic) const;
+    virtual SPARSE_MATRIX computeHyperelasticHessian(const VOLUME::HYPERELASTIC& hyperelastic) const;
+
+    // compute damping quantities
+    VECTOR computeDampingForces(const VOLUME::Damping& damping) const;
+    virtual SPARSE_MATRIX computeDampingHessian(const VOLUME::Damping& damping) const;
+
+    // compute x-based collision quantities
+    VECTOR computeVertexFaceCollisionForce() const;
+    SPARSE_MATRIX computeVertexFaceCollisionClampedHessian() const;
+    REAL computeEdgeEdgeCollisionEnergy() const;
+    VECTOR computeEdgeEdgeCollisionForces() const;
+    SPARSE_MATRIX computeEdgeEdgeCollisionClampedHessian() const;
+
+    /**
+     * @brief compute elastic and damping forces at the same time
+     * 
+     * @param hyperelastic 
+     * @param damping 
+     * @return VECTOR 
+     */
+    virtual VECTOR computeInternalForce(const VOLUME::HYPERELASTIC& hyperelastic,
+                                        const VOLUME::Damping& damping) const;
+
+
+    /**
+     * @brief get the bounding box for the current mesh
+     * 
+     * @param mins 
+     * @param maxs 
+     */
+    void getBoundingBox(VECTOR3& mins, VECTOR3& maxs) const;
+
+    /**
+     * @brief find all the vertex-face collision pairs, using the InFaceRegion test
+     * 
+     */
+    virtual void computeVertexFaceCollisions();
+
+    /**
+     * @brief find all the edge-edge collision pairs
+     * 
+     */
+    virtual void computeEdgeEdgeCollisions();
+
+    // debug edge-edge collisions, load up some specific pairs
+    // void computeEdgeEdgeCollisionsDebug();
+
+    /**
+     * @brief based on vertex-face collision pairs, build "collision tets"
+     * 
+     * @param velocity 
+     */
+    void buildVertexFaceCollisionTets(const VECTOR& velocity);
+
+    /**
+     * @brief write out the surface to OBJ triangle mesh
+     * 
+     * @param filename 
+     * @param tetMesh 
+     * @return true 
+     * @return false 
+     */
+    static bool writeSurfaceToObj(const string& filename, const TET_Mesh& tetMesh);
+
+    /**
+     * @brief read in OBJ-style tet mesh file
+     * 
+     * @param filename 
+     * @param vertices 
+     * @param tets 
+     * @return true 
+     * @return false 
+     */
+    static bool readObjFile(const string& filename, vector<VECTOR3>& vertices, vector<VECTOR4I>& tets);
+
+    /**
+     * @brief write out OBJ-style tet mesh file, the bool tells whether to write the rest or deformed vertices
+     * 
+     * @param filename 
+     * @param tetMesh 
+     * @param restVertices 
+     * @return true 
+     * @return false 
+     */
+    static bool writeObjFile(const string& filename, const TET_Mesh& tetMesh, const bool restVertices);
+
+    /**
+     * @brief normalize vertices so that they're in a unit box, centered at (0.5, 0.5, 0.5)
+     * 
+     * @param vertices 
+     * @return vector<VECTOR3> 
+     */
+    static vector<VECTOR3> normalizeVertices(const vector<VECTOR3>& vertices);
+
+    /**
+     * @brief compute distance between a point and triangle
+     * 
+     * @param v0 
+     * @param v1 
+     * @param v2 
+     * @param v4 
+     * @return REAL 
+     */
+    static REAL pointTriangleDistance(const VECTOR3& v0, const VECTOR3& v1,
+                                      const VECTOR3& v2, const VECTOR3& v4);
+
+    /**
+     * @brief see if the projection of v onto the plane of v0,v1,v2 is inside the triangle
+     *        formed by v0, v1, v2
+     * 
+     * @param v0 
+     * @param v1 
+     * @param v2 
+     * @param v 
+     * @return true 
+     * @return false 
+     */
+    static bool pointProjectsInsideTriangle(const VECTOR3& v0, const VECTOR3& v1,
+                                            const VECTOR3& v2, const VECTOR3& v);
+
+    /**
+     * @brief copmute the dihedral angle between surface faces
+     * 
+     * @param surfaceID0 
+     * @param surfaceID1 
+     * @return REAL 
+     */
+    REAL surfaceFaceDihedralAngle(const int surfaceID0, const int surfaceID1) const;
 
 protected:
     /**
