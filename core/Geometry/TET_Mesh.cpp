@@ -45,7 +45,7 @@ TET_Mesh::TET_Mesh(const vector<VECTOR3>& restVertices,
     computeSurfaceVertices();
     computeSurfaceEdges();
     computeSurfaceAreas();
-    computeSurfaceTrangleNeighbors();
+    computeSurfaceTriangleNeighbors();
     computeSurfaceEdgeTriangleNeighbors();
 
     // set the collision eps as one centimeter
@@ -334,4 +334,187 @@ void TET_Mesh::computeSurfaceEdgeTriangleNeighbors() {
             _surfaceEdgeTriangleNeighbors[i][1] = faceHash[i][1];
     }
 }
+
+void TET_Mesh::computeSurfaceTriangleNeighbors() {
+    multimap<pair<int,int>,unsigned int> edgeNeighboringTriangles;
+
+    // hash all the edges from each surface triangle
+    for (size_t i = 0; i < _surfaceTriangles.size(); i++) {
+        const VECTOR3I t = _surfaceTriangles[i];
+
+        // store each edge as pair 
+        pair<int,int> edge;
+        for (unsigned int j = 0; j < 3; j++) {
+            edge.first  = t[j];
+            edge.second = t[(j + 1) % 3];
+
+            // make sure the ordering is consistent
+            if (edge.first > edge.second) {
+                const int temp = edge.first;
+                edge.first = edge.second;
+                edge.second = temp;
+            }
+
+            // hash it 
+            pair<pair<int,int>, unsigned int> hash(edge, i);
+            edgeNeighboringTriangles.insert(hash);
+        }
+    }
+
+    // get the other edge that wasn't current one 
+    _surfaceTriangleNeighbors.clear();
+    for (size_t i = 0; i < _surfaceTriangles.size(); i++) {
+        const VECTOR3I t = _surfaceTriangles[i];
+
+        // store results here
+        VECTOR3I neighbors(-1, -1, -1);
+
+        // reconstruct the edge again
+        pair<int,int> edge;
+        for (unsigned int j = 0; j < 3; j++) {
+            edge.first  = t[j];
+            edge.second = t[(j + 1) % 3];
+
+            // make sure the ordering is consistent
+            if (edge.first > edge.second) {
+                const int temp = edge.first;
+                edge.first = edge.second;
+                edge.second = temp;
+            }
+
+            // find the matching triangles
+            auto range = edgeNeighboringTriangles.equal_range(edge);
+            for (auto it = range.first; it != range.second; it++) {
+                if (it->second != i)
+                    neighbors[j] = it->second;
+            }
+        }
+
+        // store the neighbors
+        _surfaceTriangleNeighbors.push_back(neighbors);
+    }
+}
+
+void TET_Mesh::computeSurfaceAreas() {
+    // compute the areas
+    _surfaceTriangleAreas.clear();
+    for (size_t x = 0; x < _surfaceTriangles.size(); x++) {
+        vector<VECTOR3> vertices(3);
+        vertices[0] = _restVertices[_surfaceTriangles[x][0]];
+        vertices[1] = _restVertices[_surfaceTriangles[x][1]];
+        vertices[2] = _restVertices[_surfaceTriangles[x][2]];
+
+        _surfaceTriangleAreas.push_back(triangleArea(vertices));
+    }
+
+    // compute the one-ring areas
+    assert(_surfaceVertices.size() != 0);
+    _restOneRingAreas.resize(_surfaceVertices.size());
+    for (size_t x = 0; x < _restOneRingAreas.size(); x++)
+        _restOneRingAreas[x] = 0;
+    for (size_t x = 0; x < _surfaceTriangles.size(); x++) {
+        assert(x < _surfaceTriangleAreas.size());
+        assert(x < _surfaceTriangles.size());
+        const REAL& area = _surfaceTriangleAreas[x];
+        const VECTOR3I& triangle = _surfaceTriangles[x];
+
+        for (int y = 0; y < 3; y++) {
+            const int surfaceID = _volumeToSurfaceID[triangle[y]];
+            assert(surfaceID < (int)_restOneRingAreas.size());
+            _restOneRingAreas[surfaceID] += (1.0/ 3.0) * area;
+        }
+    }
+
+    // build a mapping from edge index pairs to _surfaceEdges
+    map<pair<int,int>, int> edgeHash;
+    for (size_t x = 0; x < _surfaceEdges.size(); x++) {
+        pair<int,int> edge(_surfaceEdges[x][0], _surfaceEdges[x][1]);
+        edgeHash[edge] = x;
+    }
+
+    // compute the edge areas
+    assert(_surfaceEdges.size() != 0);
+    _restEdgeAreas.resize(_surfaceEdges.size());
+    _restEdgeAreas.setZero();
+    for (size_t x = 0; x < _surfaceTriangles.size(); x++) {
+        // build each edge
+        for (int y = 0; y < 3; y++) {
+            pair<int,int> edge(_surfaceTriangles[x][y],
+                               _surfaceTriangles[x][(y + 1) % 3]);
+            
+            // swap them to the order the hash expects
+            if (edge.first > edge.second) {
+                const int temp = edge.first;
+                edge.first = edge.second;
+                edge.second = temp;
+            }
+
+            const int edgeIndex = edgeHash[edge];
+            assert(edgeIndex >= 0);
+            assert(edgeIndex < _restEdgeAreas.size());  
+            _restEdgeAreas[edgeIndex] += _surfaceTriangleAreas[x] / 3.0;
+        }
+    }
+}
+
+void TET_Mesh::computeSurfaceVertices() {
+    if (_surfaceTriangles.size() == 0);
+        computeSurfaceTriangles();
+
+    // hash them all out
+    map<int,bool> foundVertices;
+    for (size_t x = 0; x < _surfaceTriangles.size(); x++) {
+        for (int y = 0; y < 3; y++) 
+            foundVertices[_surfaceTriangles[x][y]] = true;
+    }
+
+    // serialize
+    _surfaceVertices.clear();
+    for (auto iter = foundVertices.begin(); iter != foundVertices.end(); iter++)
+        _surfaceVertices.push_back(iter->first);
+
+    // compute the reverse lookup
+    for (size_t x = 0; x < _surfaceVertices.size(); x++)
+        _volumeToSurfaceID[_surfaceVertices[x]] = x;
+
+    RYAO_INFO("Found {} vertices on the surface", _surfaceVertices.size());
+}
+
+void TET_Mesh::computeSurfaceEdges() {
+    if (_surfaceTriangles.size() == 0) 
+        computeSurfaceTriangles();
+
+    // hash all the edges, so we don't store any repeats
+    map<pair<int,int>, bool> edgeHash;
+    for (size_t x = 0; x < _surfaceTriangles.size(); x++) {
+        for (int y = 0; y < 3; y++) {
+            const int v0 = _surfaceTriangles[x][y];
+            const int v1 = _surfaceTriangles[x][(y + 1) % 3];
+
+            // store them in sorted order
+            pair<int,int> edge;
+            if (v0 > v1) {
+                edge.first = v1;
+                edge.second = v0;
+            } else {
+                edge.first = v0;
+                edge.second = v1;
+            }
+
+            // hash it out
+            edgeHash[edge] = true;
+        }
+    }
+
+    // store all the unique hashes
+    _surfaceEdges.clear();
+    for (auto iter = edgeHash.begin(); iter != edgeHash.end(); iter++) {
+        const pair<int,int> e = iter->first;
+        const VECTOR2I edge(e.first, e.second);
+        _surfaceEdges.push_back(edge);
+    }
+
+    RYAO_INFO("Found {} edges on the surface", _surfaceEdges.size());
+}
+
 }

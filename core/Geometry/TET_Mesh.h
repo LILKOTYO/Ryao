@@ -298,7 +298,7 @@ protected:
     void computeSurfaceTriangles();
     void computeSurfaceEdges();
     void computeSurfaceAreas();
-    void computeSurfaceTrangleNeighbors();
+    void computeSurfaceTriangleNeighbors();
     void computeSurfaceEdgeTriangleNeighbors();
 
     /**
