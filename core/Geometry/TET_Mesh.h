@@ -277,7 +277,7 @@ protected:
      * @param vertices 
      * @return vector<REAL> 
      */
-    vector<REAL> computeOneRIngVolumes(const vector<VECTOR3>& vertices);
+    vector<REAL> computeOneRingVolumes(const vector<VECTOR3>& vertices);
 
     /**
      * @brief compute material inverses for deformation gradient
@@ -295,7 +295,7 @@ protected:
 
     // find what's on the surface
     void computeSurfaceVertices();
-    void computeSurfaceTrangles();
+    void computeSurfaceTriangles();
     void computeSurfaceEdges();
     void computeSurfaceAreas();
     void computeSurfaceTrangleNeighbors();
@@ -402,6 +402,9 @@ protected:
 
     // support for computing deformation gradient F
     vector<MATRIX3> _DmInvs;
+
+    // change-of-basis to go from deformation gradient (F) to positions (x)
+    vector<MATRIX9x12> _pFpxs;
 
     // deformation gradients, and their SVDs
     vector<MATRIX3> _Fs;
