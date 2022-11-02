@@ -517,4 +517,105 @@ void TET_Mesh::computeSurfaceEdges() {
     RYAO_INFO("Found {} edges on the surface", _surfaceEdges.size());
 }
 
+void TET_Mesh::computeFs() {
+    Timer functionTimer(__FUNCTION__);
+    assert(_Fs.size() == _tets.size());
+
+#pragma omp parallel
+#pragma omp for schedule(static)
+    for (size_t x = 0; x < _tets.size(); x++) 
+        _Fs[x] = computeF(x);
+
+    _svdsComputed = false;
+}
+
+void TET_Mesh::computeFdots(const VECTOR &velocity) {
+    Timer functionTimer(__FUNCTION__);
+    assert(_Fs.size() == _tets.size());
+
+#pragma omp parallel
+#pragma omp for schedule(static)
+    for (size_t x = 0; x < _tets.size(); x++) {
+        const VECTOR4I& tet = _tets[x];
+        VECTOR3 v[4];
+        for (int y = 0; y < 4; y++) {
+            v[y][0] = velocity[3 * tet[y]];
+            v[y][1] = velocity[3 * tet[y] + 1];
+            v[y][2] = velocity[3 * tet[y] + 2];
+        }
+
+        MATRIX3 V;
+        V.col(0) = v[1] - v[0];
+        V.col(1) = v[2] - v[0];
+        V.col(2) = v[3] - v[0];
+        _Fdots[x] = V * _DmInvs[x];
+    }
+}
+
+void TET_Mesh::computeSVDs() {
+    Timer functionTimer(__FUNCTION__);
+    assert(_Us.size() == _tets.size());
+    assert(_Sigmas.size() == _tets.size());
+    assert(_Vs.size() == _tets.size());
+
+#pragma omp parallel
+#pragma omp for schedule(static)
+    for (size_t x = 0; x < _tets.size(); x++)
+        svd_rv(_Fs[x], _Us[x], _Sigmas[x], _Vs[x]);
+
+    _svdsComputed = true;
+}
+
+MATRIX3 TET_Mesh::computeF(const int tetIndex) const {
+    const VECTOR4I& tet = _tets[tetIndex];
+    MATRIX3 Ds;
+    Ds.col(0) = _vertices[tet[1]] - _vertices[tet[0]];
+    Ds.col(1) = _vertices[tet[2]] - _vertices[tet[0]];
+    Ds.col(2) = _vertices[tet[3]] - _vertices[tet[0]];
+    return Ds * _DmInvs[tetIndex];
+}
+
+REAL TET_Mesh::computeHyperelasticEnergy(const VOLUME::HYPERELASTIC &hyperelastic) const {
+    assert(_tets.size() == _restTetVolumes.size());
+
+    VECTOR tetEnergies(_tets.size());
+    for (int tetIndex = 0; tetIndex < int(_tets.size()); tetIndex++) {
+        const MATRIX3 F = _Fs[tetIndex];
+        tetEnergies[tetIndex] = _restTetVolumes[tetIndex] * hyperelastic.psi(F);
+    }
+
+    return tetEnergies.sum();
+}
+
+VECTOR TET_Mesh::computeHyperelasticForces(const VOLUME::HYPERELASTIC &hyperelastic) const {
+    Timer functionTimer(__FUNCTION__);
+    vector<VECTOR12> perElementForces(_tets.size());
+    for (unsigned int tetIndex = 0; tetIndex < _tets.size(); tetIndex++) {
+        const MATRIX3& F = _Fs[tetIndex];
+        const MATRIX3 PK1 = hyperelastic.PK1(F);
+        const VECTOR12 forceDensity = _pFpxs[tetIndex].transpose() * flatten(PK1);
+        const VECTOR12 force = -_restTetVolumes[tetIndex] * forceDensity;
+        perElementForces[tetIndex] = force;
+    }
+
+    // scatter the forces to the global force vector, this can be parallelized 
+    // better where each vector entry pulls from perElementForce, but let's get
+    // the slow preliminary version working first
+    const int DOFs = _vertices.size() * 3;
+    VECTOR forces(DOFs);
+    forces.setZero();
+
+    for (unsigned int tetIndex = 0; tetIndex < _tets.size(); tetIndex++) {
+        const VECTOR4I tet = _tets[tetIndex];
+        const VECTOR12& tetForce = perElementForces[tetIndex];
+        for (int x = 0; x < 4; x++) {
+            unsigned int index = 3 * tet[x];
+            forces[index]       += tetForce[3 * x];
+            forces[index + 1]   += tetForce[3 * x + 1];
+            forces[index + 2]   += tetForce[3 * x + 2];
+        }
+    }
+
+    return forces;
+}
 }
