@@ -618,4 +618,37 @@ VECTOR TET_Mesh::computeHyperelasticForces(const VOLUME::HYPERELASTIC &hyperelas
 
     return forces;
 }
+
+VECTOR TET_Mesh::computeDampingForces(const VOLUME::Damping &damping) const {
+    Timer functionTimer(__FUNCTION__);
+    vector<VECTOR12> perElementForces(_tets.size());
+    for (unsigned int tetIndex = 0; tetIndex < _tets.size(); tetIndex++) {
+        const MATRIX3& F = _Fs[tetIndex];
+        const MATRIX3& Fdot = _Fdots[tetIndex];
+        const MATRIX3 PK1 = damping.PK1(F, Fdot);
+        const VECTOR12 forceDensity = _pFpxs[tetIndex].transpose() * flatten(PK1);
+        const VECTOR12 force = -_restTetVolumes[tetIndex] * forceDensity;
+        perElementForces[tetIndex] = force;
+    }
+    // scatter the forces to the global force vector, this can be parallelized 
+    // better where each vector entry pulls from perElementForce, but let's get
+    // the slow preliminary version working first
+    const int DOFs = _vertices.size() * 3;
+    VECTOR forces(DOFs);
+    forces.setZero();
+
+    for (unsigned int tetIndex = 0; tetIndex < _tets.size(); tetIndex++) {
+        const VECTOR4I tet = _tets[tetIndex];
+        const VECTOR12& tetForce = perElementForces[tetIndex];
+        for (int x = 0; x < 4; x++) {
+            unsigned int index = 3 * tet[x];
+            forces[index]       += tetForce[3 * x];
+            forces[index + 1]   += tetForce[3 * x + 1];
+            forces[index + 2]   += tetForce[3 * x + 2];
+        }
+    }
+
+    return forces;
+}
+
 }
