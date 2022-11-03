@@ -225,11 +225,11 @@ public:
      * @param v0 
      * @param v1 
      * @param v2 
-     * @param v4 
+     * @param v 
      * @return REAL 
      */
     static REAL pointTriangleDistance(const VECTOR3& v0, const VECTOR3& v1,
-                                      const VECTOR3& v2, const VECTOR3& v4);
+                                      const VECTOR3& v2, const VECTOR3& v);
 
     /**
      * @brief see if the projection of v onto the plane of v0,v1,v2 is inside the triangle

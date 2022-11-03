@@ -6,7 +6,6 @@
 #include <Line_Intersect.h>
 #include <Logger.h>
 #include <float.h>
-
 // DEBUG: only here specifically to debug collisions
 #include <ARAP.h>
 #include <Vertex_Face_Collision.h>
@@ -458,7 +457,7 @@ void TET_Mesh::computeSurfaceAreas() {
 }
 
 void TET_Mesh::computeSurfaceVertices() {
-    if (_surfaceTriangles.size() == 0);
+    if (_surfaceTriangles.size() == 0)
         computeSurfaceTriangles();
 
     // hash them all out
@@ -650,5 +649,444 @@ VECTOR TET_Mesh::computeDampingForces(const VOLUME::Damping &damping) const {
 
     return forces;
 }
+
+VECTOR TET_Mesh::computeInternalForce(const VOLUME::HYPERELASTIC &hyperelastic, 
+                                      const VOLUME::Damping &damping) const {
+    Timer functionTimer(__FUNCTION__);
+    vector<VECTOR12> perElementForces(_tets.size());
+#pragma omp parallel 
+#pragma  omp for schedule(static)
+    for (unsigned int tetIndex = 0; tetIndex < _tets.size(); tetIndex++) {
+        const MATRIX3& U        = _Us[tetIndex];
+        const MATRIX3& V        = _Vs[tetIndex];
+        const VECTOR3& Sigma    = _Sigmas[tetIndex];
+        const MATRIX3& F        = _Fs[tetIndex];
+        const MATRIX3& Fdot     = _Fdots[tetIndex];
+
+        const MATRIX3 elasticPK1 = hyperelastic.PK1(U, Sigma, V);
+        const MATRIX3 dampingPK1 = damping.PK1(F, Fdot);
+        const VECTOR12 forceDensity = _pFpxs[tetIndex].transpose() * flatten(elasticPK1 + dampingPK1);
+        const VECTOR12 force = -_restTetVolumes[tetIndex] * forceDensity;
+        perElementForces[tetIndex] = force;
+    }
+
+    // scatter the forces to the global force vector, this can be parallelized 
+    // better where each vector entry pulls from perElementForce, but let's get
+    // the slow preliminary version working first
+    const int DOFs = _vertices.size() * 3;
+    VECTOR forces(DOFs);
+    forces.setZero();
+
+    for (unsigned int tetIndex = 0; tetIndex < _tets.size(); tetIndex++) {
+        const VECTOR4I& tet = _tets[tetIndex];
+        const VECTOR12& tetForce = perElementForces[tetIndex];
+        for (int x = 0; x < 4; x++) {
+            unsigned int index = 3 * tet[x];
+            forces[index]       += tetForce[3 * x];
+            forces[index + 1]   += tetForce[3 * x + 1];
+            forces[index + 2]   += tetForce[3 * x + 2];
+        }
+    }
+
+    return forces;
+}
+
+/**
+ * @brief use the material Hessian to compute the damping gradient
+ *        this is all super-slow, should be optimized 
+ * 
+ * @param damping 
+ * @return SPARSE_MATRIX 
+ */
+SPARSE_MATRIX TET_Mesh::computeDampingHessian(const VOLUME::Damping &damping) const {
+    Timer functionTimer(__FUNCTION__);
+    vector<MATRIX12> perElementHessians(_tets.size());
+    for (unsigned int i = 0; i < _tets.size(); i++) {
+        const MATRIX3& F        = _Fs[i];
+        const MATRIX3& Fdot     = _Fdots[i];
+        const MATRIX9x12& pFpx  = _pFpxs[i];
+        const MATRIX9& hessian  = -_restTetVolumes[i] * damping.hessian(F, Fdot);
+        perElementHessians[i]    = (pFpx.transpose() * hessian) * pFpx;
+    }
+
+    // build out the triplets
+    typedef Eigen::Triplet<REAL> TRIPLET;
+    vector<TRIPLET> triplets;
+    for (unsigned int i = 0; i < _tets.size(); i++) {
+        const VECTOR4I& tet = _tets[i];
+        const MATRIX12& H = perElementHessians[i];
+        for (int y = 0; y < 4; y++) {
+            int yVertex = tet[y];
+            for (int x = 0; x < 4; x++) {
+                int xVertex = tet[x];
+                for (int b = 0; b < 3; b++)
+                    for (int a = 0; a < 3; a++) {
+                        const REAL entry = H(3 * x + a, 3 * x + b);
+                        TRIPLET triplet(3 * xVertex + a, 3 * yVertex + b, entry);
+                        triplets.push_back(triplet);
+                    }
+            }
+        }
+    } 
+
+    int DOFs = _vertices.size() * 3;
+    SPARSE_MATRIX A(DOFs, DOFs);
+    A.setFromTriplets(triplets.begin(), triplets.end());
+
+    return A;
+}
+
+/**
+ * @brief use the material Hessian to compute the damping gradient
+ *        this is all super-slow, should be optimized 
+ * 
+ * @param hyperelastic 
+ * @return SPARSE_MATRIX 
+ */
+SPARSE_MATRIX TET_Mesh::computeHyperelasticHessian(const VOLUME::HYPERELASTIC& hyperelastic) const {
+    vector<MATRIX12> perElementHessians(_tets.size());
+    for (unsigned int i = 0; i < _tets.size(); i++) {
+        const MATRIX3& F       = _Fs[i];
+        const MATRIX9x12& pFpx = _pFpxs[i];
+        const MATRIX9 hessian  = -_restTetVolumes[i] * hyperelastic.hessian(F);
+        perElementHessians[i] = (pFpx.transpose() * hessian) * pFpx;
+    }
+
+    // build out the triplets
+    typedef Eigen::Triplet<REAL> TRIPLET;
+    vector<TRIPLET> triplets;
+    for (unsigned int i = 0; i < _tets.size(); i++) {
+        const VECTOR4I& tet = _tets[i];
+        const MATRIX12& H = perElementHessians[i];
+        for (int y = 0; y < 4; y++) {
+            int yVertex = tet[y];
+        for (int x = 0; x < 4; x++) {
+            int xVertex = tet[x];
+            for (int b = 0; b < 3; b++)
+                for (int a = 0; a < 3; a++) {
+                    const REAL entry = H(3 * x + a, 3 * y + b);
+                    TRIPLET triplet(3 * xVertex + a, 3 * yVertex + b, entry);
+                    triplets.push_back(triplet);
+                }
+            }
+        }
+    }
+
+    int DOFs = _vertices.size() * 3;
+    SPARSE_MATRIX A(DOFs, DOFs);
+    A.setFromTriplets(triplets.begin(), triplets.end());
+
+    return A;
+}
+
+/**
+ * @brief use the material Hessian to compute the damping gradient
+ *        this is all super-slow, should be optimized 
+ * 
+ * @param hyperelastic 
+ * @return SPARSE_MATRIX 
+ */
+SPARSE_MATRIX TET_Mesh::computeHyperelasticClampedHessian(const VOLUME::HYPERELASTIC& hyperelastic) const {
+    Timer functionTimer(__FUNCTION__);
+    vector<MATRIX12> perElementHessians(_tets.size());
+    for (unsigned int i = 0; i < _tets.size(); i++) {
+        const MATRIX3& F       = _Fs[i];
+        const MATRIX9x12& pFpx = _pFpxs[i];
+        const MATRIX9 hessian  = -_restTetVolumes[i] * hyperelastic.clampedHessian(F);
+        perElementHessians[i] = (pFpx.transpose() * hessian) * pFpx;
+    }
+
+    // build out the triplets
+    typedef Eigen::Triplet<REAL> TRIPLET;
+    vector<TRIPLET> triplets;
+    for (unsigned int i = 0; i < _tets.size(); i++) {
+        const VECTOR4I& tet = _tets[i];
+        const MATRIX12& H = perElementHessians[i];
+        for (int y = 0; y < 4; y++) {
+            int yVertex = tet[y];
+        for (int x = 0; x < 4; x++) {
+            int xVertex = tet[x];
+            for (int b = 0; b < 3; b++)
+                for (int a = 0; a < 3; a++) {
+                    const REAL entry = H(3 * x + a, 3 * y + b);
+                    TRIPLET triplet(3 * xVertex + a, 3 * yVertex + b, entry);
+                    triplets.push_back(triplet);
+                }
+            }
+        }
+    }
+
+    int DOFs = _vertices.size() * 3;
+    SPARSE_MATRIX A(DOFs, DOFs);
+    A.setFromTriplets(triplets.begin(), triplets.end());
+
+    return A;
+}
+
+VECTOR TET_Mesh::getDisplacement() const {
+    VECTOR delta(_vertices.size() * 3);
+    delta.setZero();
+
+    for (unsigned int x = 0; x < _vertices.size(); x++) {
+        const VECTOR3 diff = _vertices[x] - _restVertices[x];
+        const int x3 = 3 * x;
+        delta[x3]       = diff[0];
+        delta[x3 + 1]   = diff[1];
+        delta[x3 + 2]   = diff[2];
+    }
+
+    return delta;
+}
+
+void TET_Mesh::setPositions(const VECTOR &positions) {
+    assert(positions.size() == int(_vertices.size() * 3));
+
+    for (unsigned int x = 0; x < _vertices.size(); x++) {
+        _vertices[x][0] = positions[3 * x];
+        _vertices[x][1] = positions[3 * x + 1];
+        _vertices[x][2] = positions[3 * x + 2];
+    }
+}
+
+void TET_Mesh::setDisplacement(const VECTOR &delta) {
+    assert(delta.size() == int(_vertices.size() * 3));
+
+    for (unsigned int x = 0; x < _vertices.size(); x++) {
+        _vertices[x][0] = _restVertices[x][0] + delta[3 * x];
+        _vertices[x][1] = _restVertices[x][1] + delta[3 * x + 1];
+        _vertices[x][2] = _restVertices[x][2] + delta[3 * x + 2];
+    }
+}
+
+void TET_Mesh::getBoundingBox(VECTOR3 &mins, VECTOR3 &maxs) const {
+    assert(_vertices.size() > 0);
+    mins = _vertices[0];
+    maxs = _vertices[0];
+
+    for (unsigned int x = 1; x < _vertices.size(); x++) 
+        for (int y = 0; y < 3; y++) {
+            mins[y] = (mins[y] < _vertices[x][y]) ? mins[y] : _vertices[x][y];
+            maxs[y] = (maxs[y] > _vertices[x][y]) ? maxs[y] : _vertices[x][y];
+        }
+}
+
+bool TET_Mesh::writeSurfaceToObj(const string &filename, const TET_Mesh &tetMesh) {
+    FILE* file = fopen(filename.c_str(), "w");
+
+    if (file == NULL) {
+        RYAO_ERROR("Failed to open file!");
+        return false;
+    }    
+
+    RYAO_INFO("Writing out tet mesh file: " + filename);
+
+    const vector<VECTOR3>& vertices = tetMesh.vertices();
+    const vector<VECTOR3I>& surfaceTriangles = tetMesh.surfaceTriangles();
+
+    // do the ugly thing and just write out all the vertices, even 
+    // the internal ones
+    for (unsigned int x = 0; x < surfaceTriangles.size(); x++) 
+        fprintf(file, "v %f %f %f\n", vertices[x][0], vertices[x][1], vertices[x][2]);
+
+    // write out the indices for the surface triangles, but remember that 
+    // OBJs are 1-indexed
+    for (unsigned int x = 0; x < surfaceTriangles.size(); x++) 
+        fprintf(file, "f %i %i %i\n", surfaceTriangles[x][0] + 1,
+                                                     surfaceTriangles[x][1] + 1,
+                                                     surfaceTriangles[x][2] + 1);
+    
+    fclose(file);
+    RYAO_INFO("Done.");
+    return true;
+} 
+
+bool TET_Mesh::readObjFile(const string &filename, 
+                           vector<VECTOR3> &vertices, 
+                           vector<VECTOR4I> &tets) {
+    // erase whatever was in the vectors before
+    vertices.clear();
+    tets.clear();
+
+    FILE* file = fopen(filename.c_str(), "r");
+    
+    if (file == NULL) {
+        RYAO_ERROR("Failed to open file!");
+        return false;
+    }
+
+    char nextChar = getc(file);
+
+    // get the vertices
+    while (nextChar == 'v' && nextChar != EOF) {
+        ungetc(nextChar, file);
+
+        double v[3];
+        fscanf(file, "v %lf %lf %lf\n", &v[0], &v[1], &v[2]);
+        vertices.push_back(VECTOR3(v[0], v[1], v[2]));
+
+        nextChar = getc(file);
+    }
+    if (nextChar == EOF) {
+        RYAO_ERROR("File contains only vertices and no tets!");
+        return false;
+    }
+    RYAO_INFO("Found {} vertices.", vertices.size());
+
+    // get the tets
+    while (nextChar == 't' && nextChar != EOF) {
+        ungetc(nextChar, file);
+
+        VECTOR4I tet;
+        fscanf(file , "t %i %i %i %i\n", &tet[0], &tet[1], &tet[2], &tet[3]);
+        tets.push_back(tet);
+
+        nextChar = getc(file);
+    }
+    RYAO_INFO("Found {} tets", tets.size());
+    fclose(file);
+
+    return true;
+}
+
+bool TET_Mesh::writeObjFile(const string &filename, 
+                            const TET_Mesh &tetMesh, 
+                            const bool restVertices) {
+    FILE* file = fopen(filename.c_str(), "w");
+    
+    if (file == NULL) {
+        RYAO_ERROR("Failed to open file!");
+        return false;
+    }
+
+    RYAO_INFO("Writing out tet mesh file: " + filename);
+
+    const vector<VECTOR3>& vertices = (restVertices) ? tetMesh.restVertices() : tetMesh.vertices();
+    const vector<VECTOR4I>& tets = tetMesh.tets();
+
+    for (unsigned int x = 0; x < vertices.size(); x++) {
+        const VECTOR3& v = vertices[x];
+        fprintf(file, "v %.17g %.17g %.17g\n", v[0], v[1], v[2]);
+    }
+    for (unsigned int x = 0; x < tets.size(); x++) {
+        const VECTOR4I& tet = tets[x];
+        fprintf(file, "t %i %i %i %i\n", tet[0], tet[1], tet[2], tet[3]);
+    }
+
+    fclose(file);
+    return true;
+}   
+
+vector<VECTOR3> TET_Mesh::normalizeVertices(const vector<VECTOR3> &vertices) {
+    assert(vertices.size() > 0);
+    VECTOR3 mins = vertices[0];
+    VECTOR3 maxs = vertices[0];
+    for (unsigned int x = 1; x < vertices.size(); x++) 
+        for (int y = 0; y < 3; y++) {
+            mins[y] = (mins[y] < vertices[x][y]) ? mins[y] : vertices[x][y];
+            maxs[y] = (maxs[y] > vertices[x][y]) ? maxs[y] : vertices[x][y];
+        }
+    
+    const VECTOR3 lengths = maxs - mins;
+    const REAL maxLengthInv = 1.0 / lengths.maxCoeff();
+
+    vector<VECTOR3> normalized = vertices;
+    for (unsigned int x = 0; x < vertices.size(); x++) {
+        normalized[x] -= mins;
+        normalized[x] *= maxLengthInv;
+
+        normalized[x] += VECTOR3(0.5, 0.5, 0.5);
+    }
+
+    return normalized;
+}
+
+bool TET_Mesh::pointProjectsInsideTriangle(const VECTOR3 &v0, const VECTOR3 &v1, 
+                                           const VECTOR3 &v2, const VECTOR3 &v) {
+    // get the barycentric coordinates
+    const VECTOR3 e1 = v1 - v0;
+    const VECTOR3 e2 = v2 - v0;
+    const VECTOR3 n = e1.cross(e2);
+    const VECTOR3 na = (v2 - v1).cross(v - v1);
+    const VECTOR3 nb = (v0 - v2).cross(v - v2);
+    const VECTOR3 nc = (v1 - v0).cross(v -v0);
+    REAL nNorm = n.squaredNorm();
+    const VECTOR3 barycentric(n.dot(na) / nNorm,
+                              n.dot(nb) / nNorm,
+                              n.dot(nc) / nNorm);
+    
+    const REAL barySum = fabs(barycentric[0]) + fabs(barycentric[1]) + fabs(barycentric[2]);
+
+    // if the point peojects to inside the triangle, it should sum to 1
+    if (barySum - 1.0 < 1e-8) 
+        return true;
+
+    return false;
+}
+
+REAL TET_Mesh::pointTriangleDistance(const VECTOR3 &v0, const VECTOR3 &v1, 
+                                     const VECTOR3 &v2, const VECTOR3 &v) {
+    // get the barycentric coordinates
+    const VECTOR3 e1 = v1 - v0;
+    const VECTOR3 e2 = v2 - v0;
+    const VECTOR3 n = e1.cross(e2);
+    const VECTOR3 na = (v2 - v1).cross(v - v1);
+    const VECTOR3 nb = (v0 - v2).cross(v - v2);
+    const VECTOR3 nc = (v1 - v0).cross(v -v0);
+    REAL nNorm = n.squaredNorm();
+    const VECTOR3 barycentric(n.dot(na) / nNorm,
+                              n.dot(nb) / nNorm,
+                              n.dot(nc) / nNorm);
+    
+    const REAL barySum = fabs(barycentric[0]) + fabs(barycentric[1]) + fabs(barycentric[2]);
+
+    // if the point peojects to inside the triangle, it should sum to 1
+    if (barySum - 1.0 < 1e-8) {
+        const VECTOR3 nHat = n / n.norm();
+        const REAL normalDistance = (nHat.dot(v - v0));
+        return fabs(normalDistance);
+    }
+
+    // project onto each edge, find the distance to each edge
+    const VECTOR3 e3 = v2 - v1;
+    const VECTOR3 ev = v - v0;
+    const VECTOR3 ev3 = v - v1;
+    const VECTOR3 e1Hat = e1 / e1.norm();
+    const VECTOR3 e2Hat = e2 / e2.norm();
+    const VECTOR3 e3Hat = e3 / e3.norm();
+    VECTOR3 edgeDistances(FLT_MAX, FLT_MAX, FLT_MAX);
+
+    // see if it projects onto the interval of the edge 
+    // if it doesn't, then the vertex distance will be smaller,
+    // so we can skip computing anything
+    const REAL e1dot = e1Hat.dot(ev);
+    if (e1dot > 0.0 && e1dot < e1.norm()) {
+        const VECTOR3 projected = v0 + e1Hat * e1dot;
+        edgeDistances[0] = (v - projected).norm();
+    }
+    const REAL e2dot = e2Hat.dot(ev);
+    if (e2dot > 0.0 && e2dot < e2.norm()) {
+        const VECTOR3 projected = v0 + e2Hat * e2dot;
+        edgeDistances[1] = (v - projected).norm();
+    } 
+    const REAL e3dot = e3Hat.dot(ev3);
+    if (e3dot > 0.0 && e3dot < e3.norm()) {
+        const VECTOR3 projected = v1 + e3Hat * e3dot;
+        edgeDistances[2] = (v - projected).norm();
+    }
+
+    // get the distance to each vertex
+    const VECTOR3 vertexDistances((v - v0).norm(),
+                                  (v - v1).norm(),
+                                  (v - v2).norm());
+
+    // get the smallest of both the edge and vertex distance
+    const REAL vertexMin = vertexDistances.minCoeff();
+    const REAL edgeMin = edgeDistances.minCoeff();
+    
+    // return the smallest of those
+    return (vertexMin < edgeMin) ? vertexMin : edgeMin;
+}
+
+
 
 }
