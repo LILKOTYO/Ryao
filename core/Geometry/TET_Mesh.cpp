@@ -1087,6 +1087,151 @@ REAL TET_Mesh::pointTriangleDistance(const VECTOR3 &v0, const VECTOR3 &v1,
     return (vertexMin < edgeMin) ? vertexMin : edgeMin;
 }
 
+bool TET_Mesh::insideCollisionCell(const int surfaceTriangleID, const VECTOR3& vertex) {
+    const VECTOR3I& t = _surfaceTriangles[surfaceTriangleID];
+    vector<VECTOR3> v;
+    v.push_back(_vertices[t[0]]);
+    v.push_back(_vertices[t[1]]);
+    v.push_back(_vertices[t[2]]);
+    VECTOR3 n = planeNormal(v);
 
+    // get the normals of the three adjacent faces
+    vector<VECTOR3> nNeighbors;
+    const VECTOR3I& neighbors = _surfaceTriangleNeighbors[surfaceTriangleID];
+    for (int x = 0; x < 3; x++) {
+        assert(neighbors[x] != -1);
+        const VECTOR3I& tNeighbor = _surfaceTriangles[neighbors[x]];
+        vector<VECTOR3> vNeighbor;
+        vNeighbor.push_back(_vertices[tNeighbor[0]]);
+        vNeighbor.push_back(_vertices[tNeighbor[1]]);
+        vNeighbor.push_back(_vertices[tNeighbor[2]]);
+        VECTOR3 nNeighbor = planeNormal(vNeighbor);
 
+        nNeighbors.push_back(nNeighbor);
+    }
+
+    // do the inside check
+    for (int x = 0; x < 3; x++) {
+        // the normal of a edge
+        const VECTOR3 ne = (nNeighbors[x] + n).normalized();
+        const VECTOR3 eij = v[(x + 1) % 3] - v[x];
+        // the normal of the bisector plane
+        const VECTOR3 neb = ne.cross(eij);
+        const VECTOR3 nebHat = neb.normalized();
+        const REAL deplane = nebHat.dot(vertex - v[x]);
+
+        if (deplane < 0.0)
+            return false;
+    }
+
+    return true;
+}
+
+REAL TET_Mesh::distanceToCollisionCellWall(const int surfaceTriangleID, const VECTOR3& vertex) {
+    const VECTOR3I& t = _surfaceTriangles[surfaceTriangleID];
+    vector<VECTOR3> v;
+    v.push_back(_vertices[t[0]]);
+    v.push_back(_vertices[t[1]]);
+    v.push_back(_vertices[t[2]]);
+    VECTOR3 n = planeNormal(v);
+
+    // get the normals of the three adjacent faces
+    vector<VECTOR3> nNeighbors;
+    const VECTOR3I& neighbors = _surfaceTriangleNeighbors[surfaceTriangleID];
+    for (int x = 0; x < 3; x++) {
+        assert(neighbors[x] != -1);
+        const VECTOR3I& tNeighbor = _surfaceTriangles[neighbors[x]];
+        vector<VECTOR3> vNeighbor;
+        vNeighbor.push_back(_vertices[tNeighbor[0]]);
+        vNeighbor.push_back(_vertices[tNeighbor[1]]);
+        vNeighbor.push_back(_vertices[tNeighbor[2]]);
+        VECTOR3 nNeighbor = planeNormal(vNeighbor);
+
+        nNeighbors.push_back(nNeighbor);
+    }
+
+    // do the inside check
+    REAL smallestDistance = FLT_MAX;
+    for (int x = 0; x < 3; x++) {
+        // averaged noral along the edge
+        const VECTOR3 ne = (nNeighbors[x] + n).normalized();
+
+        // the edge itself
+        const VECTOR3 eij = v[(x + 1) % 3] - v[x];
+
+        // inward-facing normal into cell
+        const VECTOR3 neb = ne.cross(eij);
+        const VECTOR3 nebHat = neb.normalized();
+
+        // dot of the current vertex against the inward-facing normal
+        const REAL deplane = nebHat.dot(vertex - v[x]);
+
+        if (fabs(deplane) < smallestDistance) 
+            smallestDistance = fabs(deplane);
+    }
+    return smallestDistance;
+}
+
+void TET_Mesh::computeVertexFaceCollisions() {
+    Timer functionTimer(__FUNCTION__);
+    
+    // if a vertex is part of an inverted tet, don't have it participate
+    // in a self-collision. That tet needs to get its house in order
+    // before it starts bossing around a surface face. Not checking for 
+    // this causes faces to get horribly tangled in verted configurations.
+    computeInvertedVertices();
+
+    _vertexFaceCollisions.clear();
+    const REAL collisionEps = _collisionEps;
+
+    for (unsigned int x = 0; x < _surfaceVertices.size(); x++) {
+        const int currentID = _surfaceVertices[x];
+
+        // if the vertex is involved in an inverted tet, give up
+        if (_invertedVertices[currentID])
+            continue;
+        
+        const VECTOR3& surfaceVertex = _vertices[currentID];
+
+        // find the close triangles
+        for (unsigned int y = 0; y < _surfaceTriangles.size(); y++) {
+            // if the surface triangle is so small the normal could be degenerate, skip it
+            if (surfaceTriangleIsDegenerate(y)) 
+                continue;
+
+            const VECTOR3I& t = _surfaceTriangles[y];
+
+            // if it's an inverted face, move
+            if (_invertedVertices[t[0]] && _invertedVertices[t[1]] && _invertedVertices[t[2]])
+                continue;
+            
+            // if this triangle is in the one-ring of the current vertex, skip it
+            if (t[0] == currentID || t[1] == currentID || t[2] == currentID)
+                continue;
+
+            const REAL distance = pointTriangleDistance(_vertices[t[0]], _vertices[t[1]],
+                                                        _vertices[t[2]], surfaceVertex);
+            
+            if (distance < collisionEps) {
+                // if the point, projected onto the face's plane, is inside the face,
+                // then record the collision now 
+                if (pointProjectsInsideTriangle(_vertices[t[0]], _vertices[t[1]],
+                                                _vertices[t[2]], surfaceVertex)) {
+                    pair<int,int> collision(currentID, y);
+                    _vertexFaceCollisions.push_back(collision);
+                    continue;
+                }
+                if (insideCollisionCell(y, surfaceVertex)) {
+                    pair<int,int> collision(currentID, y);
+                    _vertexFaceCollisions.push_back(collision);
+                }
+            }
+        }
+    }
+
+#if VERY_VERBOSE
+    if (_vertexFaceCollisions.size() > 0)
+        RYAO_INFO("Found {} vertex-face collisions", _vertexFaceCollisions.size());
+#endif
+}
 }

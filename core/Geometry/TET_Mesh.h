@@ -159,6 +159,7 @@ public:
 
     /**
      * @brief find all the vertex-face collision pairs, using the InFaceRegion test
+     *        I guess this function is used for self-collision.
      * 
      */
     virtual void computeVertexFaceCollisions();
@@ -339,7 +340,7 @@ protected:
      * @param vertex 
      * @return REAL 
      */
-    REAL distanceToCollisionCellWall(const int suerfaceTriangleID, const VECTOR3& vertex);
+    REAL distanceToCollisionCellWall(const int surfaceTriangleID, const VECTOR3& vertex);
 
     /**
      * @brief compute whether one vertex is inside the vertex one right of another 
