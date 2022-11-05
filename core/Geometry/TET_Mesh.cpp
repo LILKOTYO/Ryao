@@ -1234,4 +1234,24 @@ void TET_Mesh::computeVertexFaceCollisions() {
         RYAO_INFO("Found {} vertex-face collisions", _vertexFaceCollisions.size());
 #endif
 }
+
+void TET_Mesh::computeEdgeEdgeCollisions() {
+    Timer functionTimer(__FUNCTION__);
+    _edgeEdgeCollisions.clear();
+    _edgeEdgeIntersections.clear();
+    _edgeEdgeCoordinates.clear();
+    _edgeEdgeCollisionAreas.clear();
+
+    // build a mapping from edge index pairs to _surfaceEdges
+    map<pair<int,int>, int> edgeHash;
+    for (unsigned int x = 0; x < _surfaceEdges.size(); x++) {
+        pair<int, int> edge(_surfaceEdges[x][0], _surfaceEdges[x][1]);
+        edgeHash[edge] = x;
+    }
+
+    // get the nearest edge to each edge, not including itself 
+    // and ones where it shares a vertex
+
+}
+
 }
