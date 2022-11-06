@@ -1251,7 +1251,137 @@ void TET_Mesh::computeEdgeEdgeCollisions() {
 
     // get the nearest edge to each edge, not including itself 
     // and ones where it shares a vertex
+    for (unsigned int x = 0; x < _surfaceEdges.size(); x++) {
+        int closestEdge = -1;
+        REAL closestDistance = FLT_MAX;
+        VECTOR2 aClosest(-1, -1);
+        VECTOR2 bClosest(-1, -1);
+        const VECTOR2I outerEdge = _surfaceEdges[x];
+        const VECTOR3& v0 = _vertices[outerEdge[0]];
+        const VECTOR3& v1 = _vertices[outerEdge[1]];
 
+        // find the closest other edge
+        for (unsigned int y = x + 1; y < _surfaceEdges.size(); y++) {
+            const VECTOR2I innerEdge = _surfaceEdges[y];
+            // if there share a vertex, skip it
+            if ((outerEdge[0] == innerEdge[0]) || (outerEdge[0] == innerEdge[1]) ||
+                (outerEdge[1] == innerEdge[0]) || (outerEdge[1] == innerEdge[1]))
+                continue;
+            
+            const VECTOR3& v2 = _vertices[innerEdge[0]];
+            const VECTOR3& v3 = _vertices[innerEdge[1]];
+
+            VECTOR3 innerPoint, outerPoint;
+            IntersectLineSegments(v0, v1, v2, v3, outerPoint, innerPoint);
+
+            const REAL distance = (innerPoint - outerPoint).norm();
+
+            if (distance > closestDistance) continue;
+
+            // get the line interpolation coordinates
+            VECTOR2 a, b;
+            const VECTOR3 e0 = v1 - v0;
+            const VECTOR3 e1 = v3 - v2;
+
+            // this is a little dicey in general, but if the intersection test isn't
+            // total garbage, it should be robust
+            a[1] = (outerPoint - v0).norm() / e0.norm();
+            a[0] = 1.0 - a[1];
+            b[1] = (innerPoint - v2).norm() / e1.norm();
+            b[0] = 1.0 - b[1];
+
+            // if it's really close to an end vertex, skip it 
+            const REAL skipEps = 1e-4;
+            if ((a[0] < skipEps) || (a[0] > 1.0 - skipEps)) continue;
+            if ((a[1] < skipEps) || (a[1] > 1.0 - skipEps)) continue;
+            if ((b[0] < skipEps) || (b[1] > 1.0 - skipEps)) continue;
+            if ((b[1] < skipEps) || (b[1] > 1.0 - skipEps)) continue;
+
+            // it's mid-segment, and closest, so remember it
+            closestDistance = distance;
+            closestEdge = y;
+
+            aClosest = a;
+            bClosest = b;
+        }
+
+        // if nothing was close, move on 
+        if (closestEdge == -1) continue;
+        
+        // are they within each other's one rings?
+        const VECTOR2I innerEdge = _surfaceEdges[closestEdge];
+        bool insideOneRing = false;
+
+        for (int j = 0; j < 2; j++) {
+            pair<int, int> lookup;
+            lookup.first = outerEdge[j];
+            for (int i = 0; i < 2; i++) {
+                lookup.second = innerEdge[i];
+                if (_insideSurfaceVertexOneRing.find(lookup) != _insideSurfaceVertexOneRing.end())
+                    insideOneRing = true;
+            }
+        }
+
+        if (insideOneRing) continue;
+
+        // if it's within the positive threshold, it's in collision 
+        if (closestDistance < _collisionEps) {
+            pair<int, int> collision(x, closestEdge);
+            _edgeEdgeCollisions.push_back(collision);
+
+            // this was actually set
+            assert(aClosest[0] > 0.0 && aClosest[1] > 0.0);
+            assert(bClosest[0] > 0.0 && bClosest[1] > 0.0);
+
+            pair<VECTOR2, VECTOR2> coordinate(aClosest, bClosest);
+            _edgeEdgeCoordinates.push_back(coordinate);
+
+            // get the areas too
+            const VECTOR2I innerEdge = _surfaceEdges[closestEdge];
+            const pair<int, int> outerPair(outerEdge[0], outerEdge[1]);
+            const pair<int, int> innerPair(innerEdge[0], innerEdge[1]);
+            const REAL xArea = _restEdgeAreas[edgeHash[outerPair]];
+            const REAL closestArea = _restEdgeAreas[edgeHash[innerPair]];
+            _edgeEdgeCollisionAreas.push_back(xArea + closestArea);
+
+            // find out if they are penetrating
+            vector<VECTOR3> edge(2);
+            edge[0] = v0;
+            edge[1] = v1;
+
+            // get the adjacent triangles of the *other* edge
+            VECTOR2I adjacentTriangles = _surfaceEdgeTriangleNeighbors[edgeHash[innerPair]];
+
+            // build triangle 0
+            const VECTOR3I surfaceTriangle0 = _surfaceTriangles[adjacentTriangles[0]];
+            vector<VECTOR3> triangle0;
+            triangle0.push_back(_vertices[surfaceTriangle0[0]]);
+            triangle0.push_back(_vertices[surfaceTriangle0[1]]);
+            triangle0.push_back(_vertices[surfaceTriangle0[2]]);
+
+            // build triangle 1
+            vector<VECTOR3> triangle1;
+            if (adjacentTriangles[1] != -1) {
+                const VECTOR3I surfaceTriangle1 = _surfaceTriangles[adjacentTriangles[1]];
+                triangle1.push_back(_vertices[surfaceTriangle1[0]]);
+                triangle1.push_back(_vertices[surfaceTriangle1[1]]);
+                triangle1.push_back(_vertices[surfaceTriangle1[2]]);
+            }
+
+            // see if the edges are already penetrating the opposing faces
+            bool penetrating = false;
+            if (triangle0.size() > 0) penetrating = faceEdgeIntersection(triangle0, edge);
+            if (triangle1.size() > 0) penetrating = penetrating || faceEdgeIntersection(triangle1, edge);
+
+            _edgeEdgeIntersections.push_back(penetrating);
+        }
+    }
+    assert(_edgeEdgeCollisions.size() == _edgeEdgeCoordinates.size()); 
+
+#if VERY_VERBOSE
+    if (_edgeEdgeCollisions.size() > 0) 
+        RYAO_INFO("Found {} edge-edge collisions.", _edgeEdgeCollisions.size());
+#endif
 }
 
 }
