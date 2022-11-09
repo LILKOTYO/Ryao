@@ -1384,4 +1384,104 @@ void TET_Mesh::computeEdgeEdgeCollisions() {
 #endif
 }
 
+REAL TET_Mesh::triangleArea(const vector<VECTOR3>& triangle) {
+    const VECTOR3 edge1 = triangle[1] - triangle[0];
+    const VECTOR3 edge2 = triangle[2] - triangle[0];
+    return 0.5 * edge1.cross(edge2).norm();
+}
+
+VECTOR3 TET_Mesh::planeNormal(const vector<VECTOR3>& plane) {
+    const VECTOR3 edge1 = plane[1] - plane[0];
+    const VECTOR3 edge2 = plane[2] - plane[0];
+    return edge1.cross(edge2).normalized();
+}
+
+VECTOR3 TET_Mesh::pointPlaneProjection(const vector<VECTOR3>& plane, const VECTOR3& point) {
+    const VECTOR3 normal = planeNormal(plane);
+    return point - (normal.dot(point - plane[0])) * normal;
+}
+
+void TET_Mesh::buildVertexFaceCollisionTets(const VECTOR &velocity) {
+    // clear the old ones(not clear if it is smart or dumv)
+    _vertexFaceCollisionTets.clear();
+    _vertexFaceCollisionAreas.clear();
+
+    // make a tet for each vertex-face pair
+    for (unsigned int x = 0; x < _vertexFaceCollisions.size(); x++) {
+        const int vertexID = _vertexFaceCollisions[x].first;
+        const int faceID = _vertexFaceCollisions[x].second;
+        const VECTOR3I& face = _surfaceTriangles[faceID];
+
+       // build a tet with the correct vertex ordering
+       VECTOR4I tet;
+       tet[0] = vertexID;
+
+       // reverse the ordering here because we want the normal to face
+       // the opposite direction compared to a surface triangle
+       tet[1] = face[2];
+       tet[2] = face[1];
+       tet[3] = face[0];
+
+       // get the rest area of the triangle
+       vector<VECTOR3> restFace(3);
+       restFace[0] = _restVertices[face[0]]; 
+       restFace[1] = _restVertices[face[1]]; 
+       restFace[2] = _restVertices[face[2]];
+       const REAL restFaceArea = triangleArea(restFace);
+
+       assert(_volumeToSurfaceID.find(vertexID) != _volumeToSurfaceID.end());
+       const REAL surfaceID = _volumeToSurfaceID[vertexID];
+       const REAL restVertexArea = _restOneRingAreas[surfaceID];  
+
+       // store 
+       _vertexFaceCollisionTets.push_back(tet);
+       assert(restFaceArea >= 0.0);
+       assert(restVertexArea >= 0.0);
+        _vertexFaceCollisionAreas.push_back(restFaceArea + restVertexArea);
+    }
+}
+
+VECTOR TET_Mesh::computeVertexFaceCollisionForce() const {
+    Timer functionTimer(__FUNCTION__);
+
+    vector<VECTOR12> perElementForces(_vertexFaceCollisionTets.size());
+    for (unsigned int i = 0; i < _vertexFaceCollisionTets.size(); i++) {
+        vector<VECTOR3> vs(4);
+        for (unsigned int j = 0; j < 4; j++) 
+            vs[j] = _vertices[_vertexFaceCollisionTets[i][j]];
+        const VECTOR12 force = -_vertexFaceCollisionAreas[i] * _vertexFaceEnergy->gradient(vs);
+        perElementForces[i] = force;
+
+#if ENABLE_DEBUG_TRAPS
+        if (force.hasNaN()) {
+            RYAO_DEBUG("{} {} {}:", __FILE__, __FUNCTION__, __LINE__);
+            RYAO_DEBUG("NaN in collision tet: {}", i);
+            for (int j = 0; j < 4; j++) 
+                RYAO_DEBUG("v{}: {}", j, vs[j].transpose());
+            RYAO_DEBUG("gradient: \n{}", _vertexFaceEnergy->gradient(vs));
+        }
+#endif
+    }
+
+    // scatter the forces to the global force vector, this can be parallelized
+    // better where each vector entry pulls from perElementForce, but let's get
+    // the slow preliminary version working first
+    const int DOFs = _vertices.size() * 3;
+    VECTOR forces(DOFs);
+    forces.setZero();
+
+    for (unsigned int i = 0; i < _vertexFaceCollisionTets.size(); i++) {
+        const VECTOR4I& tet = _vertexFaceCollisionTets[i];
+        const VECTOR12& tetForce = perElementForces[i];
+        for (int x = 0; x < 4; x++) {
+            unsigned int index = 3 * tetForce[x];
+            forces[index]       += tetForce[3 * x];
+            forces[index + 1]   += tetForce[3 * x + 1];
+            forces[index + 2]   += tetForce[3 * x + 2];
+        }
+    }
+
+    return forces;
+}
+
 }
