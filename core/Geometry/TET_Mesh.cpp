@@ -1484,4 +1484,185 @@ VECTOR TET_Mesh::computeVertexFaceCollisionForce() const {
     return forces;
 }
 
+REAL TET_Mesh::computeEdgeEdgeCollisionEnergy() const {
+    Timer functionTimer(__FUNCTION__);
+
+    REAL finalEnergy = 0.0;
+    for (unsigned int i = 0; i < _edgeEdgeCollisions.size(); i++) {
+        const VECTOR2I& edge0 = _surfaceEdges[_edgeEdgeCollisions[i].first];
+        const VECTOR2I& edge1 = _surfaceEdges[_edgeEdgeCollisions[i].second];
+
+        vector<VECTOR3> vs(4);
+        vs[0] = _vertices[edge0[0]];
+        vs[1] = _vertices[edge0[1]];
+        vs[2] = _vertices[edge1[0]];
+        vs[3] = _vertices[edge1[1]];
+
+        const VECTOR2& a = _edgeEdgeCoordinates[i].first;
+        const VECTOR2& b = _edgeEdgeCoordinates[i].second;
+
+        const REAL psi = _edgeEdgeEnergy->psi(vs, a, b);
+        finalEnergy += _edgeEdgeCollisionAreas[i] * psi;
+    }
+
+    return finalEnergy;
+}
+
+VECTOR TET_Mesh::computeEdgeEdgeCollisionForces() const {
+    Timer functionTimer(__FUNCTION__);
+
+    vector<VECTOR12> perElementForces(_edgeEdgeCollisions.size());
+    for (unsigned int i = 0; i < _edgeEdgeCollisions.size(); i++) {
+        const VECTOR2I& edge0 = _surfaceEdges[_edgeEdgeCollisions[i].first];
+        const VECTOR2I& edge1 = _surfaceEdges[_edgeEdgeCollisions[i].second];
+
+        vector<VECTOR3> vs(4);
+        vs[0] = _vertices[edge0[0]];
+        vs[1] = _vertices[edge0[1]];
+        vs[2] = _vertices[edge1[0]];
+        vs[3] = _vertices[edge1[1]];
+
+        const VECTOR2& a = _edgeEdgeCoordinates[i].first;
+        const VECTOR2& b = _edgeEdgeCoordinates[i].second;
+
+#if ADD_EDGE_EDGE_PENETRATION_BUG
+        const VECTOR12 force = -_edgeEdgeCollisionAreas[i] * _edgeEdgeEnergy->gradient(vs, a, b);
+#else
+        const VECTOR12 force = (!_edgeEdgeIntersections[i]) ? -_edgeEdgeCollisionAreas[i] * _edgeEdgeEnergy->gradient(vs, a, b)
+                                                            : -_edgeEdgeCollisionAreas[i] * _edgeEdgeEnergy->gradientNegated(vs, a, b);
+#endif
+
+        perElementForces[i] = force;
+    }
+
+    // scatter the forces to the global force vector, this can be parallelized
+    // better where each vector entry pulls from perElementForce, but let's get
+    // the slow preliminary version working first
+    const int DOFs = _vertices.size() * 3;
+    VECTOR forces(DOFs);
+    forces.setZero();
+
+    for (unsigned int i = 0; i < _edgeEdgeCollisions.size(); i++) {
+        const VECTOR2I& edge0 = _surfaceEdges[_edgeEdgeCollisions[i].first];
+        const VECTOR2I& edge1 = _surfaceEdges[_edgeEdgeCollisions[i].second];
+        const VECTOR12& edgeForce = perElementForces[i];
+
+        vector<int> vertexIndices(4);
+        vertexIndices[0] = edge0[0];
+        vertexIndices[1] = edge0[1];
+        vertexIndices[2] = edge1[0];
+        vertexIndices[3] = edge1[1];
+
+        for (int x = 0; x < 4; x++) {
+            unsigned int index = 3 * vertexIndices[x];
+            assert((int)index < DOFs);
+            forces[index]       += edgeForce[3 * x];
+            forces[index + 1]   += edgeForce[3 * x + 1];
+            forces[index + 2]   += edgeForce[3 * x + 2];
+        }
+    }
+
+    return forces;
+}
+
+SPARSE_MATRIX TET_Mesh::computeEdgeEdgeCollisionClampedHessian() const {
+    Timer functionTimer(__FUNCTION__);
+
+    vector<MATRIX12> perElementHessian(_edgeEdgeCollisions.size());
+    for (unsigned int i = 0; i < _edgeEdgeCollisions.size(); i++) {
+        const VECTOR2I& edge0 = _surfaceEdges[_edgeEdgeCollisions[i].first];
+        const VECTOR2I& edge1 = _surfaceEdges[_edgeEdgeCollisions[i].second];
+
+        vector<VECTOR3> vs(4);
+        vs[0] = _vertices[edge0[0]];
+        vs[1] = _vertices[edge0[1]];
+        vs[2] = _vertices[edge1[0]];
+        vs[3] = _vertices[edge1[1]];
+
+        const VECTOR2& a = _edgeEdgeCoordinates[i].first;
+        const VECTOR2& b = _edgeEdgeCoordinates[i].second;
+
+#if ADD_EDGE_EDGE_PENETRATION_BUG
+        const MATRIX12 H = -_edgeEdgeCollisionAreas[i] * _edgeEdgeEnergy->clampedHessian(vs, a, b);
+#else
+        const MATRIX12 H = (!_edgeEdgeIntersections[i]) ? -_edgeEdgeCollisionAreas[i] * _edgeEdgeEnergy->clampedHessian(vs, a, b)
+                                                        : -_edgeEdgeCollisionAreas[i] * _edgeEdgeEnergy->clampedHessianNegated(vs, a, b);
+#endif
+        perElementHessian[i] = H;
+    }
+
+    // build out the triplets 
+    typedef Eigen::Triplet<REAL> TRIPLET;
+    vector<TRIPLET> triplets;
+    for (unsigned int i = 0; i < _edgeEdgeCollisions.size(); i++) {
+        const MATRIX12& H = perElementHessian[i];
+        const VECTOR2I& edge0 = _surfaceEdges[_edgeEdgeCollisions[i].first];
+        const VECTOR2I& edge1 = _surfaceEdges[_edgeEdgeCollisions[i].second];
+
+        vector<int> vertexIndex(4);
+        vertexIndex[0] = edge0[0];
+        vertexIndex[1] = edge0[1];
+        vertexIndex[2] = edge1[0];
+        vertexIndex[3] = edge1[1];
+
+        for (int y = 0; y < 4; y++) {
+            int yVertex = vertexIndex[y];
+            for (int x = 0; x < 4; x++) {
+                int xVertex = vertexIndex[x];
+                for (int b = 0; b < 3; b++)
+                    for (int a = 0; a < 3; a++) {
+                        const REAL entry = H(3 * x + a, 3 * y + b);
+                        TRIPLET triplet(3 * xVertex + a, 3 * yVertex + b, entry);
+                        triplets.push_back(triplet);
+                    }
+            }
+        }
+    }
+
+    int DOFs = _vertices.size() * 3;
+    SPARSE_MATRIX A(DOFs, DOFs);
+    A.setFromTriplets(triplets.begin(), triplets.end());
+
+    return A;
+}
+
+SPARSE_MATRIX TET_Mesh::computeVertexFaceCollisionClampedHessian() const {
+    Timer functionTimer(__FUNCTION__);
+
+    vector<MATRIX12> perElementHessians(_vertexFaceCollisionTets.size());
+    for (unsigned int i = 0; i < _vertexFaceCollisionTets.size(); i++) {
+        vector<VECTOR3> vs(4);
+        for (unsigned int j = 0; j < 4; j++) 
+            vs[j] = _vertices[_vertexFaceCollisionTets[i][j]];
+        const MATRIX12 H = -_vertexFaceCollisionAreas[i] * _vertexFaceEnergy->clampedHessian(vs);
+        perElementHessians[i] = H;
+    }
+
+    // build out the triplets
+    typedef Eigen::Triplet<REAL> TRIPLET;
+    vector<TRIPLET> triplets;
+    for (unsigned int i = 0; i < _vertexFaceCollisionTets.size(); i++) {
+        const VECTOR4I& tet = _vertexFaceCollisionTets[i];
+        const MATRIX12& H = perElementHessians[i];
+        for (int y = 0; y < 4; y++) {
+            int yVertex = tet[y];
+            for (int x = 0; x < 4; x++) {
+                int xVertex = tet[x];
+                for (int b = 0; b < 3; b++) 
+                    for (int a = 0; a < 3; a++) {
+                        const REAL entry = H(3 * x + a, 3 * y + b);
+                        TRIPLET triplet(3 * xVertex + a, 3 * yVertex + b, entry);
+                        triplets.push_back(triplet);
+                    }
+            }
+        }
+    }
+
+    int DOFs = _vertices.size() * 3;
+    SPARSE_MATRIX A(DOFs, DOFs);
+    A.setFromTriplets(triplets.begin(), triplets.end());
+
+    return A;
+}
+
 }
