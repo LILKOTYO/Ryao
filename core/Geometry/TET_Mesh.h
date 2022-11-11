@@ -75,7 +75,8 @@ public:
     VECTOR3 getRestTranslation() const;
 
     /**
-     * @brief get Procrustes-style global rotation
+     * @brief get Procrustes-style global rotation using Eqn.7 and surrounding 
+     *        text from Muller et al's "Meshless Deformations Based on Shape Matching" from SIGGRAPH 2005
      * 
      * @return MATRIX3 
      */

@@ -1665,4 +1665,272 @@ SPARSE_MATRIX TET_Mesh::computeVertexFaceCollisionClampedHessian() const {
     return A;
 }
 
+void TET_Mesh::computeSurfaceVertexOneRings() {
+    _insideSurfaceVertexOneRing.clear();
+    for (unsigned int x = 0; x < _surfaceEdges.size(); x++) {
+        // gonna be lazy for a moment here
+        const VECTOR2I edge = _surfaceEdges[x];
+        _insideSurfaceVertexOneRing[pair<int,int>(edge[0], edge[1])] = true;
+        _insideSurfaceVertexOneRing[pair<int,int>(edge[1], edge[0])] = true;
+    }
+}
+
+void TET_Mesh::setCollisionEps(const REAL &eps) {
+    _collisionEps = eps;
+    _vertexFaceEnergy->eps() = eps;
+    _edgeEdgeEnergy->setEps(eps);
+}
+
+void TET_Mesh::setCollisionStiffness(const REAL &stiffness) {
+    _vertexFaceEnergy->mu() = stiffness;
+    _edgeEdgeEnergy->mu() = stiffness;
+}
+
+bool TET_Mesh::areSurfaceTriangleNeighbors(const int id0, const int id1) const {
+    assert(_surfaceTriangleNeighbors.size() > 0);
+    assert(id0 < (int)_surfaceTriangleNeighbors.size());
+    assert(id1 < (int)_surfaceTriangleNeighbors.size());
+
+    const VECTOR3I neighbors0 = _surfaceTriangleNeighbors[id0];
+
+    for (int x = 0; x < 3; x++) {
+        if (neighbors0[x] == id1)
+            return true;
+    }
+
+    return false;
+}
+
+VECTOR3 TET_Mesh::surfaceTriangleNormal(const int triangleID) const {
+    assert(triangleID < (int)_surfaceTriangles.size());
+
+    const VECTOR3I& vertexIDs = _surfaceTriangles[triangleID];
+    const VECTOR3& v0 = _vertices[vertexIDs[0]];
+    const VECTOR3& v1 = _vertices[vertexIDs[1]];
+    const VECTOR3& v2 = _vertices[vertexIDs[2]];
+
+    const VECTOR3& e0 = v1 - v0;
+    const VECTOR3& e1 = v2 - v0;
+
+    return e0.cross(e1).normalized();
+}
+
+void TET_Mesh::setCollisionPairs(const vector<pair<int, int>> &vertexFace, 
+                                 const vector<pair<int, int>> &edgeEdge) {
+    _edgeEdgeCollisions = edgeEdge;
+    _vertexFaceCollisions = vertexFace;
+}            
+
+REAL TET_Mesh::surfaceFaceDihedralAngle(const int surfaceID0, const int surfaceID1) const {
+    const VECTOR4I tet = buildSurfaceFlap(surfaceID0, surfaceID1);
+
+    // let's do some cross products ...
+    //
+    //         1
+    //
+    //         o
+    //        /|\
+    //       / | \
+    //      /  |  \
+    //  0  o   |   o  3
+    //      \  |  /
+    //       \ | /
+    //        \|/
+    //         o
+    //
+    //         2
+    //
+
+    const VECTOR3& v0 = _vertices[tet[0]];
+    const VECTOR3& v1 = _vertices[tet[1]];
+    const VECTOR3& v2 = _vertices[tet[2]];
+    const VECTOR3& v3 = _vertices[tet[3]];
+
+    const VECTOR3 e20 = v2 - v0;
+    const VECTOR3 e10 = v1 - v0;
+    const VECTOR3 n0 = e20.cross(e10) / (e20 - e10).norm();
+
+    const VECTOR3 e13 = v1 - v3;
+    const VECTOR3 e23 = v2 - v3;
+    const VECTOR3 n1 = e13.cross(e23) / (e13 - e23).norm();
+
+    // will (v1 - v2).normalized() faster? @TODO
+    const VECTOR3 e12 = (v1 - v2) / (v1 - v2).norm();
+
+    const REAL sinTheta = (n0.cross(n1)).dot(e12);
+    const REAL cosTheta = n0.dot(n1);
+
+    return atan2(sinTheta, cosTheta);
+}
+
+VECTOR4I TET_Mesh::buildSurfaceFlap(const int surfaceID0, const int surfaceID1) const {
+    assert(surfaceID0 >= 0);
+    assert(surfaceId1 >= 0);
+    assert(surfaceId0 < (int)_surfaceTriangles.size());
+    assert(surfaceID1 < (int)_surfaceTriangles.size());
+
+    // they are neighbors, right?
+    assert(areSurfaceTriangleNeighbors(surfaceID0, surfaceID1));
+
+    const VECTOR3I f0 = _surfaceTriangles[surfaceID0];
+    const VECTOR3I f1 = _surfaceTriangles[surfaceID1];
+
+    int firstMatch = -1;
+    int secondMatch = -1;
+    int unmatched0 = -1;
+    int unmatched1 = -1;
+
+    // find the tet indices for the first face 
+    for (int x = 0; x < 3; x++) {
+        // let's search for this index
+        int i0 = f0[x];
+
+        bool matchFound = false;
+
+        for (int y = 0; y < 3; y++) {
+            // see if it matches
+            if (i0 == f1[y]) {
+                // which matches it?
+                if (firstMatch == -1)
+                    firstMatch = i0;
+                else 
+                    secondMatch = i0;
+
+                matchFound = true;
+            }
+        }
+
+        if (!matchFound)
+            unmatched0 = i0;
+    }
+
+    // find the unmatched vertex from the second face
+    for (int x = 0; x < 3; x++) {
+        // let's search for this index
+        int i1 = f1[x];
+        if (i1 != firstMatch && i1 != secondMatch) 
+            unmatched1 = i1;
+    }
+
+    // we did find one, right?
+    assert(unmatched1 != -1);
+
+    // build a tet/flap
+    //
+    //         1
+    //
+    //         o
+    //        /|\
+    //       / | \
+    //      /  |  \
+    //  0  o   |   o  3
+    //      \  |  /
+    //       \ | /
+    //        \|/
+    //         o
+    //
+    //         2
+    //
+    VECTOR4I tet;
+    tet[0] = unmatched0;
+    tet[1] = secondMatch;
+    tet[2] = firstMatch;
+    tet[3] = unmatched1;
+
+    return tet;
+}
+
+VECTOR3 TET_Mesh::getTranslation() const {
+    VECTOR3 vertexSum;
+    vertexSum.setZero();
+
+    REAL volumeSum = 0.0;
+    assert(_vertices.size() == _restOneRingVolumes.size());
+    for (unsigned int x = 0; x < _vertices.size(); x++) {
+        volumeSum += _restOneRingVolumes[x];
+        vertexSum += _vertices[x] * _restOneRingVolumes[x];
+    }
+
+    return vertexSum * (1.0 / volumeSum);
+}
+
+VECTOR3 TET_Mesh::getRestTranslation() const {
+    VECTOR3 vertexSum;
+    vertexSum.setZero();
+
+    REAL volumeSum = 0.0;
+    assert(_vertices.size() == _restOneRingVolumes.size());
+    for (unsigned int x = 0; x < _restVertices.size(); x++) {
+        volumeSum += _restOneRingVolumes[x];
+        vertexSum += _restVertices[x] * _restOneRingVolumes[x];
+    }
+
+    return vertexSum * (1.0 / volumeSum);
+}
+
+MATRIX3 TET_Mesh::getRotation() const {
+    // trying to follow Muller's notation here
+    const VECTOR3 x_cm0 = getRestTranslation();
+    const VECTOR3 x_cm = getTranslation();
+
+    // left matrix in Eqn.7 of Muller's paper
+    MATRIX3 Apq;
+    Apq.setZero();
+    for (unsigned int x = 0; x < _restVertices.size(); x++) {
+        const VECTOR3 p = _vertices[x] - x_cm;
+        const VECTOR3 q = _restVertices[x] - x_cm0;
+        Apq += _restOneRingVolumes[x] * (p * q.transpose());
+    }
+
+    // get the rotation
+    MATRIX3 R, S;
+    polarDecomposition(Apq, R, S);
+    return R;
+}
+
+bool TET_Mesh::surfaceTriangleIsDegenerate(const int surfaceTriangleID) {
+    assert(surfaceTriangleID >= 0);
+    assert(surfaceTriangleID < (int)_surfaceTriangles.size());
+
+    // get the rest area
+    vector<VECTOR3> vertices(3);
+    vertices[0] = _restVertices[_surfaceTriangles[surfaceTriangleID][0]];
+    vertices[1] = _restVertices[_surfaceTriangles[surfaceTriangleID][1]];
+    vertices[2] = _restVertices[_surfaceTriangles[surfaceTriangleID][2]];
+    const REAL restArea = triangleArea(vertices);
+
+    // get the deformed area 
+    vertices[0] = _vertices[_surfaceTriangles[surfaceTriangleID][0]];
+    vertices[1] = _vertices[_surfaceTriangles[surfaceTriangleID][1]];
+    vertices[2] = _vertices[_surfaceTriangles[surfaceTriangleID][2]];
+    const REAL deformedArea = triangleArea(vertices);
+
+    const REAL relativeArea = deformedArea / restArea;
+
+    const REAL degeneracyEps = 1e-4;
+    if (relativeArea < degeneracyEps) return true;
+
+    return false;
+}
+
+void TET_Mesh::computeInvertedVertices() {
+    Timer functionTimer(__FUNCTION__);
+    // first set them all to false
+    _invertedVertices.reserve(_vertices.size());
+    for (unsigned int x = 0; x < _vertices.size(); x++) 
+        _invertedVertices[x] = false;
+
+    for (unsigned int x = 0; x < _tets.size(); x++) {
+        // if the tet is not inverted, move on
+        if (_Fs[x].determinant() > 0.0) 
+            continue;
+
+        // if tet is inverted, tags all its vertices
+        for (int y = 0; y < 4; y++)
+            _invertedVertices[_tets[x][y]] = true;
+    }
+
+    //int totalInverted = 0;
+}
+
 }
