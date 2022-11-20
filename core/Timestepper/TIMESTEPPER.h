@@ -126,7 +126,7 @@ protected:
     VOLUME::HYPERELASTIC& _hyperelastic;
     VOLUME::Damping* _damping;
 
-    int DOFs;
+    int _DOFs;
     VECTOR _forces;
     VECTOR _externalForce;
 
