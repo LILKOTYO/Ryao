@@ -174,6 +174,7 @@ static void printEntry(const VECTOR& v, const int i, const string& varname) {
 }
 
 bool TIMESTEPPER::findSeparatingSurfaceConstraints(const VECTOR& unfiltered) {
+    // in most cases, the vector unfiltered is the _b(RHS of the equation)
     bool changed = false;
 
     for (unsigned int x = 0; x < _planeConstraints.size(); x++) {
@@ -195,12 +196,196 @@ bool TIMESTEPPER::findSeparatingSurfaceConstraints(const VECTOR& unfiltered) {
             constraint.isSeparating = true;
             changed = true;
             if (debug) 
-                RYAO_DEBUG("CONSTRAINT IS SEPARATING");
+                RYAO_DEBUG("CONSTRAINT IS OUTSIDE");
             continue;
         }
 
+        // what direction is the solution pointing in?
+        const int vectorID = 3 * vertexID;
+        VECTOR3 xDirection;
+        xDirection[0] = unfiltered[vectorID];
+        xDirection[1] = unfiltered[vectorID + 1];
+        xDirection[2] = unfiltered[vectorID + 2];
 
+        // make the test material agnostic and only look at the direction; then if it's a big force,
+        // the testing threshold won't get messed up later
+        if (xDirection.norm() > 1.0)
+            xDirection.normalize();
+
+        // what direction is the kinematic object's surface normal pointing in?
+        VECTOR3 normal = shape->localNormalToWorld(constraint.localNormal);
+
+        // what is the magnitude in the separation direction?
+        const REAL separationMagnitude = xDirection.dot(normal);
+
+        if (debug)
+            RYAO_DEBUG("separation magnitude: {}", separationMagnitude);
+
+        if (separationMagnitude > 1e-6) {
+            constraint.isSeparating = true;
+            changed = true;
+            if (debug)
+                RYAO_DEBUG("CONSTRAINT IS SEPARATING");
+        }
     }
+    return changed;
+}
+
+void TIMESTEPPER::addGravity(const VECTOR3 &bodyForce) {
+    const vector<REAL>& oneRingVolumes = _tetMesh.restOneRingVolumes();
+
+    for (int x = 0; x < _DOFs / 3; x++) {
+        const VECTOR3 scaledForce = oneRingVolumes[x] * bodyForce;
+        _externalForce[3 * x]       += scaledForce[0];
+        _externalForce[3 * x + 1]   += scaledForce[1];
+        _externalForce[3 * x + 2]   += scaledForce[2];
+    }
+}
+
+void TIMESTEPPER::attachKinematicSurfaceConstraints(const KINEMATIC_SHAPE *shape) {
+    // get all the nodes inside the shape
+    const vector<VECTOR3>& vertices = _tetMesh.vertices();
+    const vector<int>& surfaceVertices = _tetMesh.surfaceVertices();
+    for (unsigned int x = 0; x < surfaceVertices.size(); x++) {
+        int whichVertex = surfaceVertices[x];;
+        VECTOR3 v = vertices[whichVertex];
+
+        // if it's not inside, move on
+        if (shape->inside(v)) continue;
+
+        // if it is inside, get its local coordinates
+        VECTOR3 local = shape->worldVertexToLocal(v);
+
+        // record everything the solver will need later
+        KINEMATIC_CONSTRAINT constraint;
+        constraint.shape = shape;
+        constraint.vertexID = whichVertex;
+        constraint.localPosition = local;
+
+        // remember the constraint for later
+        _kinematicConstraints.push_back(constraint);
+    }
+}
+
+void TIMESTEPPER::attachKinematicConstraints(const KINEMATIC_SHAPE *shape) {
+    // get all the nodes inside the shape
+    const vector<VECTOR3>& vertices = _tetMesh.vertices();
+    for (unsigned int x = 0; x < vertices.size(); x++) {
+        VECTOR3 v = vertices[x];
+
+        // if it's not inside, move on
+        if (shape->inside(v)) continue;
+
+        // if it is inside, get its local coordinates
+        VECTOR3 local = shape->worldVertexToLocal(v);
+
+        // record everything the solver will need later
+        KINEMATIC_CONSTRAINT constraint;
+        constraint.shape = shape;
+        constraint.vertexID = x;
+        constraint.localPosition = local;
+
+        // remember the constraint for later
+        _kinematicConstraints.push_back(constraint);
+    }
+}
+
+vector<int> TIMESTEPPER::constrainedNodes() const {
+    // find the (unique) constrained nodes
+    map<int, bool> isConstrained;
+    for (unsigned int x = 0; x < _kinematicConstraints.size(); x++) {
+        const int vertexID = _kinematicConstraints[x].vertexID;;
+        isConstrained[vertexID] = true;
+    }
+
+    // tape out the unique IDs
+    vector<int> nodes;
+    for (auto iter = isConstrained.begin(); iter != isConstrained.end(); iter++) {
+        nodes.push_back(iter->first);
+    }
+
+    return nodes;
+}
+
+void TIMESTEPPER::addKinematicCollisionObject(const KINEMATIC_SHAPE *shape) {
+    // make sure we didn't already add it 
+    for (unsigned int x = 0; x < _collisionObjects.size(); x++) 
+        if (_collisionObjects[x] == shape) {
+            RYAO_ERROR("Tried to add the same kinematic shape twice!");
+            return;
+        }
+    _collisionObjects.push_back(shape);
+}
+
+void TIMESTEPPER::findNewSurfaceConstraints(const bool verbose) {
+    const vector<VECTOR3> vertices = _tetMesh.vertices();
+    const vector<int> surfaceVertices = _tetMesh.surfaceVertices();
+
+    if (verbose)
+        RYAO_INFO("Currently tracking {} constraints", _planeConstraints.size());
+
+    // build any new constraints
+    int newConstraints = 0;
+    for (unsigned int y = 0; y < _collisionObjects.size(); y++) {
+        const KINEMATIC_SHAPE *shape = _collisionObjects[y];
+        for (unsigned int x = 0; x < surfaceVertices.size(); x++) {
+            // get the vertex
+            assert(surfaceVertices[x] < int(vertices.size()));
+            int vertexID = surfaceVertices[x];
+
+            bool debug = false;
+
+            // if it's already in collision, skip it
+            if (_inCollision[vertexID]) {
+                if (debug)
+                    RYAO_DEBUG("vertex is already in collision, move on");
+                continue;
+            }
+
+            // see if it's inside the shape 
+            const VECTOR3& vertex = vertices[vertexID];
+            if (!shape->inside(vertex)) {
+                if (debug)
+                    RYAO_DEBUG("vertex is not inside the shape, move on");
+                continue;
+            }
+
+            VECTOR3 closestPoint;
+            VECTOR3 closestNormal;
+            shape->getClosestPoint(vertex, closestPoint, closestNormal);
+
+            // if the velocity is pulling away from the surface, don't constrain it
+            VECTOR3 vertexVelocity = velocity(vertexID);
+            VECTOR3 normal = shape->localNormalToWorld(closestNormal);
+            const REAL velocitySeparation = vertexVelocity.dot(normal);
+
+            if (debug) {
+                RYAO_DEBUG("velocity:   {}", vertexVelocity.transpose());
+                RYAO_DEBUG("normal:     {}", normal.transpose());
+                RYAO_DEBUG("separation: {}", velocitySeparation);
+            }
+
+            if (velocitySeparation >= -FLT_EPSILON) {
+                if (debug)
+                    RYAO_DEBUG("velocity is pulling away, move on");
+                continue;
+            }
+
+            // store the constraint
+            PLANE_CONSTRAINT constraint;
+            constraint.shape = shape;
+            constraint.vertexID = x;
+            constraint.localClosestPoint = closestPoint;
+            constraint.localNormal = closestNormal;
+            constraint.isSeparating = false;
+            addPlaneConstraint(constraint);
+
+            _inCollision[vertexID] = true;
+            newConstraints++;
+        }
+    }
+    if (verbose)
+        RYAO_INFO("Found {} new constraints", newConstraints);
 }
 
 }

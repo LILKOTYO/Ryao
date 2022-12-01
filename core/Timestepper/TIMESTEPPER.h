@@ -104,6 +104,7 @@ protected:
     void deleteSurfaceConstraints(const bool verbose = false);
 
     // find the surface constraints that are separating
+    // used to do what? what is the unfiltered?
     bool findSeparatingSurfaceConstraints(const VECTOR& unfiltered);
 
     // build the mass matrix based on the one-ring volume
