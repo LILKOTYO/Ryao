@@ -20,6 +20,10 @@ class Backward_Euler_Velocity : public TIMESTEPPER {
 public:
     Backward_Euler_Velocity(TET_Mesh& tetMesh, VOLUME::HYPERELASTIC& hyperelastic);
 
+    // take a timestep
+    virtual bool solve(const bool verbose) override;
+    bool solveRayleighDamped(const bool verbose);
+    bool solveEnergyDamped(const bool verbose);
 private:
     // update the displacement targets the Baraff-Witkin-style constraints
     // are trying to hit. Assumes that buildConstraintMatrix() has already been called

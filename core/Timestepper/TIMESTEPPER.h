@@ -17,8 +17,8 @@ public:
     TIMESTEPPER(TET_Mesh& tetMesh, VOLUME::HYPERELASTIC& hyperelastic, VOLUME::Damping& damping);
     virtual ~TIMESTEPPER();
 
-    VECTOR& externalForce()             { return _externalForce; };
-    const VECTOR& externalForce() const { return _externalForce; };
+    VECTOR& externalForce()             { return _externalForces; };
+    const VECTOR& externalForce() const { return _externalForces; };
     const vector<PLANE_CONSTRAINT>& planeConstraints() const { return _planeConstraints; };
     const VOLUME::HYPERELASTIC& material() const             { return _hyperelastic; };
     const string materialName() const                        { return _hyperelastic.name(); };
@@ -129,7 +129,7 @@ protected:
 
     int _DOFs;
     VECTOR _forces;
-    VECTOR _externalForce;
+    VECTOR _externalForces;
 
     // RHS of the solve 
     VECTOR _b;
@@ -177,7 +177,7 @@ protected:
 
     // global Hessian matrix
     SPARSE_MATRIX _H;
-    Eigen::ConjugateGradient<SPARSE_MATRIX, Eigen::Lower|Eigen::Upper> _cgColver;
+    Eigen::ConjugateGradient<SPARSE_MATRIX, Eigen::Lower|Eigen::Upper> _cgSolver;
 
     // what's this timestepper called
     string _name;

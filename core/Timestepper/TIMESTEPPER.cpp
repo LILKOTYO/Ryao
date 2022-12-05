@@ -28,7 +28,7 @@ void TIMESTEPPER::initialize() {
     _DOFs = _tetMesh.DOFs();
     _b.resize(_DOFs);
     _forces.resize(_DOFs);
-    _externalForce.resize(_DOFs);
+    _externalForces.resize(_DOFs);
     _constraintTargets.resize(_DOFs);
 
     int totalVertices = _tetMesh.vertices().size();
@@ -143,6 +143,9 @@ SPARSE_MATRIX TIMESTEPPER::buildMassMatrix() {
     return A;
 }
 
+// matbe we can optimize this function
+// we do not need to call this function every step
+// OPT TAG
 SPARSE_MATRIX TIMESTEPPER::buildRayleighDampingMatrix() {
     // back up current state 
     _temp = _tetMesh.getDisplacement();
@@ -236,9 +239,9 @@ void TIMESTEPPER::addGravity(const VECTOR3 &bodyForce) {
 
     for (int x = 0; x < _DOFs / 3; x++) {
         const VECTOR3 scaledForce = oneRingVolumes[x] * bodyForce;
-        _externalForce[3 * x]       += scaledForce[0];
-        _externalForce[3 * x + 1]   += scaledForce[1];
-        _externalForce[3 * x + 2]   += scaledForce[2];
+        _externalForces[3 * x]       += scaledForce[0];
+        _externalForces[3 * x + 1]   += scaledForce[1];
+        _externalForces[3 * x + 2]   += scaledForce[2];
     }
 }
 
