@@ -133,7 +133,7 @@ public:
     virtual SPARSE_MATRIX computeDampingHessian(const VOLUME::Damping& damping) const;
 
     // compute x-based collision quantities
-    VECTOR computeVertexFaceCollisionForce() const;
+    VECTOR computeVertexFaceCollisionForces() const;
     SPARSE_MATRIX computeVertexFaceCollisionClampedHessian() const;
     REAL computeEdgeEdgeCollisionEnergy() const;
     VECTOR computeEdgeEdgeCollisionForces() const;

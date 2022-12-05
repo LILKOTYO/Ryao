@@ -1441,7 +1441,7 @@ void TET_Mesh::buildVertexFaceCollisionTets(const VECTOR &velocity) {
     }
 }
 
-VECTOR TET_Mesh::computeVertexFaceCollisionForce() const {
+VECTOR TET_Mesh::computeVertexFaceCollisionForces() const {
     Timer functionTimer(__FUNCTION__);
 
     vector<VECTOR12> perElementForces(_vertexFaceCollisionTets.size());

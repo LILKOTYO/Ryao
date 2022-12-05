@@ -388,5 +388,135 @@ void TIMESTEPPER::findNewSurfaceConstraints(const bool verbose) {
         RYAO_INFO("Found {} new constraints", newConstraints);
 }
 
+void TIMESTEPPER::updateSurfaceConstraints() {
+    const vector<VECTOR3> vertices = _tetMesh.vertices();
+    for (unsigned int x = 0; x < _planeConstraints.size(); x++) {
+        const KINEMATIC_SHAPE& shape = *_planeConstraints[x].shape;
+
+        // get the new vertex position 
+        const int vertexID = _planeConstraints[x].vertexID;
+        const VECTOR3& vertex = vertices[vertexID];
+
+        // recompute the closest point
+        VECTOR3 closestPointLocal, normalLocal;
+        shape.getClosestPoint(vertex, closestPointLocal, normalLocal);
+
+        // store the result
+        _planeConstraints[x].localClosestPoint = closestPointLocal;
+        _planeConstraints[x].localNormal = normalLocal;
+    }
+    // we're not checking whether it's still inside or separating here.
+    // That will be handled by findSeparatingSurfaceConstraints.
+}
+
+void TIMESTEPPER::deleteSurfaceConstraints(const bool verbose) {
+    int totalDeleted = 0;
+
+    // here I'm just building a whole new vector instead of deleting nodes
+    // from a linked list. This may be too ugly to be optimized.
+    vector<PLANE_CONSTRAINT> constraints;
+    for (unsigned int x = 0; x < _planeConstraints.size(); x++) {
+        // if it's not separating, keep it
+        if (!_planeConstraints[x].isSeparating)
+            constraints.push_back(_planeConstraints[x]);
+        else {
+            // otherwise, mark it as not in collision
+            _inCollision[_planeConstraints[x].vertexID] = false;
+            totalDeleted++;
+        }
+    }
+
+    if (verbose)
+        RYAO_INFO("Deleted {} constraints", totalDeleted);
+
+    _planeConstraints = constraints;
+}
+
+const VECTOR3 TIMESTEPPER::velocity(unsigned int index) const {
+    assert(index >= 0);
+    assert(index < _velocity.size());
+    VECTOR3 vertexVelocity;
+    vertexVelocity[0] = _velocity[index * 3];
+    vertexVelocity[1] = _velocity[index * 3 + 1];
+    vertexVelocity[2] = _velocity[index * 3 + 2];
+
+    return vertexVelocity;
+}
+
+void TIMESTEPPER::setRayeligh(const REAL alpha, const REAL beta) {
+    _rayleighAlpha = alpha;
+    _rayleighBeta = beta;
+}
+
+void TIMESTEPPER::computeCollisionDetection() {
+    Timer functionTimer(__FUNCTION__);
+
+    // if the tet mesh has an AABB accelerator, refit it
+    TET_Mesh_Faster* fast = dynamic_cast<TET_Mesh_Faster*>(&_tetMesh);
+    if (fast != NULL)
+        fast->refitAABB();
+
+    // do the collision processing
+    const REAL invDt = 1.0 / _dt;
+    if (_vertexFaceSelfCollisionsOn) {
+        // vertex-face collision detection
+        _tetMesh.computeVertexFaceCollisions();
+
+        // build out the vertex-face "collision tets"
+        // TODO: this need to get cut down
+        _tetMesh.buildVertexFaceCollisionTets(_velocity);
+    }
+    if (_edgeEdgeSelfCollisionsOn) 
+        _tetMesh.computeEdgeEdgeCollisions();
+}
+
+void TIMESTEPPER::computeCollisionResponse(VECTOR& R, SPARSE_MATRIX& K, SPARSE_MATRIX& collisionC, const bool verbose) {
+    Timer functionTimer(__FUNCTION__);
+
+    // build the collision forces and Hessians
+    const int rank = R.size();
+    VECTOR collisionForces(rank);
+    SPARSE_MATRIX collisionK(rank, rank);
+
+    collisionForces.setZero();
+    collisionK.setZero();
+    collisionC.setZero();
+
+    const REAL dampingBeta = _collisionDampingBeta;
+    _tetMesh.setCollisionStiffness(_collisionStiffness);
+
+    // vertex-face case
+    VECTOR forcesVF;
+    SPARSE_MATRIX hessianVF;
+    if (_vertexFaceSelfCollisionsOn) {
+        // get vertex-face collision forces and gradient
+        forcesVF = _tetMesh.computeVertexFaceCollisionForces();
+        hessianVF = _tetMesh.computeVertexFaceCollisionClampedHessian();
+
+        collisionForces += forcesVF;
+        collisionK += hessianVF;
+        collisionC += dampingBeta * hessianVF;
+    }
+
+    // edge-edge case
+    VECTOR forcesEE;
+    SPARSE_MATRIX hessianEE;
+    if (_edgeEdgeSelfCollisionsOn) {
+        // get edge-edge collision forces and gradient
+        forcesEE = _tetMesh.computeEdgeEdgeCollisionForces();
+        hessianEE = _tetMesh.computeEdgeEdgeCollisionClampedHessian();
+
+        collisionForces += forcesEE;
+        collisionK += hessianEE;
+        collisionC += dampingBeta * hessianEE;
+    }
+
+    // add self-collisions to both LHS and RHS
+    if (_vertexFaceSelfCollisionsOn || _edgeEdgeSelfCollisionsOn) {
+        R += collisionForces;
+        K += collisionK;
+    }
+}
+
 }
 }
