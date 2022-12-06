@@ -184,7 +184,121 @@ bool Backward_Euler_Velocity::solveRayleighDamped(const bool verbose) {
     _curretTimestep++;
 
     return true;
+
 }
 
+bool Backward_Euler_Velocity::solveEnergyDamped(const bool verbose) {
+    Timer functionTimer(__FUNCTION__);
+    if (verbose) {
+        RYAO_INFO("==================================================");
+        RYAO_INFO(" BACKWARD_EULER_VELOCITY ENERGY-DAMPED SOLVE {}", _curretTimestep);
+        RYAO_INFO("==================================================");
+    }
+
+    // only caching this for visualization purposes
+    _positionOld = _position;
+
+    // should need to call once, but then preserved throughout
+    applyKinematicConstraints();
+
+    // store the filtered b for later
+    VECTOR unfiltered;
+
+    // do collision detection, including spatial data structure updates
+    computeCollisionDetection();
+
+    // build new constraints and see if we should break any
+    findNewSurfaceConstraints(verbose);
+    buildConstraintMatrix();
+
+    _tetMesh.setDisplacement(_position);
+    _tetMesh.computeFs();
+    _tetMesh.computeSVDs();
+
+    // z is a vector of the desired values for the constrained variables
+    // We apply the _IminusS because _constraintTargets did not project off
+    // the kinematic constraints
+    updateConstraintTargets();
+    VECTOR z = _IminusS * _constraintTargets;
+
+    // get the internal forces
+    VECTOR R = _tetMesh.computeInternalForce(_hyperelastic, *_damping);
+
+    // get the stiffness matrix
+    SPARSE_MATRIX K = _tetMesh.computeHyperelasticClampedHessian(_hyperelastic);
+    SPARSE_MATRIX C = _tetMesh.computeDampingHessian(*_damping);
+
+    // compute collision forces and stiffnesses
+    computeCollisionResponse(R, K, C);
+
+    // assemble RHS from Eqn. 18 in [BW98]
+    Timer systemTimer("Forming linear system");
+    _b = _dt * (R + _dt * K * _velocity + _externalForces);
+
+    // assemble system matrix A, LHS from Eqn.18 in [BW98]
+    _A = _M - _dt * C - _dt * _dt * K;
+
+    // from [TJM15], this is c = b - Az (page 8, top of column 2)
+    VECTOR c = _b - _A * z;
+    systemTimer.stop();
+
+    Timer projectionTimer("PPCG projection");
+    VECTOR RHS = _S * c;
+    SPARSE_MATRIX LHS = _S * _A * _S + _IminusS;
+    projectionTimer.stop();
+
+    Timer pcgTimer("PCG Solve");
+    _cgSolver.compute(LHS);
+    VECTOR y = _cgSolver.solve(RHS);
+    pcgTimer.stop();
+
+    if (verbose)
+        RYAO_INFO("PCG iters: {}, err: {}", (int)_cgSolver.iterations(), (float)_cgSolver.error());
+
+    // aliasing _solution to \Delta v just to make clear what we're doing here
+    VECTOR& vDelta = _solution;
+    vDelta = y + z;
+
+    // update velocity
+    _velocity = _velocity + vDelta;
+    _position = _position + _dt * _velocity;
+
+    // In addition to filtering by _S here, the right thing is to pick up the velocity of the kinematic
+    // object in the constraint direction. I.e. we've implemented the _S part, but not the _IminusS part
+    // of this update. For now, stoping these components to zero will at least keep the things stable,
+    // so keeping it for future work.
+    // QUASTION TAG: why we need to do this?
+    _velocity = _S * _velocity;
+
+    const bool constraintsChanged = findSeparatingSurfaceConstraints(_b);
+
+    // ONLY change the constraints here. Trying to do it inside the Newton loop
+    // is too oscillatory, and the direction that the forces point in can oscilliate
+    // if something was separating
+    //
+    // Delete constraints this AFTER the Newmark update. Otherwise, we don't
+    // know how to filter off the position changes due to purely the constraints,
+    // and we see huge accelerations
+    if (constraintsChanged) {
+        deleteSurfaceConstraints(verbose);
+        updateSurfaceConstraints();
+        buildConstraintMatrix();
+        updateConstraintTargets();
+    }
+    // otherwise, update the targets, but the constraint matrix should not have changed.
+    else {
+        updateSurfaceConstraints();
+        updateConstraintTargets();
+    }
+
+    // update node positions
+    _tetMesh.setDisplacement(_position);
+
+    // record which timestep we're on
+    _time += _dt;
+    _curretTimestep++;
+
+    return true;
+}
 }
 }
