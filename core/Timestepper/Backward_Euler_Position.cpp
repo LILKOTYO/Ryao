@@ -218,5 +218,132 @@ bool Backward_Euler_Position::solveRayleighDamped(const bool verbose) {
     return true;
 }
 
+bool Backward_Euler_Position::solveEnergyDamped(const bool verbose) {
+    Timer functionTimer(__FUNCTION__);
+    if (verbose) {
+        RYAO_INFO("==================================================");
+        RYAO_INFO(" BACKWARD_EULER_POSITION ENERGY DAMPED SOLVE {}", _currentTimestep);
+        RYAO_INFO("==================================================");
+    }
+
+    // copy the current values into the old values
+    _positionOld = _position;
+    _velocityOld = _velocity;
+
+    // should need to call once, but then preserved throughout
+    applyKinematicConstraints();
+
+    // store the filtered b for later
+    VECTOR unfiltered;
+
+    // store the internal forces for later
+    VECTOR R;
+    VECTOR z;
+
+    // build new constraints and see if we should break any
+    findNewSurfaceConstraints(verbose);
+    buildConstraintMatrix();
+
+    // before any energy calculation
+    _tetMesh.setDisplacement(_position);
+    _tetMesh.computeFs();
+    _tetMesh.computeSVDs();
+
+    // do collision detection, including spatial data structure updates
+    computeCollisionDetection();
+
+    // z is a vector of the desired values for the constrained variables
+    updateConstraintTargets();
+    z = _IminusS * _constraintTargets;
+
+    // get the internal forces
+    R = _tetMesh.computeInternalForce(_hyperelastic, *_damping);
+
+    // get the reduced stiffness matrix
+    SPARSE_MATRIX K = _tetMesh.computeHyperelasticClampedHessian(_hyperelastic);
+    SPARSE_MATRIX C = _tetMesh.computeDampingHessian(*_damping);
+
+    // compute collision forces and stiffnesses
+    computeCollisionResponse(R, K, C);
+
+    // compute the RHS of the residual
+    Timer rhsTimer("Forming Initial RHS");
+    const REAL invDt = 1.0 / _dt;
+    const REAL invDt2 = invDt * invDt;
+    // why not use (invDt * _M - C) * _velocity + R + _externalForces ?????
+    // QUASITION TAG: why????
+    _b = (invDt * _M) * _velocity + R + _externalForces;
+    rhsTimer.stop();
+
+    // assemble system matrix A
+    Timer lhsTimer("Forming Initial LHS");
+    _A = _M * invDt2 - C * invDt - K;
+    lhsTimer.stop();
+
+    // in [TJM15], this is c = b - Az (page 8, top pf column 2)
+    Timer projectionTimer("PPCG projection");
+    VECTOR c = _b - _A * z;
+
+    VECTOR RHS = _S * c;
+    SPARSE_MATRIX LHS = _S * _A * _S + _IminusS;
+    projectionTimer.stop();
+
+    Timer pcgTimer("PCG Solve");
+    _cgSolver.compute(LHS);
+    VECTOR y = _cgSolver.solve(RHS);
+    pcgTimer.stop();
+
+    if (verbose)
+        RYAO_INFO("PCG iters: {} err: {}", (int)_cgSolver.iterations(), (float)_cgSolver.error());
+    
+    // aliasing _solution to \Delta x just to make clear what we're doing here
+    VECTOR& xDelta = _solution;
+    xDelta = y + z;
+
+    // update positions 
+    _position += xDelta;
+
+    // when checking against normals, unfiltered should be negated for Newmark
+    const bool constraintsChanged = findSeparatingSurfaceConstraints(_b);
+
+    // see if any of the constraints changed. Used to be that this was outside the Newton loop
+    // because the behavior was too oscillatory, but causes too many penetrations to slip
+    // through when the Poisson's ratio gets high
+    if (constraintsChanged) {
+        deleteSurfaceConstraints(verbose);
+        updateSurfaceConstraints();
+        buildConstraintMatrix();
+        updateConstraintTargets();
+    }
+    // update the targets, but the constraint matrix should not have changed.
+    else {
+        updateSurfaceConstraints();
+        updateConstraintTargets();
+    }
+
+    // update node positions
+    _tetMesh.setDisplacement(_position);
+
+    // update the velocity
+    _velocity = invDt * (_position - _positionOld);
+
+    // update acceleration
+    _acceleration = invDt * (_velocity - _velocityOld);
+
+    // In addition to filtering by _S here, the right thing is to pick up the velocity of the kinematic
+    // object in the constraint direction. I.e. we've implemented the _S part, but not the _IminusS part
+    // of this update. For now, stoping these components to zero will at least keep the things stable,
+    // so keeping it for future work.
+    // QUASTION TAG: why we need to do this?
+    _velocity = _S * _velocity;
+    _acceleration = _S * _acceleration;
+
+    // record which timestep we're on
+    _time += _dt;
+    _currentTimestep++;
+
+    return true;
+}
+
 }
 }
