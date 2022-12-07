@@ -18,7 +18,7 @@ Backward_Euler_Velocity::Backward_Euler_Velocity(TET_Mesh& tetMesh, VOLUME::HYPE
     _dt = 1.0 / 60.0;
 
     _time = 0.0;
-    _curretTimestep = 0;
+    _currentTimestep = 0;
 
     _name = string("Backward_Euler_Velocity");
 }
@@ -70,7 +70,7 @@ bool Backward_Euler_Velocity::solveRayleighDamped(const bool verbose) {
     Timer functionTimer(__FUNCTION__);
     if (verbose) {
         RYAO_INFO("==================================================");
-        RYAO_INFO(" BACKWARD_EULER_VELOCITY RAYLEIGH SOLVE {}", _curretTimestep);
+        RYAO_INFO(" BACKWARD_EULER_VELOCITY RAYLEIGH SOLVE {}", _currentTimestep);
         RYAO_INFO("==================================================");
     }
 
@@ -181,7 +181,7 @@ bool Backward_Euler_Velocity::solveRayleighDamped(const bool verbose) {
 
     // record which timestep we're on
     _time += _dt;
-    _curretTimestep++;
+    _currentTimestep++;
 
     return true;
 
@@ -191,7 +191,7 @@ bool Backward_Euler_Velocity::solveEnergyDamped(const bool verbose) {
     Timer functionTimer(__FUNCTION__);
     if (verbose) {
         RYAO_INFO("==================================================");
-        RYAO_INFO(" BACKWARD_EULER_VELOCITY ENERGY-DAMPED SOLVE {}", _curretTimestep);
+        RYAO_INFO(" BACKWARD_EULER_VELOCITY ENERGY-DAMPED SOLVE {}", _currentTimestep);
         RYAO_INFO("==================================================");
     }
 
@@ -296,7 +296,7 @@ bool Backward_Euler_Velocity::solveEnergyDamped(const bool verbose) {
 
     // record which timestep we're on
     _time += _dt;
-    _curretTimestep++;
+    _currentTimestep++;
 
     return true;
 }

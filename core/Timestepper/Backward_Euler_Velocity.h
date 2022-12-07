@@ -36,7 +36,7 @@ private:
     REAL _time;
 
     // current simulation step
-    int _curretTimestep;
+    int _currentTimestep;
 };
 
 } // Ryao   
