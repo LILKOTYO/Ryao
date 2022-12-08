@@ -33,23 +33,17 @@ public:
 int main() {
 	Logger::Init();
 	new EarthGui();
-	VECTOR3 a = VECTOR3(0.0, 2.0, 0.0);
-	VECTOR3 b = VECTOR3(0.0, 0.0, -3.0);
-	VECTOR3 c = VECTOR3(1.0, 0.0, 0.0);
-	VECTOR3 o = VECTOR3(-2.0, 0.0, 0.0);
-	VECTOR3 e = VECTOR3(2.0, 1.0, -1.0);
-	std::vector<VECTOR3> triangle;
-	triangle.push_back(a);
-	triangle.push_back(b);
-	triangle.push_back(c);
 
-	std::vector<VECTOR3> edge;
-	edge.push_back(o);
-	edge.push_back(e);
-	if (faceEdgeIntersection(triangle, edge)) {
-		std::cout << "yes";
-	}
+	using namespace Eigen;
+	MATRIX3 M;
+	auto term1 = AngleAxisd(-0.5 * M_PI, Vector3d::UnitX());
+	auto term2 = Vector3d::UnitX();
+	M = AngleAxisd(-0.5 * M_PI, Vector3d::UnitX())
+		* AngleAxisd(0, Vector3d::UnitY())
+		* AngleAxisd(0, Vector3d::UnitZ());	
 
-
+	RYAO_INFO("M is {}", M);
+	// RYAO_INFO("term1 is {}", term1);
+	RYAO_INFO("term2 is {}", term2.transpose());
 	return 0;
 }
