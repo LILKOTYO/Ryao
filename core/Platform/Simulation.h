@@ -66,6 +66,16 @@ public:
 	 * the simulation itself is in its own thread.)
 	 */
 	virtual void renderRenderGeometry(igl::opengl::glfw::Viewer &viewer) = 0;
+    
+	/*
+	 * Reset class variables specific to a certain simulation. Is called by
+	 * Simulation::reset().
+	 * This function is roughly equivalent to HOBAK's buildScene function
+	 */
+	virtual void resetMembers() = 0;
+
+	// Describe the scene build.
+	virtual void printSceneDescription() = 0;
 
     void setTimestep(double t) { m_dt = t; }
 
@@ -74,12 +84,17 @@ public:
 	unsigned long getStep() const { return m_step; }
 
 protected:
-    /*
-	 * Reset class variables specific to a certain simulation. Is called by
-	 * Simulation::reset().
-	 * This function is roughly equivalent to HOBAK's buildScene function
-	 */
-	virtual void resetMembers() = 0;
+	// scene geometry
+	TET_Mesh* _tetMesh;
+	vector<KINEMATIC_SHAPE*> _kinematicShapes;
+
+	// solver and materials
+	TIMESTEPPER::TIMESTEPPER* _solver;
+	VOLUME::HYPERELASTIC* _hyperelastic;
+
+	// initial rotation-scale and translation of tet mesh
+	MATRIX3 _initialRotation;
+	VECTOR3 _initialTranslation;
 
 	// what frame are we on?
 	int _frameNumber;
