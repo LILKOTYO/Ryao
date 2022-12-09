@@ -2,6 +2,17 @@
 #define RYAO_SIMULATION_H
 
 #include <igl/opengl/glfw/Viewer.h>
+#include <Capsule.h>
+#include <Cube.h>
+#include <Sphere.h>
+#include <TET_Mesh.h>
+#include <TET_Mesh_Faster.h>
+#include <SNH.h>
+#include <StVK.h>
+#include <ARAP.h>
+#include <Backward_Euler_Velocity.h>
+#include <Backward_Euler_Position.h>
+#include <Timer.h>
 
 namespace Ryao {
 /*
@@ -66,8 +77,21 @@ protected:
     /*
 	 * Reset class variables specific to a certain simulation. Is called by
 	 * Simulation::reset().
+	 * This function is roughly equivalent to HOBAK's buildScene function
 	 */
 	virtual void resetMembers() = 0;
+
+	// what frame are we on?
+	int _frameNumber;
+
+	// tet mesh filename 
+	string _tetMeshFilename;
+
+	// did we normalize the vertices when we read them in?
+	bool _normalizedVertices;
+
+	// scene name, used to determine the JSON and MOV filenames
+	string _sceneName;
 
     double m_dt = 0.0;          // length of timestep
     double m_time = 0.0;        // current time
