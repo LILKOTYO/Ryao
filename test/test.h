@@ -39,6 +39,8 @@ public:
         for (size_t i = 0; i < m_objects.size(); i++) {
             BaseObject &o = m_objects[i];
             if (o.getID() < 0) {    // negative id means newly created object, reverse memory for it
+                // emplace_back = push_back + constructor
+                // this will append a object with default constructor
                 m_renderVs.emplace_back();
                 m_renderFs.emplace_back();
             }
