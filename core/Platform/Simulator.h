@@ -127,7 +127,7 @@ public:
         return duration_cast<microseconds>(m_duration).count() * 0.001;
     }
 
-    double getSimulationTime() const {return p_simulation->getTime(); }
+    double getSimulationTime() const { return p_simulation->getTime(); }
 
     unsigned long getSimulationStep() const { return p_simulation->getStep(); }
 
