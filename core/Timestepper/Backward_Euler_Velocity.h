@@ -27,6 +27,7 @@ public:
 private:
     // update the displacement targets the Baraff-Witkin-style constraints
     // are trying to hit. Assumes that buildConstraintMatrix() has already been called
+    // Only PLANE_CONSTRAINT is token into consideration.
     virtual void updateConstraintTargets() override;
 
     // Baraff-Witkin solves for change in velocity 

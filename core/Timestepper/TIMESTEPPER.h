@@ -78,7 +78,7 @@ protected:
     // shared initialization across constructors
     void initialize();
 
-    // build the constraint matrix to incorporate Baraff-Witkin-style constraints,
+    // build the constraint matrix S blocks to incorporate Baraff-Witkin-style constraints,
     // by using the [TJM15] projection matrix
     void buildConstraintMatrix();
 
