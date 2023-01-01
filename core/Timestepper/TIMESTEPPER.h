@@ -114,6 +114,8 @@ protected:
     SPARSE_MATRIX buildRayleighDampingMatrix();
 
     // do the collision detection, in anticipation of collision response
+    // only for the collision between mesh and mesh 
+    // do not detect the collision between mesh and kinematic shape
     void computeCollisionDetection();
 
     // compute collision forces, add them to the forces and stiffness matrix
