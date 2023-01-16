@@ -283,6 +283,7 @@ void TET_Mesh_Faster::computeEdgeEdgeCollisions() {
         const VECTOR2I& outerEdge = _surfaceEdges[x];
         const VECTOR3& v0 = _vertices[outerEdge[0]];
         const VECTOR3& v1 = _vertices[outerEdge[1]];
+        // why we need a new index named outerFalt?
         const unsigned int outerFlat = outerEdge[0] + outerEdge[1] * _surfaceEdges.size();
 
         vector<int> nearbyEdges;
