@@ -187,6 +187,7 @@ bool Backward_Euler_Velocity::solveRayleighDamped(const bool verbose) {
 
 }
 
+
 bool Backward_Euler_Velocity::solveEnergyDamped(const bool verbose) {
     Timer functionTimer(__FUNCTION__);
     if (verbose) {
