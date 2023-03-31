@@ -2,6 +2,7 @@ build/
 debug/
 .DS_Store
 .vscode
+.vs
 .clang-format
 *.aux
 *.log
