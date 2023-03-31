@@ -33,12 +33,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE spdlog::spdlog spdlog::spdlog_head
 find_package(Eigen3 CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE Eigen3::Eigen)
 
-# find_package(imgui CONFIG REQUIRED)
-# target_link_libraries(${PROJECT_NAME} PRIVATE imgui::imgui)
-
-# find_package(assimp CONFIG REQUIRED)
-# target_link_libraries(${PROJECT_NAME} PRIVATE assimp::assimp)
-
 find_package(glfw3 CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
 

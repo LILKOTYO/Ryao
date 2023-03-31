@@ -69,7 +69,6 @@ protected:
     VECTOR3 _translation;
 
     std::string _name;
-
 };
 }
 

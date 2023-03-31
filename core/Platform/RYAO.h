@@ -5,7 +5,6 @@
 #include <Eigen/Sparse>
 
 typedef double REAL;
-
 typedef Eigen::Matrix<REAL, 3,  3>  MATRIX3;
 typedef Eigen::Matrix<REAL, 9,  9>  MATRIX9;
 typedef Eigen::Matrix<REAL, 3,  12> MATRIX3x12;

@@ -8,6 +8,10 @@
 #include <Arrow.h>
 #include <ReferencePlane.h>
 #include <Eigen/Core>
+// for intellisense
+#include <Viewer.h>
+#include <ViewerMesh.h>
+#include <RYAO.h>
 
 int main(int argc, char** argv)
 {
