@@ -184,7 +184,6 @@ bool Backward_Euler_Velocity::solveRayleighDamped(const bool verbose) {
     _currentTimestep++;
 
     return true;
-
 }
 
 
