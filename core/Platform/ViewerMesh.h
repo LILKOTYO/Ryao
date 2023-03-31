@@ -23,14 +23,17 @@ struct Vertex {
 class ViewerMesh {
 public:
 	// ViewerMesh Data
-	std::vector<Vertex> vertices;
-	std::vector<unsigned int> indices;
-	unsigned int VAO;
+	std::vector<Vertex> _vertices;
+	std::vector<unsigned int> _indices;
+	unsigned int _VAO;
+
+    // shader index
+    std::vector<unsigned int> _shaderids;
 
 	// Construct
 	ViewerMesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices) {
-		this->vertices = vertices;
-		this->indices = indices;
+		this->_vertices = vertices;
+		this->_indices = indices;
 
 		// now that we have all the required data, set the vertex buffers and its attribute pointers.
 		RYAO_INFO("Load Viewer Mesh ...");
@@ -39,13 +42,15 @@ public:
 	}
 
     // Render the Viewer Mesh
-    void Draw(Shader& shader) {
+    void Draw(std::vector<Shader*>& shaderList) {
         // draw mesh
-        shader.use();
+        for (unsigned int idx : _shaderids) {
+            shaderList[idx]->use();
 
-        glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(indices.size()), GL_UNSIGNED_INT, 0);
-        glBindVertexArray(0);
+            glBindVertexArray(_VAO);
+            glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(_indices.size()), GL_UNSIGNED_INT, 0);
+            glBindVertexArray(0);
+        }
     }
 
 private:
