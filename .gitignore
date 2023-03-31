@@ -9,5 +9,5 @@ debug/
 *.gz
 *.out
 _deps/
-
+CMakeSettings.json
 (old)*
