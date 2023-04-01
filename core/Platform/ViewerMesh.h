@@ -1,6 +1,7 @@
 #ifndef VIEWERMESH_H
 #define VIEWERMESH_H
 
+#include <GLFW/glfw3.h>
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -16,8 +17,6 @@ struct Vertex {
 	glm::vec3 position;
 	// normal 
 	glm::vec3 normal;
-	
-	Vertex(glm::vec3 p, glm::vec3 n) : position(p), normal(n) {}
 };
 
 class ViewerMesh {

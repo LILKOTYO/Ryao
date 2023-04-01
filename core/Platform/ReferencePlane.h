@@ -1,52 +1,96 @@
 #ifndef RYAO_REFERENCE_PLANE_H
 #define RYAO_REFERENCE_PLANE_H
 #include <RYAO.h>
-
-#if defined(RYAO_REFERENCE_PLANE_DEBUG)
-// For DEBUG
-//----------------------------------------------------
-#include "Logger.h"
-#endif
+#include <glad/glad.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <Shader.h>
+#include <Camera.h>
+#include <string>
+#include <vector>
+#include <Logger.h>
 
 namespace Ryao {
 
 class ReferencePlane {
 public:
-    ReferencePlane() : size(10), color(ROWVECTOR3(0.25, 0.25, 0.25)) {
-        int num_edges = 2 * (2 * size) * (2 * size) + (2 * size) * 2;
-        start = MATRIX(num_edges, 3);
-        end = MATRIX(num_edges, 3);
+    ReferencePlane() = delete;
 
-        int e = 0;
-        for (int z = -size; z <= size; ++z) {
-            for (int x = -size; x <= size; ++x) {
-                if (x < size) {
-                    start.row(e) = ROWVECTOR3(x, 0, z);
-                    end.row(e++) = ROWVECTOR3(x + 1, 0, z); 
-                }
-                if (z < size) {
-                    start.row(e) = ROWVECTOR3(x, 0, z);
-                    end.row(e) = ROWVECTOR3(x, 0, z + 1);
-                }
-            }
+    ReferencePlane(int size)
+        : _size(size), _color(glm::vec3(0.25, 0.25, 0.25)),
+        _shader(Shader("shaders/ReferencePlane.vert", "shaders/ReferencePlane.frag")) {
+        unsigned int num_edges = 2 * (2 * _size + 1);
+        //_vertices.reserve(2 * num_edges);
+        float interval = 0.9 / (float)_size;
+
+        for (int i = -size; i < size + 1; i++) {
+            // parallel to the x-axis
+            _vertices.push_back(glm::vec3((float)i * interval, 0.0f, -0.9f));
+            _vertices.push_back(glm::vec3((float)i * interval, 0.0f, 0.9f));
         }
 
-        #if defined(RYAO_REFERENCE_PLANE_DEBUG)  
-        RYAO_INFO("---------------------------REFERENCE PLANE DEBUGGING START-----------------------");
-        RYAO_INFO("The Size is: {}", size);
-        RYAO_INFO("The Start Point number is: {}", start.size());
-        RYAO_INFO("The End Point number is: {}", end.size());
-        RYAO_INFO("The Color is: {}", color);
-        RYAO_INFO("---------------------------REFERENCE PLANE DEBUGGING END-----------------------");
-        #endif
+        for (int i = -size; i < size + 1; i++) {
+            // parallel to the z-axis
+            _vertices.push_back(glm::vec3(-0.9f, 0.0f, (float)i * interval));
+            _vertices.push_back(glm::vec3(0.9f, 0.0f, (float)i * interval));
+        }
 
+        SetupViewerReferencePlane();
     }
-    int size;
-    MATRIX start;
-    MATRIX end;
-    ROWVECTOR3 color;
-};
 
+    void Draw(Camera& camera, unsigned int width, unsigned int height) {
+        // draw mesh
+        glBindVertexArray(_VAO);
+        _shader.use();
+
+        // mvp: view 
+        glm::mat4 view(1.0f);
+        view = camera.GetViewMatrix();
+        _shader.setMat4("view", view);
+
+        glm::mat4 projection(1.0f);
+        projection = glm::perspective(glm::radians(camera.Zoom), (float)width / (float)height, 0.1f, 100.0f);
+        _shader.setMat4("projection", projection);
+
+        glm::mat4 model(1.0f);
+        _shader.setMat4("model", model);
+
+        _shader.setVec3("color", _color);
+
+        //glLineWidth(20.0f);
+        glDrawArrays(GL_LINES, 0, _vertices.size());
+        glBindVertexArray(0);
+    }
+
+private:
+    unsigned int _size;
+    glm::vec3 _color;
+    std::vector<glm::vec3> _vertices;
+    unsigned int _VAO;
+    Shader _shader;
+
+    // Render Buffer
+    unsigned int _VBO;
+
+    // Setup the Viewer Mesh
+    void SetupViewerReferencePlane() {
+        // create buffers/arrays
+        glGenVertexArrays(1, &_VAO);
+        glGenBuffers(1, &_VBO);
+
+        glBindVertexArray(_VAO);
+
+        // load data into vertex buffers
+        glBindBuffer(GL_ARRAY_BUFFER, _VBO);
+        
+        glBufferData(GL_ARRAY_BUFFER, _vertices.size() * sizeof(glm::vec3), &_vertices[0], GL_STATIC_DRAW);
+
+        // set the vertex attribute pointers
+        // vertex Positions
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
+        glEnableVertexAttribArray(0);
+    }
+};
 }
 
 #endif

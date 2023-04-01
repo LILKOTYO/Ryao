@@ -13,6 +13,10 @@ message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
+
 file(GLOB LIBFILES ${PROJECT_SOURCE_DIR}/../core/Platform/*.*)
 source_group("Library Files" FILES ${LIBFILES})
 
@@ -29,6 +33,12 @@ file(GLOB SRCFILES *.cpp)
 file(GLOB HFILES *.h)
 
 add_executable(${PROJECT_NAME} ${SRCFILES} ${HFILES} ${LIBFILES} )
+
+add_custom_command(
+        TARGET ${PROJECT_NAME}  POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${PROJECT_SOURCE_DIR}/../shaders ${PROJECT_BINARY_DIR}/bin/shaders
+    )
 
 find_package(spdlog CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE spdlog::spdlog spdlog::spdlog_header_only)

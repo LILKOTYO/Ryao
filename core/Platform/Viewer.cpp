@@ -56,7 +56,7 @@ void Viewer::init() {
 
     glEnable(GL_DEPTH_TEST);
     
-    RYAO_INFO("Viewer initialization finshed! ")
+    RYAO_INFO("Viewer initialization finshed! ");
 }
 
 void Viewer::launch() {
@@ -68,13 +68,23 @@ void Viewer::launch() {
 
         // render command
         glClearColor(0.2, 0.3, 0.3, 1.0);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        if (_referencePlane != nullptr) {
+            //RYAO_INFO("Draw reference plane.");
+            _referencePlane->Draw(_camera, _SCR_WIDTH, _SCR_HEIGHT);
+        }
+        
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
         glfwSwapBuffers(_window);
         glfwPollEvents();
     }
+}
+
+void Viewer::setReferencePlane(int size) { 
+    _referencePlane = new ReferencePlane(size);
 }
 
 }

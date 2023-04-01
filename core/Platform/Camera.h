@@ -7,6 +7,7 @@
 
 #include <vector>
 
+namespace Ryao {
 // Defines several possible options for camera movement. Used as abstraction to stay away from window-system specific input methods
 enum Camera_Movement {
     FORWARD,
@@ -118,5 +119,6 @@ private:
         Up = glm::normalize(glm::cross(Right, Front));
     }
 };
+}
 
 #endif // !CAMERA_H
