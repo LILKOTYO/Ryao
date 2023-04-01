@@ -55,9 +55,12 @@ void Viewer::init() {
     }
 
     glEnable(GL_DEPTH_TEST);
+    
+    RYAO_INFO("Viewer initialization finshed! ")
 }
 
 void Viewer::launch() {
+    RYAO_INFO("Viewer Launch");
     while (!glfwWindowShouldClose(_window)) {
         // input
         // -----
