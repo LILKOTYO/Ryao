@@ -54,7 +54,7 @@ private:
 	unsigned int _SCR_HEIGHT;
 	float _Fov;
 	float _deltaTime;
-	float _currentTime;
+	float _lastTime;
 
 
 };

@@ -64,6 +64,11 @@ void Viewer::launch() {
     while (!glfwWindowShouldClose(_window)) {
         // input
         // -----
+        // frame frequency
+        float currentFrame = glfwGetTime();
+        _deltaTime = currentFrame - _lastTime;
+        _lastTime = currentFrame;
+
         processInput(_window, _camera, _deltaTime);
 
         // render command
