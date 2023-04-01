@@ -13,13 +13,16 @@ message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+file(GLOB LIBFILES ${PROJECT_SOURCE_DIR}/../core/Platform/*.*)
+source_group("Library Files" FILES ${LIBFILES})
+
 # Add default project files
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../core/Platform)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../core/Hyperelastic)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../core/Geometry)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../external/spectra/include)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../core/Damping)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../core/Timestepper)
+# include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../core/Hyperelastic)
+# include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../core/Geometry)
+# include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../external/spectra/include)
+# include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../core/Damping)
+# include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../core/Timestepper)
 
 # Add your project files
 file(GLOB SRCFILES *.cpp)

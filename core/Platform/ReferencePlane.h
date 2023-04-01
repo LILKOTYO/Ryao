@@ -2,7 +2,7 @@
 #define RYAO_REFERENCE_PLANE_H
 #include <RYAO.h>
 
-#if defined(RYAO_DEBUG) || defined(RYAO_REFERENCE_PLANE_DEBUG)
+#if defined(RYAO_REFERENCE_PLANE_DEBUG)
 // For DEBUG
 //----------------------------------------------------
 #include "Logger.h"
@@ -31,7 +31,7 @@ public:
             }
         }
 
-        #if defined(RYAO_DEBUG) || defined(RYAO_REFERENCE_PLANE_DEBUG)  
+        #if defined(RYAO_REFERENCE_PLANE_DEBUG)  
         RYAO_INFO("---------------------------REFERENCE PLANE DEBUGGING START-----------------------");
         RYAO_INFO("The Size is: {}", size);
         RYAO_INFO("The Start Point number is: {}", start.size());

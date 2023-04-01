@@ -55,25 +55,25 @@ public:
 
 private:
 	// Render Buffer
-	unsigned int VBO, EBO;
+	unsigned int _VBO, _EBO;
 
 	// Setup the Viewer Mesh
 	void SetupViewerMesh() {
         // create buffers/arrays
-        glGenVertexArrays(1, &VAO);
-        glGenBuffers(1, &VBO);
-        glGenBuffers(1, &EBO);
+        glGenVertexArrays(1, &_VAO);
+        glGenBuffers(1, &_VBO);
+        glGenBuffers(1, &_EBO);
 
-        glBindVertexArray(VAO);
+        glBindVertexArray(_VAO);
         // load data into vertex buffers
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBindBuffer(GL_ARRAY_BUFFER, _VBO);
         // A great thing about structs is that their memory layout is sequential for all its items.
         // The effect is that we can simply pass a pointer to the struct and it translates perfectly to a glm::vec3/2 array which
         // again translates to 3/2 floats which translates to a byte array.
-        glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, _vertices.size() * sizeof(Vertex), &_vertices[0], GL_STATIC_DRAW);
 
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, _indices.size() * sizeof(unsigned int), &_indices[0], GL_STATIC_DRAW);
 
         // set the vertex attribute pointers
         // vertex Positions
