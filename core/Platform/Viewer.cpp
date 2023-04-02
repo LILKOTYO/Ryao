@@ -4,18 +4,46 @@ namespace Ryao {
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
 // ---------------------------------------------------------------------------------------------------------
-void Viewer::processInput(GLFWwindow* window, Camera& camera, const float deltaTime) {
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
+void Viewer::processInput() {
+    if (glfwGetKey(_window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(_window, true);
 
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        camera.ProcessKeyboard(FORWARD, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        camera.ProcessKeyboard(BACKWARD, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        camera.ProcessKeyboard(LEFT, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        camera.ProcessKeyboard(RIGHT, deltaTime);
+    if (glfwGetKey(_window, GLFW_KEY_W) == GLFW_PRESS)
+        _camera.ProcessKeyboard(FORWARD, _deltaTime);
+    if (glfwGetKey(_window, GLFW_KEY_S) == GLFW_PRESS)
+        _camera.ProcessKeyboard(BACKWARD, _deltaTime);
+    if (glfwGetKey(_window, GLFW_KEY_A) == GLFW_PRESS)
+        _camera.ProcessKeyboard(LEFT, _deltaTime);
+    if (glfwGetKey(_window, GLFW_KEY_D) == GLFW_PRESS)
+        _camera.ProcessKeyboard(RIGHT, _deltaTime);
+    if (glfwGetKey(_window, GLFW_KEY_E) == GLFW_PRESS)
+        _camera.ProcessKeyboard(UPLIFT, _deltaTime);
+    if (glfwGetKey(_window, GLFW_KEY_Q) == GLFW_PRESS)
+        _camera.ProcessKeyboard(DECLINE, _deltaTime);
+}
+
+void Viewer::setisDrag(bool flag) {
+    _isDrag = flag;
+}
+
+double* Viewer::getLastX() {
+    return &_lastX;
+}
+
+double* Viewer::getLastY() {
+    return &_lastY;
+}
+
+bool Viewer::getisDrag() {
+    return _isDrag;
+}
+
+void Viewer::cameraProcessMouseMovement(double deltaX, double deltaY) {
+    _camera.ProcessMouseMovement((float)deltaX, (float)deltaY);
+}
+
+void Viewer::cameraProcessMouseScroll(double yoffset) {
+    _camera.ProcessMouseScroll(yoffset);
 }
 
 void Viewer::init() {
@@ -37,15 +65,42 @@ void Viewer::init() {
         return;
     }
     glfwMakeContextCurrent(_window);
+
+    // set user pointer so one can use the viewer method in callback function
+    glfwSetWindowUserPointer(_window, this);
+
     glfwSetFramebufferSizeCallback(_window, [](GLFWwindow* window, int width, int height) {
         // make sure the viewport matches the new window dimensions; note that width and 
         // height will be significantly larger than specified on retina displays.
         glViewport(0, 0, width, height);
         });
 
-    //glfwSetScrollCallback(_window, [](GLFWwindow* window, double xoffset, double yoffset) {
-    //    _camera.ProcessMouseScroll(yoffset);
-    //    });
+    glfwSetScrollCallback(_window, [](GLFWwindow* window, double xoffset, double yoffset) {
+        Viewer* v = reinterpret_cast<Viewer*>(glfwGetWindowUserPointer(window));
+        v->cameraProcessMouseScroll(yoffset);
+        });
+
+    glfwSetMouseButtonCallback(_window, [](GLFWwindow* window, int button, int action, int mods) {
+        Viewer* v = reinterpret_cast<Viewer*>(glfwGetWindowUserPointer(window));
+        if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+            v->setisDrag(true);
+            glfwGetCursorPos(window, v->getLastX(), v->getLastY());
+        }
+        else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
+            v->setisDrag(false);
+        }
+        });
+
+    glfwSetCursorPosCallback(_window, [](GLFWwindow* window, double xpos, double ypos) {
+        Viewer* v = reinterpret_cast<Viewer*>(glfwGetWindowUserPointer(window));
+        if (v->getisDrag()) {
+            double deltaX = xpos - *(v->getLastX());
+            double deltaY = ypos - *(v->getLastY());
+            *(v->getLastX()) = xpos;
+            *(v->getLastY()) = ypos;
+            v->cameraProcessMouseMovement(deltaX, deltaY);
+        }
+        });
 
     // glad: load all OpenGL function pointers
     // ---------------------------------------
@@ -69,7 +124,7 @@ void Viewer::launch() {
         _deltaTime = currentFrame - _lastTime;
         _lastTime = currentFrame;
 
-        processInput(_window, _camera, _deltaTime);
+        processInput();
 
         // render command
         glClearColor(0.2, 0.3, 0.3, 1.0);

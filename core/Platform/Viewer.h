@@ -19,20 +19,30 @@ public:
 		: _camera(camera), _SCR_WIDTH(800), _SCR_HEIGHT(600), _Fov(45.0f) {
 		_window = nullptr;
 		_referencePlane = nullptr;
+		_isDrag = false;
 	}
 
 	Viewer(unsigned int width, unsigned int height, float fov, Camera& camera)
 		:_camera(camera), _SCR_WIDTH(width), _SCR_HEIGHT(height), _Fov(fov) {
 		_window = nullptr;
 		_referencePlane = nullptr;
+		_isDrag = false;
 	}
 	~Viewer() {
 		glfwTerminate();
 	}
 
-	void processInput(GLFWwindow* window, Camera& camera, const float deltaTime);
+	// for control (keyborad and mouse)
+	void processInput();
+	void cameraProcessMouseMovement(double deltaX, double deltaY);
+	void cameraProcessMouseScroll(double yoffset);
 
 	void setReferencePlane(int size);
+	void setisDrag(bool flag);
+
+	double* getLastX();
+	double* getLastY();
+	bool getisDrag();
 
 	void addViewerMesh(ViewerMesh* vmesh)	{ _viewerMeshList.push_back(vmesh); }
 	void addShader(Shader* shader)			{ _shaderList.push_back(shader); }
@@ -55,7 +65,8 @@ private:
 	float _Fov;
 	float _deltaTime;
 	float _lastTime;
-
+	bool _isDrag;
+	double _lastX, _lastY;
 
 };
 

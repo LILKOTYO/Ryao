@@ -13,14 +13,16 @@ enum Camera_Movement {
     FORWARD,
     BACKWARD,
     LEFT,
-    RIGHT
+    RIGHT,
+    UPLIFT,
+    DECLINE
 };
 
 // Default camera values
 const float YAW = -90.0f;
 const float PITCH = 0.0f;
 const float SPEED = 2.5f;
-//const float SENSITIVITY = 0.1f;
+const float SENSITIVITY = 0.1f;
 const float ZOOM = 45.0f;
 
 
@@ -32,17 +34,18 @@ public:
     glm::vec3 Front;
     glm::vec3 Up;
     glm::vec3 Right;
+    glm::vec3 Lift;
     glm::vec3 WorldUp;
     // euler Angles
     float Yaw;
     float Pitch;
     // camera options
     float MovementSpeed;
-    //float MouseSensitivity;
+    float MouseSensitivity;
     float Zoom;
 
     // constructor with vectors
-    Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), Zoom(ZOOM) {
+    Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), Lift(glm::vec3(0.0f, 1.0f, 0.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM) {
         Position = position;
         WorldUp = up;
         Yaw = yaw;
@@ -50,7 +53,7 @@ public:
         updateCameraVectors();
     }
     // constructor with scalar values
-    Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), Zoom(ZOOM) {
+    Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), Lift(glm::vec3(0.0f, 1.0f, 0.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM) {
         Position = glm::vec3(posX, posY, posZ);
         WorldUp = glm::vec3(upX, upY, upZ);
         Yaw = yaw;
@@ -74,27 +77,31 @@ public:
             Position -= Right * velocity;
         if (direction == RIGHT)
             Position += Right * velocity;
+        if (direction == UPLIFT)
+            Position += Lift * velocity;
+        if (direction == DECLINE)
+            Position -= Lift * velocity;
     }
 
     // processes input received from a mouse input system. Expects the offset value in both the x and y direction.
-    //void ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true) {
-    //    xoffset *= MouseSensitivity;
-    //    yoffset *= MouseSensitivity;
+    void ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true) {
+        xoffset *= MouseSensitivity;
+        yoffset *= MouseSensitivity;
 
-    //    Yaw += xoffset;
-    //    Pitch += yoffset;
+        Yaw += xoffset;
+        Pitch -= yoffset;
 
-    //    // make sure that when pitch is out of bounds, screen doesn't get flipped
-    //    if (constrainPitch) {
-    //        if (Pitch > 89.0f)
-    //            Pitch = 89.0f;
-    //        if (Pitch < -89.0f)
-    //            Pitch = -89.0f;
-    //    }
+        // make sure that when pitch is out of bounds, screen doesn't get flipped
+        if (constrainPitch) {
+            if (Pitch > 89.0f)
+                Pitch = 89.0f;
+            if (Pitch < -89.0f)
+                Pitch = -89.0f;
+        }
 
-    //    // update Front, Right and Up Vectors using the updated Euler angles
-    //    updateCameraVectors();
-    //}
+        // update Front, Right and Up Vectors using the updated Euler angles
+        updateCameraVectors();
+    }
 
     // processes input received from a mouse scroll-wheel event. Only requires input on the vertical wheel-axis
     void ProcessMouseScroll(float yoffset) {
