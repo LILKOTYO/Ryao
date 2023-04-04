@@ -11,7 +11,7 @@
 #include <RYAO.h>
 #include <vector>
 #include <Timer.h>
-#include <Arrow.h>	
+#include <Arrow.h>
 
 namespace Ryao {
 
@@ -22,6 +22,10 @@ public:
 		_window = nullptr;
 		_referencePlane = nullptr;
 		_isDrag = false;
+		_lastX = 0.0;
+		_lastY = 0.0;
+		_lastTime = 0.0;
+		_deltaTime = 0.0;
 	}
 
 	Viewer(unsigned int width, unsigned int height, float fov, Camera& camera)
@@ -29,7 +33,12 @@ public:
 		_window = nullptr;
 		_referencePlane = nullptr;
 		_isDrag = false;
+		_lastX = 0.0;
+		_lastY = 0.0;
+		_lastTime = 0.0;
+		_deltaTime = 0.0;
 	}
+
 	~Viewer() {
 		glfwTerminate();
 	}
