@@ -38,6 +38,51 @@ struct Vertex {
 	glm::vec3 position;
 	// normal 
 	glm::vec3 normal;
+	// constructor
+	Vertex(glm::vec3& p, glm::vec3& n) : position(p), normal(n) {}
+};
+
+struct LightDir {
+	glm::vec3 direction;
+
+	glm::vec3 ambient;
+	glm::vec3 diffuse;
+	glm::vec3 specular;
+
+	// constructor
+	LightDir(glm::vec3& dir, glm::vec3& ambi, glm::vec3& diff, glm::vec3& spec)
+		: direction(dir), ambient(ambi), diffuse(diff), specular(spec) {
+	}
+};
+
+struct LightPoint {
+	glm::vec3 position;
+
+	glm::vec3 ambient;
+	glm::vec3 diffuse;
+	glm::vec3 specular;
+
+	float constant;
+	float linear;
+	float quadratic;
+
+	// constructor
+	LightPoint(glm::vec3& pos, glm::vec3& ambi, glm::vec3& diff, glm::vec3& spec, float& con, float& lin, float& qua)
+		: position(pos), ambient(ambi), diffuse(diff), specular(spec),
+		constant(con), linear(lin), quadratic(qua) { 
+	}
+};
+
+struct Material {
+	glm::vec3 ambient;
+	glm::vec3 diffuse;
+	glm::vec3 specular;
+	float shininess;
+
+	// contructor
+	Material(glm::vec3& ambi, glm::vec3& diff, glm::vec3& spec, float& shin)
+		: ambient(ambi), diffuse(diff), specular(spec), shininess(shin) {
+	}
 };
 
 #endif

@@ -25,8 +25,8 @@ public:
     Shader _shaderLine;
 
 	// Construct
-	ViewerMesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices)
-    : _vertices(vertices), _indices(indices),
+	ViewerMesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, glm::vec3& color)
+    : _vertices(vertices), _indices(indices), _color(color),
         _shaderFill(Shader("shaders/ViewerMeshFill.vert", "shaders/ViewerMeshFill.frag")),
         _shaderLine(Shader("shaders/ViewerMeshLine.vert", "shaders/ViewerMeshLine.frag")) {
         // now that we have all the required data, set the vertex buffers and its attribute pointers.
@@ -35,10 +35,10 @@ public:
         RYAO_INFO("Successfully Loaded Viewer Mesh! ");
 	}
 
-    ViewerMesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, 
+    ViewerMesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, glm::vec3& color,
         const char* fillVertexPath, const char* fillFragmentPath,
         const char* lineVertexPath, const char* lineFragmentPath)
-    : _vertices(vertices), _indices(indices), 
+    : _vertices(vertices), _indices(indices), _color(color),
     _shaderFill(Shader(fillVertexPath, fillFragmentPath)),
     _shaderLine(Shader(lineVertexPath, lineFragmentPath)) {
         // now that we have all the required data, set the vertex buffers and its attribute pointers.
@@ -50,7 +50,7 @@ public:
     ~ViewerMesh() {}
 
     // Render the Viewer Mesh
-    void Draw(Camera& camera, unsigned int width, unsigned int height) {
+    void Draw(Camera& camera, LightDir& lightdir, LightPoint& lightpoint, unsigned int width, unsigned int height) {
         // draw mesh
         glBindVertexArray(_VAO);
 
@@ -79,8 +79,8 @@ public:
 
         _shaderFill.setMat3("normat", normat);
         _shaderFill.setVec3("viewPos", camera.Position);
-        _shaderFill.setVec3("material.ambient", 1.0f, 0.5f, 0.31f);
-        _shaderFill.setVec3("material.diffuse", 1.0f, 0.5f, 0.31f);
+        _shaderFill.setVec3("material.ambient", _color);
+        _shaderFill.setVec3("material.diffuse", _color);
         _shaderFill.setVec3("material.specular", 0.5f, 0.5f, 0.5f);
         _shaderFill.setFloat("material.shininess", 32.0f);
         _shaderFill.setVec3("lightdir.ambient", 0.2f, 0.2f, 0.2f);
@@ -120,6 +120,8 @@ public:
 private:
 	// Render Buffer
 	unsigned int _VBO, _EBO;
+    glm::vec3 _color;
+    Material _material;
 
 	// Setup the Viewer Mesh
 	void SetupViewerMesh() {
