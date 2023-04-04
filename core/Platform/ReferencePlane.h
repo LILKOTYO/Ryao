@@ -17,7 +17,7 @@ public:
     ReferencePlane() = delete;
 
     ReferencePlane(int size)
-        : _size(size), _color(glm::vec3(0.25, 0.25, 0.25)),
+        : _size(size), _color(glm::vec3(0.35, 0.35, 0.35)),
         _shader(Shader("shaders/ReferencePlane.vert", "shaders/ReferencePlane.frag")) {
         unsigned int num_edges = 2 * (2 * _size + 1);
         //_vertices.reserve(2 * num_edges);

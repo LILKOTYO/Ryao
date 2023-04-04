@@ -13,7 +13,6 @@
 int main()
 {
     Ryao::Logger::Init();
-
     Ryao::Camera camera(glm::vec3(0.0, 0.0, 3.0));
 
     Ryao::Viewer viewer(camera);
