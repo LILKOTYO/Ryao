@@ -9,15 +9,9 @@
 #include <Logger.h>
 #include <string>
 #include <vector>
+#include <RYAO.h>
 
 namespace Ryao {
-
-struct Vertex {
-	// position 
-	glm::vec3 position;
-	// normal 
-	glm::vec3 normal;
-};
 
 class ViewerMesh {
 public:
@@ -27,29 +21,100 @@ public:
 	unsigned int _VAO;
 
     // shader index
-    std::vector<unsigned int> _shaderids;
+    Shader _shaderFill;
+    Shader _shaderLine;
 
 	// Construct
-	ViewerMesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices) {
-		this->_vertices = vertices;
-		this->_indices = indices;
-
-		// now that we have all the required data, set the vertex buffers and its attribute pointers.
-		RYAO_INFO("Load Viewer Mesh ...");
+	ViewerMesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices)
+    : _vertices(vertices), _indices(indices),
+        _shaderFill(Shader("shaders/ViewerMeshFill.vert", "shaders/ViewerMeshFill.frag")),
+        _shaderLine(Shader("shaders/ViewerMeshLine.vert", "shaders/ViewerMeshLine.frag")) {
+        // now that we have all the required data, set the vertex buffers and its attribute pointers.
+        RYAO_INFO("Load Viewer Mesh ...");
         SetupViewerMesh();
-		RYAO_INFO("Successfully Loaded Viewer Mesh! ");
+        RYAO_INFO("Successfully Loaded Viewer Mesh! ");
 	}
 
-    // Render the Viewer Mesh
-    void Draw(std::vector<Shader*>& shaderList) {
-        // draw mesh
-        for (unsigned int idx : _shaderids) {
-            shaderList[idx]->use();
+    ViewerMesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, 
+        const char* fillVertexPath, const char* fillFragmentPath,
+        const char* lineVertexPath, const char* lineFragmentPath)
+    : _vertices(vertices), _indices(indices), 
+    _shaderFill(Shader(fillVertexPath, fillFragmentPath)),
+    _shaderLine(Shader(lineVertexPath, lineFragmentPath)) {
+        // now that we have all the required data, set the vertex buffers and its attribute pointers.
+        RYAO_INFO("Load Viewer Mesh ...");
+        SetupViewerMesh();
+        RYAO_INFO("Successfully Loaded Viewer Mesh! ");
+    }
 
-            glBindVertexArray(_VAO);
-            glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(_indices.size()), GL_UNSIGNED_INT, 0);
-            glBindVertexArray(0);
-        }
+    ~ViewerMesh() {}
+
+    // Render the Viewer Mesh
+    void Draw(Camera& camera, unsigned int width, unsigned int height) {
+        // draw mesh
+        glBindVertexArray(_VAO);
+
+        _shaderFill.use();
+
+        // mvp: view 
+        glm::mat4 view(1.0f);
+        view = camera.GetViewMatrix();
+        _shaderFill.setMat4("view", view);
+
+        // mvp: projection
+        glm::mat4 projection(1.0f);
+        projection = glm::perspective(glm::radians(camera.Zoom), (float)width / (float)height, 0.1f, 100.0f);
+        _shaderFill.setMat4("projection", projection);
+
+        // mvp: model
+        glm::mat4 model(1.0f);
+        float angle = (float)glfwGetTime() * glm::radians(20.0f);
+        model = glm::translate(model, glm::vec3(0.0f, 0.0f, -1.5f));
+        model = glm::rotate(model, angle, glm::vec3(0.5f, 1.0f, 0.0f));
+        _shaderFill.setMat4("model", model);
+
+        // normal needs to be rotated too!!!!
+        glm::mat4 normat(1.0f);
+        normat = glm::mat3(glm::transpose(glm::inverse(model)));
+
+        _shaderFill.setMat3("normat", normat);
+        _shaderFill.setVec3("viewPos", camera.Position);
+        _shaderFill.setVec3("material.ambient", 1.0f, 0.5f, 0.31f);
+        _shaderFill.setVec3("material.diffuse", 1.0f, 0.5f, 0.31f);
+        _shaderFill.setVec3("material.specular", 0.5f, 0.5f, 0.5f);
+        _shaderFill.setFloat("material.shininess", 32.0f);
+        _shaderFill.setVec3("lightdir.ambient", 0.2f, 0.2f, 0.2f);
+        _shaderFill.setVec3("lightdir.diffuse", 0.5f, 0.5f, 0.5f);
+        _shaderFill.setVec3("lightdir.specular", 1.0f, 1.0f, 1.0f);
+        _shaderFill.setVec3("lightdir.direction", 0.0f, -1.0f, 0.0f);
+        _shaderFill.setVec3("lightpoint.position", 1.2f, -0.5f, 1.0f);
+        _shaderFill.setVec3("lightpoint.ambient", 0.2f, 0.2f, 0.2f);
+        _shaderFill.setVec3("lightpoint.diffuse", 0.5f, 0.5f, 0.5f);
+        _shaderFill.setVec3("lightpoint.specular", 1.0f, 1.0f, 1.0f);
+        _shaderFill.setFloat("lightpoint.constant", 1.0f);
+        _shaderFill.setFloat("lightpoint.linear", 0.09f);
+        _shaderFill.setFloat("lightpoint.quadratic", 0.032f);
+
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(_indices.size()), GL_UNSIGNED_INT, 0);
+        
+        // Draw the Wireframe
+        _shaderLine.use();
+
+        _shaderLine.setMat4("view", view);
+        _shaderLine.setMat4("projection", projection);
+        _shaderLine.setMat4("model", model);
+
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        glEnable(GL_POLYGON_OFFSET_LINE);
+        glPolygonOffset(-1.0, -1.0);
+
+        glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(_indices.size()), GL_UNSIGNED_INT, 0);
+
+        glDisable(GL_POLYGON_OFFSET_LINE);
+
+        glBindVertexArray(0);
+
     }
 
 private:

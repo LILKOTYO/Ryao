@@ -11,6 +11,7 @@
 #include <RYAO.h>
 #include <vector>
 #include <Timer.h>
+#include <Arrow.h>	
 
 namespace Ryao {
 
@@ -47,6 +48,7 @@ public:
 
 	void addViewerMesh(ViewerMesh* vmesh)	{ _viewerMeshList.push_back(vmesh); }
 	void addShader(Shader* shader)			{ _shaderList.push_back(shader); }
+	void addArrow(Arrow* arrow)				{ _arrowList.push_back(arrow); }
 
 	void init();
 	void launch();
@@ -54,6 +56,7 @@ private:
 	// data 
 	std::vector<ViewerMesh*> _viewerMeshList;
 	std::vector<Shader*> _shaderList;
+	std::vector<Arrow*> _arrowList;
 
 	// widgets
 	ReferencePlane* _referencePlane;

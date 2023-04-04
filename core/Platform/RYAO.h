@@ -33,4 +33,11 @@ typedef Eigen::SparseMatrix<REAL> SPARSE_MATRIX;
 
 typedef Eigen::Quaterniond QUATERNIOND;
 
+struct Vertex {
+	// position 
+	glm::vec3 position;
+	// normal 
+	glm::vec3 normal;
+};
+
 #endif
