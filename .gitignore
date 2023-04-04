@@ -10,4 +10,5 @@ debug/
 *.out
 _deps/
 CMakeSettings.json
+
 (old)*
