@@ -25,8 +25,8 @@ public:
     Shader _shaderLine;
 
 	// Construct
-	ViewerMesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, glm::vec3& color)
-    : _vertices(vertices), _indices(indices), _color(color),
+	ViewerMesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, Material& material)
+    : _vertices(vertices), _indices(indices), _material(material),
         _shaderFill(Shader("shaders/ViewerMeshFill.vert", "shaders/ViewerMeshFill.frag")),
         _shaderLine(Shader("shaders/ViewerMeshLine.vert", "shaders/ViewerMeshLine.frag")) {
         // now that we have all the required data, set the vertex buffers and its attribute pointers.
@@ -35,10 +35,10 @@ public:
         RYAO_INFO("Successfully Loaded Viewer Mesh! ");
 	}
 
-    ViewerMesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, glm::vec3& color,
+    ViewerMesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, Material& material,
         const char* fillVertexPath, const char* fillFragmentPath,
         const char* lineVertexPath, const char* lineFragmentPath)
-    : _vertices(vertices), _indices(indices), _color(color),
+    : _vertices(vertices), _indices(indices), _material(material),
     _shaderFill(Shader(fillVertexPath, fillFragmentPath)),
     _shaderLine(Shader(lineVertexPath, lineFragmentPath)) {
         // now that we have all the required data, set the vertex buffers and its attribute pointers.
@@ -79,21 +79,21 @@ public:
 
         _shaderFill.setMat3("normat", normat);
         _shaderFill.setVec3("viewPos", camera.Position);
-        _shaderFill.setVec3("material.ambient", _color);
-        _shaderFill.setVec3("material.diffuse", _color);
-        _shaderFill.setVec3("material.specular", 0.5f, 0.5f, 0.5f);
-        _shaderFill.setFloat("material.shininess", 32.0f);
-        _shaderFill.setVec3("lightdir.ambient", 0.2f, 0.2f, 0.2f);
-        _shaderFill.setVec3("lightdir.diffuse", 0.5f, 0.5f, 0.5f);
-        _shaderFill.setVec3("lightdir.specular", 1.0f, 1.0f, 1.0f);
-        _shaderFill.setVec3("lightdir.direction", 0.0f, -1.0f, 0.0f);
-        _shaderFill.setVec3("lightpoint.position", 1.2f, -0.5f, 1.0f);
-        _shaderFill.setVec3("lightpoint.ambient", 0.2f, 0.2f, 0.2f);
-        _shaderFill.setVec3("lightpoint.diffuse", 0.5f, 0.5f, 0.5f);
-        _shaderFill.setVec3("lightpoint.specular", 1.0f, 1.0f, 1.0f);
-        _shaderFill.setFloat("lightpoint.constant", 1.0f);
-        _shaderFill.setFloat("lightpoint.linear", 0.09f);
-        _shaderFill.setFloat("lightpoint.quadratic", 0.032f);
+        _shaderFill.setVec3("material.ambient", _material.ambient);
+        _shaderFill.setVec3("material.diffuse", _material.diffuse);
+        _shaderFill.setVec3("material.specular", _material.specular);
+        _shaderFill.setFloat("material.shininess", _material.shininess);
+        _shaderFill.setVec3("lightdir.ambient", lightdir.ambient);
+        _shaderFill.setVec3("lightdir.diffuse", lightdir.diffuse);
+        _shaderFill.setVec3("lightdir.specular", lightdir.specular);
+        _shaderFill.setVec3("lightdir.direction", lightdir.direction);
+        _shaderFill.setVec3("lightpoint.position", lightpoint.position);
+        _shaderFill.setVec3("lightpoint.ambient", lightpoint.ambient);
+        _shaderFill.setVec3("lightpoint.diffuse", lightpoint.diffuse);
+        _shaderFill.setVec3("lightpoint.specular", lightpoint.specular);
+        _shaderFill.setFloat("lightpoint.constant", lightpoint.constant);
+        _shaderFill.setFloat("lightpoint.linear", lightpoint.linear);
+        _shaderFill.setFloat("lightpoint.quadratic", lightpoint.quadratic);
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(_indices.size()), GL_UNSIGNED_INT, 0);
@@ -120,7 +120,6 @@ public:
 private:
 	// Render Buffer
 	unsigned int _VBO, _EBO;
-    glm::vec3 _color;
     Material _material;
 
 	// Setup the Viewer Mesh
@@ -145,6 +144,7 @@ private:
         // vertex Positions
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+
         // vertex normals
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));

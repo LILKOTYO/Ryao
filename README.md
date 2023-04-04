@@ -1,44 +1,22 @@
 # Ryao
-Ryao is a graphics simulator full of bugs XD. Currently it works fine on ubuntu, and will be tested on Windows in the future.
+Ryao is a graphics simulator. This version runs smoothly on windows.
 
-This branch is the `cmake` version of Ryao, and I am also trying to develop the `xmake` version, but it may take some time to learn and debug
 ## Dependencies
-- libigl
-- **spdlog**
-- **spectra**(TODO)
-- Eigen
-- imgui
+- spdlog
+- Eigen3
 - glad
 - glfw
 
-On Ubuntu, you need to install the following packages:
+I use [`vcpkg`](https://github.com/microsoft/vcpkg) to manage packages.
+You can use the following commands to complete the package installation (take 64-bit windows system as an example):
 ```shell
-sudo apt-get install build-essential libx11-dev mesa-common-dev libgl1-mesa-dev libglu1-mesa-dev libxrandr-dev libxi-dev libxmu-dev libblas-dev libxinerama-dev libxcursor-dev
+vcpkg install spdlog:x64-windows
+vcpkg install eigen3:x64-windows
+vcpkg install glad:x64-windows
+vcpkg install glfw3:x64-windows
 ```
+If you haven't installed vcpkg, or don't know how to use vcpkg-managed libraries in Visual Studio's CMake projects, be sure to check the official vcpkg documentation.
 
-Except for spdlog, all other dependencies can be automatically downloaded by cmake.
-
-To install spdlog:
-```shell
-$ git clone https://github.com/gabime/spdlog.git
-$ cd spdlog && mkdir build && cd build
-$ cmake .. && make -j
-```
-
-For Windows users, you can install spdlog sing vcpkg:
-```
-vcpkg install spdlog
-```
-Or you can also use head-only version, however it is not recommended as it is much slower while compiling.
-## Quick Start
-```shell
-git clone git@github.com:LILKOTYO/Ryao.git
-git checkout cmake_version
-mkdir build
-cd build
-cmake ..
-make -j8
-```
 ## ChangeLog
 ### 2022.08.17
 cmake bug:
