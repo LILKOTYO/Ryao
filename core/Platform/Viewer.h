@@ -10,6 +10,7 @@
 #include <Logger.h>
 #include <RYAO.h>
 #include <vector>
+#include <Timer.h>
 
 namespace Ryao {
 

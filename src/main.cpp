@@ -9,13 +9,13 @@
 #include <Viewer.h>
 #include <RYAO.h>
 #include <Logger.h>
-
+#include <Timer.h>
 int main()
 {
     Ryao::Logger::Init();
     Ryao::Camera camera(glm::vec3(0.0, 0.0, 3.0));
-
     Ryao::Viewer viewer(camera);
+
     viewer.init();
 
     viewer.setReferencePlane(10);

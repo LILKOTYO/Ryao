@@ -75,7 +75,6 @@ private:
 
     // Setup the Viewer Mesh
     void SetupViewerReferencePlane() {
-        Timer functionTimer(__FUNCTION__);
         // create buffers/arrays
         glGenVertexArrays(1, &_VAO);
         glGenBuffers(1, &_VBO);
@@ -91,7 +90,6 @@ private:
         // vertex Positions
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
         glEnableVertexAttribArray(0);
-        RYAO_INFO("Setup viewer reference plane tooks: {} second", functionTimer.timing());
     }
 };
 }
