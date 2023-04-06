@@ -10,6 +10,8 @@
 #include <RYAO.h>
 #include <Logger.h>
 #include <Timer.h>
+#include <FileIO.h>
+
 int main()
 {
     Ryao::Logger::Init();
@@ -19,6 +21,19 @@ int main()
     viewer.init();
 
     viewer.setReferencePlane(10);
+
+    std::vector<TetVertex> vertices;
+    std::vector<VECTOR3I> indices;
+    VECTOR3 ambi(0.2, 0.3, 0.3);
+    VECTOR3 diff(0.2, 0.3, 0.3);
+    VECTOR3 spec(0.2, 0.3, 0.3);
+
+    Material material(ambi, diff, spec, 0.3);
+
+    if (Ryao::readObjFileNoNormal("../../../../resources/obj/bunny.obj", vertices, indices)) {
+        Ryao::ViewerTriMesh* trim = new Ryao::ViewerTriMesh(vertices, indices, material);
+        viewer.addViewerMesh(trim);
+    }
 
     viewer.launch();
     return 0;

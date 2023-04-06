@@ -35,59 +35,59 @@ typedef Eigen::Quaterniond QUATERNIOND;
 
 struct TriVertex {
 	// position 
-	glm::vec3 position;
+	VECTOR3 position;
 	// normal 
-	glm::vec3 normal;
+	VECTOR3 normal;
 	// constructor
-	TriVertex(glm::vec3& p, glm::vec3& n) : position(p), normal(n) {}
+	TriVertex(VECTOR3& p, VECTOR3& n) : position(p), normal(n) {}
 };
 
 struct TetVertex {
 	// position
-	glm::vec3 position;
+	VECTOR3 position;
 	// constructor
-	TetVertex(glm::vec3& p) : position(p) {}
+	TetVertex(VECTOR3& p) : position(p) {}
 };
 
 struct LightDir {
-	glm::vec3 direction;
+	VECTOR3 direction;
 
-	glm::vec3 ambient;
-	glm::vec3 diffuse;
-	glm::vec3 specular;
+	VECTOR3 ambient;
+	VECTOR3 diffuse;
+	VECTOR3 specular;
 
 	// constructor
-	LightDir(glm::vec3& dir, glm::vec3& ambi, glm::vec3& diff, glm::vec3& spec)
+	LightDir(VECTOR3& dir, VECTOR3& ambi, VECTOR3& diff, VECTOR3& spec)
 		: direction(dir), ambient(ambi), diffuse(diff), specular(spec) {
 	}
 };
 
 struct LightPoint {
-	glm::vec3 position;
+	VECTOR3 position;
 
-	glm::vec3 ambient;
-	glm::vec3 diffuse;
-	glm::vec3 specular;
+	VECTOR3 ambient;
+	VECTOR3 diffuse;
+	VECTOR3 specular;
 
 	float constant;
 	float linear;
 	float quadratic;
 
 	// constructor
-	LightPoint(glm::vec3& pos, glm::vec3& ambi, glm::vec3& diff, glm::vec3& spec, float& con, float& lin, float& qua)
+	LightPoint(VECTOR3& pos, VECTOR3& ambi, VECTOR3& diff, VECTOR3& spec, float con, float lin, float qua)
 		: position(pos), ambient(ambi), diffuse(diff), specular(spec),
 		constant(con), linear(lin), quadratic(qua) { 
 	}
 };
 
 struct Material {
-	glm::vec3 ambient;
-	glm::vec3 diffuse;
-	glm::vec3 specular;
+	VECTOR3 ambient;
+	VECTOR3 diffuse;
+	VECTOR3 specular;
 	float shininess;
 
 	// contructor
-	Material(glm::vec3& ambi, glm::vec3& diff, glm::vec3& spec, float& shin)
+	Material(VECTOR3& ambi, VECTOR3& diff, VECTOR3& spec, float shin)
 		: ambient(ambi), diffuse(diff), specular(spec), shininess(shin) {
 	}
 };

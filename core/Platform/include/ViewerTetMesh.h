@@ -17,7 +17,7 @@ namespace Ryao {
     public:
         // ViewerMesh Data
         std::vector<TetVertex> _vertices;
-        std::vector<unsigned int> _indices;
+        std::vector<VECTOR3I> _indices;
         unsigned int _VAO;
 
         // shader index
@@ -25,7 +25,7 @@ namespace Ryao {
         Shader _shaderLine;
 
         // Construct
-        ViewerTetMesh(std::vector<TetVertex>& vertices, std::vector<unsigned int>& indices, Material& material)
+        ViewerTetMesh(std::vector<TetVertex>& vertices, std::vector<VECTOR3I>& indices, Material& material)
             : _vertices(vertices), _indices(indices), _material(material),
             _shaderFill(Shader("shaders/ViewerTetMeshFill.vert", "shaders/ViewerTetMeshFill.frag")),
             _shaderLine(Shader("shaders/ViewerMeshLine.vert", "shaders/ViewerMeshLine.frag")) {
@@ -35,7 +35,7 @@ namespace Ryao {
             RYAO_INFO("Successfully Loaded Viewer Mesh! ");
         }
 
-        ViewerTetMesh(std::vector<TetVertex>& vertices, std::vector<unsigned int>& indices, Material& material,
+        ViewerTetMesh(std::vector<TetVertex>& vertices, std::vector<VECTOR3I>& indices, Material& material,
             const char* fillVertexPath, const char* fillFragmentPath,
             const char* lineVertexPath, const char* lineFragmentPath)
             : _vertices(vertices), _indices(indices), _material(material),
@@ -121,7 +121,7 @@ namespace Ryao {
             // set the vertex attribute pointers
             // vertex Positions
             glEnableVertexAttribArray(0);
-            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(TriVertex), (void*)0);
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(TetVertex), (void*)0);
         }
     };
 

@@ -135,6 +135,9 @@ void Viewer::launch() {
             _referencePlane->Draw(_camera, _SCR_WIDTH, _SCR_HEIGHT);
         }
         
+        if (_viewerTriMeshList.size() > 0) {
+            _viewerTriMeshList[0]->Draw(_camera,)
+        }
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
