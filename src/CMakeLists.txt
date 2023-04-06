@@ -17,11 +17,11 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 
-file(GLOB LIBFILES ${PROJECT_SOURCE_DIR}/../core/Platform/*.*)
-source_group("Library Files" FILES ${LIBFILES})
+# file(GLOB LIBFILES ${PROJECT_SOURCE_DIR}/../core/Platform/*.*)
+# source_group("Library Files" FILES ${LIBFILES})
 
 # Add default project files
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../core/Platform)
+# include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../core/Platform)
 # include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../core/Hyperelastic)
 # include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../core/Geometry)
 # include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../external/spectra/include)
@@ -32,13 +32,18 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../core/Platform)
 file(GLOB SRCFILES *.cpp)
 file(GLOB HFILES *.h)
 
-add_executable(${PROJECT_NAME} ${SRCFILES} ${HFILES} ${LIBFILES} )
+add_executable(${PROJECT_NAME} ${SRCFILES} ${HFILES} )
 
 add_custom_command(
         TARGET ${PROJECT_NAME}  POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${PROJECT_SOURCE_DIR}/../shaders ${PROJECT_BINARY_DIR}/bin/shaders
     )
+
+target_link_libraries(${PROJECT_NAME}
+    PUBLIC
+    Ryao::Platform
+)
 
 find_package(spdlog CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE spdlog::spdlog spdlog::spdlog_header_only)

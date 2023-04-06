@@ -39,7 +39,7 @@ struct TriVertex {
 	// normal 
 	glm::vec3 normal;
 	// constructor
-	Vertex(glm::vec3& p, glm::vec3& n) : position(p), normal(n) {}
+	TriVertex(glm::vec3& p, glm::vec3& n) : position(p), normal(n) {}
 };
 
 struct LightDir {
