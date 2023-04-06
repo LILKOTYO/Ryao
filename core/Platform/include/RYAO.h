@@ -42,6 +42,13 @@ struct TriVertex {
 	TriVertex(glm::vec3& p, glm::vec3& n) : position(p), normal(n) {}
 };
 
+struct TetVertex {
+	// position
+	glm::vec3 position;
+	// constructor
+	TetVertex(glm::vec3& p) : position(p) {}
+};
+
 struct LightDir {
 	glm::vec3 direction;
 

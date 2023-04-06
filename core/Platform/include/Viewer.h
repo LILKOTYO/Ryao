@@ -5,7 +5,8 @@
 #include <GLFW/glfw3.h>
 #include <Camera.h>
 #include <Shader.h>
-#include <ViewerMesh.h>
+#include <ViewerTriMesh.h>
+#include <ViewerTetMesh.h>
 #include <ReferencePlane.h>
 #include <Logger.h>
 #include <RYAO.h>
@@ -55,7 +56,7 @@ public:
 	double* getLastY();
 	bool getisDrag();
 
-	void addViewerMesh(ViewerMesh* vmesh)	{ _viewerMeshList.push_back(vmesh); }
+	void addViewerMesh(ViewerTriMesh* vTriMesh)	{ _viewerTriMeshList.push_back(vTriMesh); }
 	void addShader(Shader* shader)			{ _shaderList.push_back(shader); }
 	void addArrow(Arrow* arrow)				{ _arrowList.push_back(arrow); }
 
@@ -63,7 +64,7 @@ public:
 	void launch();
 private:
 	// data 
-	std::vector<ViewerMesh*> _viewerMeshList;
+	std::vector<ViewerTriMesh*> _viewerTriMeshList;
 	std::vector<Shader*> _shaderList;
 	std::vector<Arrow*> _arrowList;
 

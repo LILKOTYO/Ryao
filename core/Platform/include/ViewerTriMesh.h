@@ -1,5 +1,5 @@
-#ifndef VIEWERMESH_H
-#define VIEWERMESH_H
+#ifndef VIEWERTRIMESH_H
+#define VIEWERTRIMESH_H
 
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
@@ -13,7 +13,7 @@
 
 namespace Ryao {
 
-class ViewerMesh {
+class ViewerTriMesh {
 public:
 	// ViewerMesh Data
 	std::vector<TriVertex> _vertices;
@@ -25,9 +25,9 @@ public:
     Shader _shaderLine;
 
 	// Construct
-	ViewerMesh(std::vector<TriVertex>& vertices, std::vector<unsigned int>& indices, Material& material)
+    ViewerTriMesh(std::vector<TriVertex>& vertices, std::vector<unsigned int>& indices, Material& material)
     : _vertices(vertices), _indices(indices), _material(material),
-        _shaderFill(Shader("shaders/ViewerMeshFill.vert", "shaders/ViewerMeshFill.frag")),
+        _shaderFill(Shader("shaders/ViewerTriMeshFill.vert", "shaders/ViewerTriMeshFill.frag")),
         _shaderLine(Shader("shaders/ViewerMeshLine.vert", "shaders/ViewerMeshLine.frag")) {
         // now that we have all the required data, set the vertex buffers and its attribute pointers.
         RYAO_INFO("Load Viewer Mesh ...");
@@ -35,7 +35,7 @@ public:
         RYAO_INFO("Successfully Loaded Viewer Mesh! ");
 	}
 
-    ViewerMesh(std::vector<TriVertex>& vertices, std::vector<unsigned int>& indices, Material& material,
+    ViewerTriMesh(std::vector<TriVertex>& vertices, std::vector<unsigned int>& indices, Material& material,
         const char* fillVertexPath, const char* fillFragmentPath,
         const char* lineVertexPath, const char* lineFragmentPath)
     : _vertices(vertices), _indices(indices), _material(material),
@@ -47,7 +47,7 @@ public:
         RYAO_INFO("Successfully Loaded Viewer Mesh! ");
     }
 
-    ~ViewerMesh() {}
+    ~ViewerTriMesh() {}
 
     // Render the Viewer Mesh
     void Draw(Camera& camera, LightDir& lightdir, LightPoint& lightpoint, unsigned int width, unsigned int height) {
@@ -153,4 +153,4 @@ private:
 
 } // Ryao
 
-#endif // !VIEWERMESH_H
+#endif // !VIEWERTRIMESH_H
