@@ -16,7 +16,7 @@ namespace Ryao {
 class ViewerMesh {
 public:
 	// ViewerMesh Data
-	std::vector<Vertex> _vertices;
+	std::vector<TriVertex> _vertices;
 	std::vector<unsigned int> _indices;
 	unsigned int _VAO;
 
@@ -25,7 +25,7 @@ public:
     Shader _shaderLine;
 
 	// Construct
-	ViewerMesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, Material& material)
+	ViewerMesh(std::vector<TriVertex>& vertices, std::vector<unsigned int>& indices, Material& material)
     : _vertices(vertices), _indices(indices), _material(material),
         _shaderFill(Shader("shaders/ViewerMeshFill.vert", "shaders/ViewerMeshFill.frag")),
         _shaderLine(Shader("shaders/ViewerMeshLine.vert", "shaders/ViewerMeshLine.frag")) {
@@ -35,7 +35,7 @@ public:
         RYAO_INFO("Successfully Loaded Viewer Mesh! ");
 	}
 
-    ViewerMesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, Material& material,
+    ViewerMesh(std::vector<TriVertex>& vertices, std::vector<unsigned int>& indices, Material& material,
         const char* fillVertexPath, const char* fillFragmentPath,
         const char* lineVertexPath, const char* lineFragmentPath)
     : _vertices(vertices), _indices(indices), _material(material),
@@ -135,7 +135,7 @@ private:
         // A great thing about structs is that their memory layout is sequential for all its items.
         // The effect is that we can simply pass a pointer to the struct and it translates perfectly to a glm::vec3/2 array which
         // again translates to 3/2 floats which translates to a byte array.
-        glBufferData(GL_ARRAY_BUFFER, _vertices.size() * sizeof(Vertex), &_vertices[0], GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, _vertices.size() * sizeof(TriVertex), &_vertices[0], GL_STATIC_DRAW);
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, _indices.size() * sizeof(unsigned int), &_indices[0], GL_STATIC_DRAW);
@@ -143,11 +143,11 @@ private:
         // set the vertex attribute pointers
         // vertex Positions
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(TriVertex), (void*)0);
 
         // vertex normals
         glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(TriVertex), (void*)offsetof(TriVertex, normal));
 	}
 };
 
