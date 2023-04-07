@@ -35,18 +35,18 @@ typedef Eigen::Quaterniond QUATERNIOND;
 
 struct TriVertex {
 	// position 
-	VECTOR3 position;
+	ROWVECTOR3 position;
 	// normal 
-	VECTOR3 normal;
+	ROWVECTOR3 normal;
 	// constructor
-	TriVertex(VECTOR3& p, VECTOR3& n) : position(p), normal(n) {}
+	TriVertex(ROWVECTOR3& p, ROWVECTOR3& n) : position(p), normal(n) {}
 };
 
 struct TetVertex {
 	// position
-	VECTOR3 position;
+	glm::vec3 position;
 	// constructor
-	TetVertex(VECTOR3& p) : position(p) {}
+	TetVertex(glm::vec3& p) : position(p) {}
 };
 
 struct LightDir {

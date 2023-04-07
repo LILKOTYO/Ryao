@@ -22,18 +22,18 @@ public:
         _shader(Shader("shaders/ReferencePlane.vert", "shaders/ReferencePlane.frag")) {
         unsigned int num_edges = 2 * (2 * _size + 1);
         //_vertices.reserve(2 * num_edges);
-        float interval = 0.9 / (float)_size;
+        float interval = 10.0 / (float)_size;
 
         for (int i = -size; i < size + 1; i++) {
             // parallel to the x-axis
-            _vertices.push_back(glm::vec3((float)i * interval, 0.0f, -0.9f));
-            _vertices.push_back(glm::vec3((float)i * interval, 0.0f, 0.9f));
+            _vertices.push_back(glm::vec3((float)i * interval, 0.0f, -10.0f));
+            _vertices.push_back(glm::vec3((float)i * interval, 0.0f, 10.0f));
         }
 
         for (int i = -size; i < size + 1; i++) {
             // parallel to the z-axis
-            _vertices.push_back(glm::vec3(-0.9f, 0.0f, (float)i * interval));
-            _vertices.push_back(glm::vec3(0.9f, 0.0f, (float)i * interval));
+            _vertices.push_back(glm::vec3(-10.0f, 0.0f, (float)i * interval));
+            _vertices.push_back(glm::vec3(10.0f, 0.0f, (float)i * interval));
         }
 
         SetupViewerReferencePlane();

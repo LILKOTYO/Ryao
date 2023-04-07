@@ -17,7 +17,7 @@ namespace Ryao {
     public:
         // ViewerMesh Data
         std::vector<TetVertex> _vertices;
-        std::vector<VECTOR3I> _indices;
+        std::vector<unsigned int> _indices;
         unsigned int _VAO;
 
         // shader index
@@ -25,7 +25,7 @@ namespace Ryao {
         Shader _shaderLine;
 
         // Construct
-        ViewerTetMesh(std::vector<TetVertex>& vertices, std::vector<VECTOR3I>& indices, Material& material)
+        ViewerTetMesh(std::vector<TetVertex>& vertices, std::vector<unsigned int>& indices, Material& material)
             : _vertices(vertices), _indices(indices), _material(material),
             _shaderFill(Shader("shaders/ViewerTetMeshFill.vert", "shaders/ViewerTetMeshFill.frag")),
             _shaderLine(Shader("shaders/ViewerMeshLine.vert", "shaders/ViewerMeshLine.frag")) {
@@ -35,7 +35,7 @@ namespace Ryao {
             RYAO_INFO("Successfully Loaded Viewer Mesh! ");
         }
 
-        ViewerTetMesh(std::vector<TetVertex>& vertices, std::vector<VECTOR3I>& indices, Material& material,
+        ViewerTetMesh(std::vector<TetVertex>& vertices, std::vector<unsigned int>& indices, Material& material,
             const char* fillVertexPath, const char* fillFragmentPath,
             const char* lineVertexPath, const char* lineFragmentPath)
             : _vertices(vertices), _indices(indices), _material(material),
@@ -50,7 +50,7 @@ namespace Ryao {
         ~ViewerTetMesh() {}
 
         // Render the Viewer Mesh
-        void Draw(Camera& camera, LightDir& lightdir, LightPoint& lightpoint, unsigned int width, unsigned int height) {
+        void Draw(Camera& camera, unsigned int width, unsigned int height) {
             // draw mesh
             glBindVertexArray(_VAO);
 
@@ -68,14 +68,16 @@ namespace Ryao {
 
             // mvp: model
             glm::mat4 model(1.0f);
-            float angle = (float)glfwGetTime() * glm::radians(20.0f);
-            model = glm::translate(model, glm::vec3(0.0f, 0.0f, -1.5f));
-            model = glm::rotate(model, angle, glm::vec3(0.5f, 1.0f, 0.0f));
+            //float angle = (float)glfwGetTime() * glm::radians(20.0f);
+            //model = glm::translate(model, glm::vec3(0.0f, 0.0f, -1.5f));
+            //model = glm::rotate(model, angle, glm::vec3(0.5f, 1.0f, 0.0f));
+            //model = glm::scale(model, glm::vec3(10, 10, 10));
             _shaderFill.setMat4("model", model);
+
+            _shaderFill.setVec3("color", glm::vec3(0.0, 1.0, 1.0));
 
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
             glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(_indices.size()), GL_UNSIGNED_INT, 0);
-
             // Draw the Wireframe
             _shaderLine.use();
 
@@ -113,6 +115,7 @@ namespace Ryao {
             // A great thing about structs is that their memory layout is sequential for all its items.
             // The effect is that we can simply pass a pointer to the struct and it translates perfectly to a glm::vec3/2 array which
             // again translates to 3/2 floats which translates to a byte array.
+            
             glBufferData(GL_ARRAY_BUFFER, _vertices.size() * sizeof(TetVertex), &_vertices[0], GL_STATIC_DRAW);
 
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
@@ -121,7 +124,7 @@ namespace Ryao {
             // set the vertex attribute pointers
             // vertex Positions
             glEnableVertexAttribArray(0);
-            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(TetVertex), (void*)0);
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(TetVertex), (void*)offsetof(TetVertex, position));
         }
     };
 
