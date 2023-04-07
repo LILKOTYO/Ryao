@@ -35,11 +35,11 @@ typedef Eigen::Quaterniond QUATERNIOND;
 
 struct TriVertex {
 	// position 
-	ROWVECTOR3 position;
+	glm::vec3 position;
 	// normal 
-	ROWVECTOR3 normal;
+	glm::vec3 normal;
 	// constructor
-	TriVertex(ROWVECTOR3& p, ROWVECTOR3& n) : position(p), normal(n) {}
+	TriVertex(glm::vec3& p, glm::vec3& n) : position(p), normal(n) {}
 };
 
 struct TetVertex {

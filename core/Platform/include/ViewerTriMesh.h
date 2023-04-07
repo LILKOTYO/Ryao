@@ -17,7 +17,7 @@ class ViewerTriMesh {
 public:
 	// ViewerMesh Data
 	std::vector<TriVertex> _vertices;
-	std::vector<VECTOR3I> _indices;
+	std::vector<unsigned int> _indices;
 	unsigned int _VAO;
 
     // shader index
@@ -25,7 +25,7 @@ public:
     Shader _shaderLine;
 
 	// Construct
-    ViewerTriMesh(std::vector<TriVertex>& vertices, std::vector<VECTOR3I>& indices, Material& material)
+    ViewerTriMesh(std::vector<TriVertex>& vertices, std::vector<unsigned int>& indices, Material& material)
     : _vertices(vertices), _indices(indices), _material(material),
         _shaderFill(Shader("shaders/ViewerTriMeshFill.vert", "shaders/ViewerTriMeshFill.frag")),
         _shaderLine(Shader("shaders/ViewerMeshLine.vert", "shaders/ViewerMeshLine.frag")) {
@@ -35,7 +35,7 @@ public:
         RYAO_INFO("Successfully Loaded Viewer Mesh! ");
 	}
 
-    ViewerTriMesh(std::vector<TriVertex>& vertices, std::vector<VECTOR3I>& indices, Material& material,
+    ViewerTriMesh(std::vector<TriVertex>& vertices, std::vector<unsigned int>& indices, Material& material,
         const char* fillVertexPath, const char* fillFragmentPath,
         const char* lineVertexPath, const char* lineFragmentPath)
     : _vertices(vertices), _indices(indices), _material(material),
@@ -96,7 +96,7 @@ public:
         _shaderFill.setFloat("lightpoint.quadratic", lightpoint.quadratic);
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        glDrawElements(GL_TRIANGLES, 3 * static_cast<unsigned int>(_indices.size()), GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(_indices.size()), GL_UNSIGNED_INT, 0);
         
         // Draw the Wireframe
         _shaderLine.use();
@@ -109,7 +109,7 @@ public:
         glEnable(GL_POLYGON_OFFSET_LINE);
         glPolygonOffset(-1.0, -1.0);
 
-        glDrawElements(GL_TRIANGLES, 3 * static_cast<unsigned int>(_indices.size()), GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(_indices.size()), GL_UNSIGNED_INT, 0);
 
         glDisable(GL_POLYGON_OFFSET_LINE);
 
@@ -141,11 +141,8 @@ private:
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, _indices.size() * sizeof(unsigned int), &_indices[0], GL_STATIC_DRAW);
 
         // set the vertex attribute pointers
-        // vertex Positions
-        // Where are the sizes come from?
-        // check here https://stackoverflow.com/questions/58217443/using-opengl-with-eigen-for-storing-vertex-data-and-glvertexattribpointer
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(TriVertex), (void*)0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(TriVertex), (void*)offsetof(TriVertex, position));
 
         // vertex normals
         glEnableVertexAttribArray(1);
