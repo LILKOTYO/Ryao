@@ -6,5 +6,5 @@ add_subdirectory(core/Platform)
 add_subdirectory(core/Geometry)
 
 # demo project
-add_subdirectory(src)
+add_subdirectory(demo)
 # add_subdirectory(test)
