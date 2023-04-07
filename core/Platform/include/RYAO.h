@@ -3,6 +3,8 @@
 
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 typedef double REAL;
 typedef Eigen::Matrix<REAL, 3,  3>  MATRIX3;
@@ -91,5 +93,7 @@ struct Material {
 		: ambient(ambi), diffuse(diff), specular(spec), shininess(shin) {
 	}
 };
+
+#define M_PI 3.14159265358979323846
 
 #endif

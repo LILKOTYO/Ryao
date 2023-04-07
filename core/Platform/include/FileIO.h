@@ -12,7 +12,7 @@
 
 namespace Ryao {
 
-std::vector<TetVertex> normalizeVertices(const std::vector<TetVertex>& vertices) {
+inline std::vector<TetVertex> normalizeVertices(const std::vector<TetVertex>& vertices) {
     assert(vertices.size() > 0);
     glm::vec3 mins = vertices[0].position;
     glm::vec3 maxs = vertices[0].position;
@@ -45,7 +45,7 @@ std::vector<TetVertex> normalizeVertices(const std::vector<TetVertex>& vertices)
     return normalized;
 }
 
-std::vector<VECTOR3> normalizeVertices(const std::vector<VECTOR3>& vertices) {
+inline std::vector<VECTOR3> normalizeVertices(const std::vector<VECTOR3>& vertices) {
     assert(vertices.size() > 0);
     VECTOR3 mins = vertices[0];
     VECTOR3 maxs = vertices[0];
@@ -72,7 +72,7 @@ std::vector<VECTOR3> normalizeVertices(const std::vector<VECTOR3>& vertices) {
     return normalized;
 }
 
-bool readObjFileNoNormal(const std::string& filename,
+inline bool readObjFileNoNormal(const std::string& filename,
     std::vector<TetVertex>& vertices,
     std::vector<unsigned int>& faces) {
     // erase whatever was in the vectors before
@@ -126,7 +126,7 @@ bool readObjFileNoNormal(const std::string& filename,
 }
 
 // move to TET_Mesh later @TODO
-bool readTetGenMesh(const std::string& filename,
+inline bool readTetGenMesh(const std::string& filename,
     std::vector<VECTOR3>& vertices,
     std::vector<unsigned int>& faces,
     std::vector<VECTOR4I>& tets,
