@@ -1,7 +1,7 @@
 #ifndef KINEMATIC_SHAPE_H
 #define KINEMATIC_SHAPE_H
 
-#include "core/Platform/include/RYAO.h"
+#include <Platform/include/RYAO.h>
 
 namespace Ryao {
 

@@ -3,6 +3,7 @@ project(Ryao)
 
 # engine ilbrary
 add_subdirectory(core/Platform)
+add_subdirectory(core/Geometry)
 
 # demo project
 add_subdirectory(src)

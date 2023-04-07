@@ -43,6 +43,7 @@ add_custom_command(
 target_link_libraries(${PROJECT_NAME}
     PUBLIC
     Ryao::Platform
+    Ryao::Geometry
 )
 
 find_package(spdlog CONFIG REQUIRED)
