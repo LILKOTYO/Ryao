@@ -30,7 +30,7 @@ int main()
 
     Material material(ambi, diff, spec, 0.3);
 
-    if (Ryao::readObjFileNoNormal("../../../../resources/obj/arm.obj", vertices, indices)) {
+    if (Ryao::readObjFileNoNormal("../../../../resources/obj/armadillo.obj", vertices, indices)) {
         Ryao::ViewerTetMesh* trim = new Ryao::ViewerTetMesh(vertices, indices, material);
         viewer.addViewerTetMesh(trim);
     }
