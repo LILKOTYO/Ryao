@@ -212,7 +212,7 @@ void Cylinder::generateViewerMesh(vector<TriVertex>& vertices, vector<unsigned i
 
     for (int i = 0; i < vertices.size(); i++) {
         vertices[i].position = rotate * scale * vertices[i].position + translate;
-        vertices[i].normal = rotate * scale * vertices[i].normal + translate;
+        vertices[i].normal = glm::transpose(glm::inverse(rotate * scale)) * vertices[i].normal;
     }
 
     for (int i = 1; i < _segment; i++) {

@@ -23,11 +23,11 @@ public:
 		 _lightDir(LightDir(VECTOR3(0.0, -1.0, -1.0),
 			 VECTOR3(1.0, 1.0, 1.0),
 			 VECTOR3(1.0, 1.0, 1.0),
-			 VECTOR3(0.3, 0.3, 0.3))),
+			 VECTOR3(0.0, 0.0, 0.0))),
 		 _lightPoint(LightPoint(VECTOR3(-1.2, 1.2, 0.0),
 			 VECTOR3(1.0, 1.0, 1.0),
 			 VECTOR3(1.0, 1.0, 1.0),
-			 VECTOR3(1.0, 1.0, 1.0),
+			 VECTOR3(0.0, 0.0, 0.0),
 			 1.0f, 0.09f, 0.032f)){
 		_window = nullptr;
 		_referencePlane = nullptr;

@@ -222,7 +222,7 @@ void Cube::generateViewerMesh(vector<TriVertex>& vertices, vector<unsigned int>&
 
     for (int i = 0; i < vertices.size(); i++) {
         vertices[i].position = rotate * scale * vertices[i].position + translate;
-        vertices[i].normal = rotate * scale * vertices[i].normal + translate;
+        vertices[i].normal = glm::transpose(glm::inverse(rotate * scale)) * vertices[i].normal;
     }
 }
 

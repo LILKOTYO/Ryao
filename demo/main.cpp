@@ -13,6 +13,7 @@
 #include <FileIO.h>
 #include <Cube.h>
 #include <Cylinder.h>
+#include <Sphere.h>
 
 int main()
 {
@@ -56,6 +57,16 @@ int main()
 
     Ryao::ViewerTriMesh* trim2 = new Ryao::ViewerTriMesh(cylinderV, cylinderI, material, DRAWELEMENT);
     viewer.addViewerTriMesh(trim2);
+
+    std::vector<TriVertex> sphereV;
+    std::vector<unsigned int> sphereI;
+
+    Ryao::Sphere sphere(VECTOR3(0.0, 1.0, 0.0), 0.3);
+
+    sphere.generateViewerMesh(sphereV, sphereI);
+
+    Ryao::ViewerTriMesh* trim3 = new Ryao::ViewerTriMesh(sphereV, sphereI, material, DRAWELEMENT);
+    viewer.addViewerTriMesh(trim3);
 
     viewer.launch();
     //std::vector<VECTOR3> vertices;
