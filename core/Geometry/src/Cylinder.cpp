@@ -167,4 +167,16 @@ namespace Ryao {
         }
     }
 
+    void Cylinder::generateViewerMesh(std::vector<TriVertex>& vertices, std::vector<unsigned int> indices) {
+        float segmentAngle = 2.0f * glm::pi<float>() / static_cast<float>(segments);
+        int size = 2 * (_segment + 1);
+        vertices.resize(size);
+        indices.resize(4 * _segment);
+
+        // Generate the top and bottom center vertices
+        glm::vec3 topCenter(0.0f, 0.5f * height, 0.0f);
+        glm::vec3 bottomCenter(0.0f, -0.5f * height, 0.0f);
+
+        // Add the top and bottom center vertices to the vertices array
+    }
 }
