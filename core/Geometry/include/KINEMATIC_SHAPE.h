@@ -3,6 +3,7 @@
 
 #include <Platform/include/RYAO.h>
 #include <vector>
+#include <string>
 
 namespace Ryao {
 
@@ -61,7 +62,7 @@ public:
         VECTOR3& closestPointLocal,
         VECTOR3& normalLocal) const = 0;
 
-    virtual void generateViewerMesh(std::vector<TriVertex>& vertices, std::vector<unsigned int> indices) = 0;
+    virtual void generateViewerMesh(std::vector<TriVertex>& vertices, std::vector<unsigned int>& indices) = 0;
 protected:
     //VECTOR3 _center;
     MATRIX3 _scale;

@@ -136,11 +136,13 @@ void Viewer::launch() {
         }
         
         if (_viewerTriMeshList.size() > 0) {
-            _viewerTriMeshList[0]->Draw(_camera, _lightDir, _lightPoint, _SCR_WIDTH, _SCR_HEIGHT);
+            for (int i = 0; i < _viewerTriMeshList.size(); i++) 
+                _viewerTriMeshList[i]->Draw(_camera, _lightDir, _lightPoint, _SCR_WIDTH, _SCR_HEIGHT);
         }
 
         if (_viewerTetMeshList.size() > 0) {
-            _viewerTetMeshList[0]->Draw(_camera, _SCR_WIDTH, _SCR_HEIGHT);
+            for (int i = 0; i < _viewerTetMeshList.size(); i++)
+                _viewerTetMeshList[i]->Draw(_camera, _SCR_WIDTH, _SCR_HEIGHT);
         }
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)

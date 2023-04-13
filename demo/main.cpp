@@ -12,6 +12,7 @@
 #include <Timer.h>
 #include <FileIO.h>
 #include <Cube.h>
+#include <Cylinder.h>
 
 int main()
 {
@@ -43,8 +44,18 @@ int main()
 
     cube.generateViewerMesh(cubeV, cubeI);
 
-    Ryao::ViewerTriMesh* trim = new Ryao::ViewerTriMesh(cubeV, cubeI, material, DRAWARRAY);
-    viewer.addViewerTriMesh(trim);
+    Ryao::ViewerTriMesh* trim1 = new Ryao::ViewerTriMesh(cubeV, cubeI, material, DRAWARRAY);
+    viewer.addViewerTriMesh(trim1);
+
+    std::vector<TriVertex> cylinderV;
+    std::vector<unsigned int> cylinderI;
+
+    Ryao::Cylinder cylinder(VECTOR3(-1.0, 0.0, 0.0), 0.25, 1.0, 180);
+    
+    cylinder.generateViewerMesh(cylinderV, cylinderI);
+
+    Ryao::ViewerTriMesh* trim2 = new Ryao::ViewerTriMesh(cylinderV, cylinderI, material, DRAWELEMENT);
+    viewer.addViewerTriMesh(trim2);
 
     viewer.launch();
     //std::vector<VECTOR3> vertices;

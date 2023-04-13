@@ -154,7 +154,7 @@ void Cube::getClosestPoint(const VECTOR3& query,
     }
 }
 
-void Cube::generateViewerMesh(std::vector<TriVertex>& vertices, std::vector<unsigned int> indices) {
+void Cube::generateViewerMesh(vector<TriVertex>& vertices, vector<unsigned int>& indices) {
     vertices.clear();
     indices.clear();
 

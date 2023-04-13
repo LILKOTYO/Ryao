@@ -109,22 +109,22 @@ public:
             glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(_indices.size()), GL_UNSIGNED_INT, 0);
         
         // Draw the Wireframe
-        _shaderLine.use();
+        //_shaderLine.use();
 
-        _shaderLine.setMat4("view", view);
-        _shaderLine.setMat4("projection", projection);
-        _shaderLine.setMat4("model", model);
+        //_shaderLine.setMat4("view", view);
+        //_shaderLine.setMat4("projection", projection);
+        //_shaderLine.setMat4("model", model);
 
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        glEnable(GL_POLYGON_OFFSET_LINE);
-        glPolygonOffset(-1.0, -1.0);
+        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        //glEnable(GL_POLYGON_OFFSET_LINE);
+        //glPolygonOffset(-1.0, -1.0);
 
-        if (_renderType == DRAWARRAY)
-            glDrawArrays(GL_TRIANGLES, 0, static_cast<unsigned int>(_vertices.size()));
-        else
-            glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(_indices.size()), GL_UNSIGNED_INT, 0);
+        //if (_renderType == DRAWARRAY)
+        //    glDrawArrays(GL_TRIANGLES, 0, static_cast<unsigned int>(_vertices.size()));
+        //else
+        //    glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(_indices.size()), GL_UNSIGNED_INT, 0);
 
-        glDisable(GL_POLYGON_OFFSET_LINE);
+        //glDisable(GL_POLYGON_OFFSET_LINE);
 
         glBindVertexArray(0);
     }
