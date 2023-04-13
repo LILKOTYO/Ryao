@@ -5,8 +5,8 @@ using namespace std;
 
 namespace Ryao {
 
-    Cylinder::Cylinder(const VECTOR3& center, const REAL& radius, const REAL& height) :
-        _radius(radius), _height(height) {
+    Cylinder::Cylinder(const VECTOR3& center, const REAL& radius, const REAL& height, int& segment) :
+        _radius(radius), _height(height), _segment(segment) {
         _scale = MATRIX3::Identity();
         _scale(0, 0) = _scale(2, 2) = radius;
         _scale(1, 1) = height;

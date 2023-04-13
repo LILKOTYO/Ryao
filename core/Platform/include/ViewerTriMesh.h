@@ -25,25 +25,32 @@ public:
     Shader _shaderLine;
 
 	// Construct
-    ViewerTriMesh(std::vector<TriVertex>& vertices, std::vector<unsigned int>& indices, Material& material)
-    : _vertices(vertices), _indices(indices), _material(material),
+    ViewerTriMesh(std::vector<TriVertex>& vertices, std::vector<unsigned int>& indices, Material& material, RenderType renderType)
+    : _vertices(vertices), _indices(indices), _material(material), _renderType(renderType),
         _shaderFill(Shader("shaders/ViewerTriMeshFill.vert", "shaders/ViewerTriMeshFill.frag")),
         _shaderLine(Shader("shaders/ViewerMeshLine.vert", "shaders/ViewerMeshLine.frag")) {
         // now that we have all the required data, set the vertex buffers and its attribute pointers.
         RYAO_INFO("Load Viewer Mesh ...");
-        SetupViewerMesh();
+        if (_renderType == DRAWARRAY)
+            SetupViewerMeshArray();
+        if (_renderType == DRAWELEMENT)
+            SetupViewerMeshElement();
         RYAO_INFO("Successfully Loaded Viewer Mesh! ");
 	}
 
-    ViewerTriMesh(std::vector<TriVertex>& vertices, std::vector<unsigned int>& indices, Material& material,
+    ViewerTriMesh(std::vector<TriVertex>& vertices, std::vector<unsigned int>& indices, Material& material, RenderType renderType,
         const char* fillVertexPath, const char* fillFragmentPath,
         const char* lineVertexPath, const char* lineFragmentPath)
-    : _vertices(vertices), _indices(indices), _material(material),
+    : _vertices(vertices), _indices(indices), _material(material), _renderType(renderType),
     _shaderFill(Shader(fillVertexPath, fillFragmentPath)),
     _shaderLine(Shader(lineVertexPath, lineFragmentPath)) {
         // now that we have all the required data, set the vertex buffers and its attribute pointers.
         RYAO_INFO("Load Viewer Mesh ...");
-        SetupViewerMesh();
+        if (_renderType == DRAWARRAY)
+            SetupViewerMeshArray();
+        if (_renderType == DRAWELEMENT)
+            SetupViewerMeshElement();
+
         RYAO_INFO("Successfully Loaded Viewer Mesh! ");
     }
 
@@ -68,9 +75,9 @@ public:
 
         // mvp: model
         glm::mat4 model(1.0f);
-        float angle = (float)glfwGetTime() * glm::radians(20.0f);
-        model = glm::translate(model, glm::vec3(0.0f, 0.0f, -1.5f));
-        model = glm::rotate(model, angle, glm::vec3(0.5f, 1.0f, 0.0f));
+        //float angle = (float)glfwGetTime() * glm::radians(20.0f);
+        //model = glm::translate(model, glm::vec3(0.0f, 0.0f, -1.5f));
+        //model = glm::rotate(model, angle, glm::vec3(0.5f, 1.0f, 0.0f));
         _shaderFill.setMat4("model", model);
 
         // normal needs to be rotated too!!!!
@@ -96,7 +103,10 @@ public:
         _shaderFill.setFloat("lightpoint.quadratic", lightpoint.quadratic);
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(_indices.size()), GL_UNSIGNED_INT, 0);
+        if (_renderType == DRAWARRAY)
+            glDrawArrays(GL_TRIANGLES, 0, static_cast<unsigned int>(_vertices.size()));
+        else 
+            glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(_indices.size()), GL_UNSIGNED_INT, 0);
         
         // Draw the Wireframe
         _shaderLine.use();
@@ -109,21 +119,24 @@ public:
         glEnable(GL_POLYGON_OFFSET_LINE);
         glPolygonOffset(-1.0, -1.0);
 
-        glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(_indices.size()), GL_UNSIGNED_INT, 0);
+        if (_renderType == DRAWARRAY)
+            glDrawArrays(GL_TRIANGLES, 0, static_cast<unsigned int>(_vertices.size()));
+        else
+            glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(_indices.size()), GL_UNSIGNED_INT, 0);
 
         glDisable(GL_POLYGON_OFFSET_LINE);
 
         glBindVertexArray(0);
-
     }
 
 private:
 	// Render Buffer
 	unsigned int _VBO, _EBO;
     Material _material;
+    RenderType _renderType;
 
 	// Setup the Viewer Mesh
-	void SetupViewerMesh() {
+	void SetupViewerMeshElement() {
         // create buffers/arrays
         glGenVertexArrays(1, &_VAO);
         glGenBuffers(1, &_VBO);
@@ -148,6 +161,28 @@ private:
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(TriVertex), (void*)offsetof(TriVertex, normal));
 	}
+
+    void SetupViewerMeshArray() {
+        // create buffers/arrays
+        glGenVertexArrays(1, &_VAO);
+        glGenBuffers(1, &_VBO);
+
+        glBindVertexArray(_VAO);
+        // load data into vertex buffers
+        glBindBuffer(GL_ARRAY_BUFFER, _VBO);
+        // A great thing about structs is that their memory layout is sequential for all its items.
+        // The effect is that we can simply pass a pointer to the struct and it translates perfectly to a glm::vec3/2 array which
+        // again translates to 3/2 floats which translates to a byte array.
+        glBufferData(GL_ARRAY_BUFFER, _vertices.size() * sizeof(TriVertex), &_vertices[0], GL_STATIC_DRAW);
+
+        // set the vertex attribute pointers
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(TriVertex), (void*)offsetof(TriVertex, position));
+
+        // vertex normals
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(TriVertex), (void*)offsetof(TriVertex, normal));
+    }
 };
 
 } // Ryao

@@ -154,4 +154,76 @@ void Cube::getClosestPoint(const VECTOR3& query,
     }
 }
 
+void Cube::generateViewerMesh(std::vector<TriVertex>& vertices, std::vector<unsigned int> indices) {
+    vertices.clear();
+    indices.clear();
+
+    glm::mat3 scale;
+    glm::mat3 rotate;
+    glm::vec3 translate;
+    
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            scale[i][j] = _scale(i, j);
+            rotate[i][j] = _rotation(i, j);
+        }
+    }
+    translate.x = _translation[0];
+    translate.y = _translation[1];
+    translate.z = _translation[2];
+
+    // front
+    vertices.push_back(TriVertex(glm::vec3(-0.5, -0.5, 0.5), glm::vec3(0.0, 0.0, 1.0)));
+    vertices.push_back(TriVertex(glm::vec3(0.5, -0.5, 0.5), glm::vec3(0.0, 0.0, 1.0)));
+    vertices.push_back(TriVertex(glm::vec3(-0.5, 0.5, 0.5), glm::vec3(0.0, 0.0, 1.0)));
+    vertices.push_back(TriVertex(glm::vec3(0.5, -0.5, 0.5), glm::vec3(0.0, 0.0, 1.0)));
+    vertices.push_back(TriVertex(glm::vec3(0.5, 0.5, 0.5), glm::vec3(0.0, 0.0, 1.0)));
+    vertices.push_back(TriVertex(glm::vec3(-0.5, 0.5, 0.5), glm::vec3(0.0, 0.0, 1.0)));
+
+    // top
+    vertices.push_back(TriVertex(glm::vec3(-0.5, 0.5, 0.5), glm::vec3(0.0, 1.0, 0.0)));
+    vertices.push_back(TriVertex(glm::vec3(0.5, 0.5, 0.5), glm::vec3(0.0, 1.0, 0.0)));
+    vertices.push_back(TriVertex(glm::vec3(-0.5, 0.5, -0.5), glm::vec3(0.0, 1.0, 0.0)));
+    vertices.push_back(TriVertex(glm::vec3(0.5, 0.5, 0.5), glm::vec3(0.0, 1.0, 0.0)));
+    vertices.push_back(TriVertex(glm::vec3(0.5, 0.5, -0.5), glm::vec3(0.0, 1.0, 0.0)));
+    vertices.push_back(TriVertex(glm::vec3(-0.5, 0.5, -0.5), glm::vec3(0.0, 1.0, 0.0)));
+
+    // back
+    vertices.push_back(TriVertex(glm::vec3(-0.5, 0.5, -0.5), glm::vec3(0.0, 0.0, -1.0)));
+    vertices.push_back(TriVertex(glm::vec3(0.5, 0.5, -0.5), glm::vec3(0.0, 0.0, -1.0)));
+    vertices.push_back(TriVertex(glm::vec3(-0.5, -0.5, -0.5), glm::vec3(0.0, 0.0, -1.0)));
+    vertices.push_back(TriVertex(glm::vec3(0.5, 0.5, -0.5), glm::vec3(0.0, 0.0, -1.0)));
+    vertices.push_back(TriVertex(glm::vec3(0.5, -0.5, -0.5), glm::vec3(0.0, 0.0, -1.0)));
+    vertices.push_back(TriVertex(glm::vec3(-0.5, -0.5, -0.5), glm::vec3(0.0, 0.0, -1.0)));
+
+    // bottom
+    vertices.push_back(TriVertex(glm::vec3(-0.5, -0.5, -0.5), glm::vec3(0.0, -1.0, 0.0)));
+    vertices.push_back(TriVertex(glm::vec3(0.5, -0.5, -0.5), glm::vec3(0.0, -1.0, 0.0)));
+    vertices.push_back(TriVertex(glm::vec3(-0.5, -0.5, 0.5), glm::vec3(0.0, -1.0, 0.0)));
+    vertices.push_back(TriVertex(glm::vec3(0.5, -0.5, -0.5), glm::vec3(0.0, -1.0, 0.0)));
+    vertices.push_back(TriVertex(glm::vec3(0.5, -0.5, 0.5), glm::vec3(0.0, -1.0, 0.0)));
+    vertices.push_back(TriVertex(glm::vec3(-0.5, -0.5, 0.5), glm::vec3(0.0, -1.0, 0.0)));
+
+    // left
+    vertices.push_back(TriVertex(glm::vec3(-0.5, -0.5, -0.5), glm::vec3(-1.0, 0.0, 0.0)));
+    vertices.push_back(TriVertex(glm::vec3(-0.5, -0.5, 0.5), glm::vec3(-1.0, 0.0, 0.0)));
+    vertices.push_back(TriVertex(glm::vec3(-0.5, 0.5, -0.5), glm::vec3(-1.0, 0.0, 0.0)));
+    vertices.push_back(TriVertex(glm::vec3(-0.5, -0.5, 0.5), glm::vec3(-1.0, 0.0, 0.0)));
+    vertices.push_back(TriVertex(glm::vec3(-0.5, 0.5, 0.5), glm::vec3(-1.0, 0.0, 0.0)));
+    vertices.push_back(TriVertex(glm::vec3(-0.5, 0.5, -0.5), glm::vec3(-1.0, 0.0, 0.0)));
+
+    // right 
+    vertices.push_back(TriVertex(glm::vec3(0.5, -0.5, 0.5), glm::vec3(1.0, 0.0, 0.0)));
+    vertices.push_back(TriVertex(glm::vec3(0.5, -0.5, -0.5), glm::vec3(1.0, 0.0, 0.0)));
+    vertices.push_back(TriVertex(glm::vec3(0.5, 0.5, 0.5), glm::vec3(1.0, 0.0, 0.0)));
+    vertices.push_back(TriVertex(glm::vec3(0.5, -0.5, -0.5), glm::vec3(1.0, 0.0, 0.0)));
+    vertices.push_back(TriVertex(glm::vec3(0.5, 0.5, -0.5), glm::vec3(1.0, 0.0, 0.0)));
+    vertices.push_back(TriVertex(glm::vec3(0.5, 0.5, 0.5), glm::vec3(1.0, 0.0, 0.0)));
+
+    for (int i = 0; i < vertices.size(); i++) {
+        vertices[i].position = rotate * scale * vertices[i].position + translate;
+        vertices[i].normal = rotate * scale * vertices[i].normal + translate;
+    }
+}
+
 }

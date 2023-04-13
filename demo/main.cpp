@@ -11,6 +11,7 @@
 #include <Logger.h>
 #include <Timer.h>
 #include <FileIO.h>
+#include <Cube.h>
 
 int main()
 {
@@ -31,9 +32,19 @@ int main()
     Material material(ambi, diff, spec, 0.3);
 
     if (Ryao::readObjFileNoNormal("../../../../resources/obj/armadillo.obj", vertices, indices)) {
-        Ryao::ViewerTetMesh* trim = new Ryao::ViewerTetMesh(vertices, indices, material);
-        viewer.addViewerTetMesh(trim);
+        Ryao::ViewerTetMesh* tetm = new Ryao::ViewerTetMesh(vertices, indices, material);
+        viewer.addViewerTetMesh(tetm);
     }
+
+    std::vector<TriVertex> cubeV;
+    std::vector<unsigned int> cubeI;
+
+    Ryao::Cube cube(VECTOR3(1.0, 0.0, 0.0), 0.5);
+
+    cube.generateViewerMesh(cubeV, cubeI);
+
+    Ryao::ViewerTriMesh* trim = new Ryao::ViewerTriMesh(cubeV, cubeI, material, DRAWARRAY);
+    viewer.addViewerTriMesh(trim);
 
     viewer.launch();
     //std::vector<VECTOR3> vertices;

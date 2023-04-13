@@ -30,7 +30,6 @@ public:
     void setVec3(const std::string& name, const glm::vec3& value) const;
     void setVec3(const std::string& name, VECTOR3& value) const;
     void setVec3(const std::string& name, float x, float y, float z) const;
-    void setVec3(const std::string& name, double x, double y, double z) const;
     void setVec4(const std::string& name, const glm::vec4& value) const;
     void setVec4(const std::string& name, float x, float y, float z, float w) const;
     void setMat2(const std::string& name, const glm::mat2& mat) const;

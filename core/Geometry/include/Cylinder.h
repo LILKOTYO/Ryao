@@ -14,7 +14,7 @@ namespace Ryao {
     class Cylinder : public KINEMATIC_SHAPE {
 
     public:
-        Cylinder(const VECTOR3& center, const REAL& radius, const REAL& height);
+        Cylinder(const VECTOR3& center, const REAL& radius, const REAL& height, int& segment);
         ~Cylinder();
 
         const REAL radius() const { return _radius; };
@@ -40,10 +40,11 @@ namespace Ryao {
             VECTOR3& closestPointLocal,
             VECTOR3& normalLocal) const override;
 
+        virtual void generateViewerMesh(std::vector<TriVertex>& vertices, std::vector<unsigned int> indices) override;
     protected:
         REAL _radius;
         REAL _height;
-
+        int _segment;
     };
 
 }

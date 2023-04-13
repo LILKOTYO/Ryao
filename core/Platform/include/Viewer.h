@@ -25,9 +25,9 @@ public:
 			 VECTOR3(1.0, 1.0, 1.0),
 			 VECTOR3(0.3, 0.3, 0.3))),
 		 _lightPoint(LightPoint(VECTOR3(-1.2, 1.2, 0.0),
-			 VECTOR3(0.5, 0.6, 0.2),
-			 VECTOR3(0.5, 0.6, 0.2),
-			 VECTOR3(0.3, 0.3, 0.3),
+			 VECTOR3(1.0, 1.0, 1.0),
+			 VECTOR3(1.0, 1.0, 1.0),
+			 VECTOR3(1.0, 1.0, 1.0),
 			 1.0f, 0.09f, 0.032f)){
 		_window = nullptr;
 		_referencePlane = nullptr;
@@ -78,6 +78,7 @@ public:
 	bool getisDrag();
 
 	void addViewerTetMesh(ViewerTetMesh* vTetMesh)	{ _viewerTetMeshList.push_back(vTetMesh); }
+	void addViewerTriMesh(ViewerTriMesh* vTriMesh)	{ _viewerTriMeshList.push_back(vTriMesh); }
 	void addShader(Shader* shader)			{ _shaderList.push_back(shader); }
 	void addArrow(Arrow* arrow)				{ _arrowList.push_back(arrow); }
 
