@@ -26,10 +26,14 @@ namespace Ryao {
 using namespace std;
 
 TET_Mesh::TET_Mesh(const vector<VECTOR3>& restVertices,
-    const vector<VECTOR4I>& tets) :
+    const vector<VECTOR3I>& faces,
+    const vector<VECTOR4I>& tets,
+    const vector<VECTOR2I>& edges) :
     _vertices(restVertices),
     _restVertices(restVertices),
-    _tets(tets) {
+    _surfaceTriangles(faces), 
+    _tets(tets),
+    _surfaceEdges(edges) {
     _restTetVolumes = computeTetVolumes(_restVertices);
     _restOneRingVolumes = computeOneRingVolumes(_restVertices);
     _DmInvs = computeDmInvs();
@@ -42,9 +46,9 @@ TET_Mesh::TET_Mesh(const vector<VECTOR3>& restVertices,
     _Vs.resize(totalTets);
     _Fdots.resize(totalTets);
 
-    computeSurfaceTriangles();
+    //computeSurfaceTriangles();
     computeSurfaceVertices();
-    computeSurfaceEdges();
+    //computeSurfaceEdges();
     computeSurfaceAreas();
     computeSurfaceTriangleNeighbors();
     computeSurfaceEdgeTriangleNeighbors();
@@ -230,56 +234,56 @@ struct triangleCompare {
     }
 };
 
-void TET_Mesh::computeSurfaceTriangles() {
-    map<VECTOR3I, int, triangleCompare> faceCounts;
-
-    // for each tet, add its faces to the face count
-    for (size_t x = 0; x < _tets.size(); x++) {
-        VECTOR4I t = _tets[x];
-
-        VECTOR3I faces[4];
-        faces[0] << t[0], t[1], t[3];
-        faces[1] << t[0], t[2], t[1];
-        faces[2] << t[0], t[3], t[2];
-        faces[3] << t[1], t[2], t[3];
-
-        for (int y = 0; y < 4; y++)
-            std::sort(faces[y].data(), faces[y].data() + faces[y].size());
-
-        for (int y = 0; y < 4; y++)
-            faceCounts[faces[y]]++;
-    }
-
-    // go back through the tets, if any of its faces have a count less than 2, 
-    // then it must be because it faces outside
-    _surfaceTriangles.clear();
-    for (size_t x = 0; x < _tets.size(); x++) {
-        VECTOR4I t = _tets[x];
-
-        VECTOR3I faces[4];
-
-        // these are consistently  ordered counter-clockwise
-        faces[0] << t[0], t[1], t[3];
-        faces[1] << t[0], t[2], t[1];
-        faces[2] << t[0], t[3], t[2];
-        faces[3] << t[1], t[2], t[3];
-
-        VECTOR3I facesSorted[4];
-
-        // make a sorted copy, but keep the original around for rendering
-        for (int y = 0; y < 4; y++) {
-            facesSorted[y] = faces[y];
-            std::sort(facesSorted[y].data(), facesSorted[y].data() + facesSorted[y].size());
-        }
-
-        // see which faces don't have a dual 
-        for (int y = 0; y < 4; y++) {
-            if (faceCounts[facesSorted[y]] < 2)
-                _surfaceTriangles.push_back(faces[y]);
-        }
-    }
-    RYAO_INFO("Found {} surface triangles out of {} possible.", _surfaceTriangles.size(), _tets.size() * 4);
-}
+//void TET_Mesh::computeSurfaceTriangles() {
+//    map<VECTOR3I, int, triangleCompare> faceCounts;
+//
+//    // for each tet, add its faces to the face count
+//    for (size_t x = 0; x < _tets.size(); x++) {
+//        VECTOR4I t = _tets[x];
+//
+//        VECTOR3I faces[4];
+//        faces[0] << t[0], t[1], t[3];
+//        faces[1] << t[0], t[2], t[1];
+//        faces[2] << t[0], t[3], t[2];
+//        faces[3] << t[1], t[2], t[3];
+//
+//        for (int y = 0; y < 4; y++)
+//            std::sort(faces[y].data(), faces[y].data() + faces[y].size());
+//
+//        for (int y = 0; y < 4; y++)
+//            faceCounts[faces[y]]++;
+//    }
+//
+//    // go back through the tets, if any of its faces have a count less than 2, 
+//    // then it must be because it faces outside
+//    _surfaceTriangles.clear();
+//    for (size_t x = 0; x < _tets.size(); x++) {
+//        VECTOR4I t = _tets[x];
+//
+//        VECTOR3I faces[4];
+//
+//        // these are consistently  ordered counter-clockwise
+//        faces[0] << t[0], t[1], t[3];
+//        faces[1] << t[0], t[2], t[1];
+//        faces[2] << t[0], t[3], t[2];
+//        faces[3] << t[1], t[2], t[3];
+//
+//        VECTOR3I facesSorted[4];
+//
+//        // make a sorted copy, but keep the original around for rendering
+//        for (int y = 0; y < 4; y++) {
+//            facesSorted[y] = faces[y];
+//            std::sort(facesSorted[y].data(), facesSorted[y].data() + facesSorted[y].size());
+//        }
+//
+//        // see which faces don't have a dual 
+//        for (int y = 0; y < 4; y++) {
+//            if (faceCounts[facesSorted[y]] < 2)
+//                _surfaceTriangles.push_back(faces[y]);
+//        }
+//    }
+//    RYAO_INFO("Found {} surface triangles out of {} possible.", _surfaceTriangles.size(), _tets.size() * 4);
+//}
 
 void TET_Mesh::computeSurfaceEdgeTriangleNeighbors() {
     // translate the VEC2I into a index
@@ -460,7 +464,7 @@ void TET_Mesh::computeSurfaceAreas() {
 
 void TET_Mesh::computeSurfaceVertices() {
     if (_surfaceTriangles.size() == 0)
-        computeSurfaceTriangles();
+        RYAO_ERROR("Did not generate surface triangles!");
 
     // hash them all out
     map<int, bool> foundVertices;
@@ -481,43 +485,43 @@ void TET_Mesh::computeSurfaceVertices() {
     RYAO_INFO("Found {} vertices on the surface", _surfaceVertices.size());
 }
 
-void TET_Mesh::computeSurfaceEdges() {
-    if (_surfaceTriangles.size() == 0)
-        computeSurfaceTriangles();
-
-    // hash all the edges, so we don't store any repeats
-    map<pair<int, int>, bool> edgeHash;
-    for (size_t x = 0; x < _surfaceTriangles.size(); x++) {
-        for (int y = 0; y < 3; y++) {
-            const int v0 = _surfaceTriangles[x][y];
-            const int v1 = _surfaceTriangles[x][(y + 1) % 3];
-
-            // store them in sorted order
-            pair<int, int> edge;
-            if (v0 > v1) {
-                edge.first = v1;
-                edge.second = v0;
-            }
-            else {
-                edge.first = v0;
-                edge.second = v1;
-            }
-
-            // hash it out
-            edgeHash[edge] = true;
-        }
-    }
-
-    // store all the unique hashes
-    _surfaceEdges.clear();
-    for (auto iter = edgeHash.begin(); iter != edgeHash.end(); iter++) {
-        const pair<int, int> e = iter->first;
-        const VECTOR2I edge(e.first, e.second);
-        _surfaceEdges.push_back(edge);
-    }
-
-    RYAO_INFO("Found {} edges on the surface", _surfaceEdges.size());
-}
+//void TET_Mesh::computeSurfaceEdges() {
+//    if (_surfaceTriangles.size() == 0)
+//        RYAO_ERROR("Did not generate surface triangles!");
+//
+//    // hash all the edges, so we don't store any repeats
+//    map<pair<int, int>, bool> edgeHash;
+//    for (size_t x = 0; x < _surfaceTriangles.size(); x++) {
+//        for (int y = 0; y < 3; y++) {
+//            const int v0 = _surfaceTriangles[x][y];
+//            const int v1 = _surfaceTriangles[x][(y + 1) % 3];
+//
+//            // store them in sorted order
+//            pair<int, int> edge;
+//            if (v0 > v1) {
+//                edge.first = v1;
+//                edge.second = v0;
+//            }
+//            else {
+//                edge.first = v0;
+//                edge.second = v1;
+//            }
+//
+//            // hash it out
+//            edgeHash[edge] = true;
+//        }
+//    }
+//
+//    // store all the unique hashes
+//    _surfaceEdges.clear();
+//    for (auto iter = edgeHash.begin(); iter != edgeHash.end(); iter++) {
+//        const pair<int, int> e = iter->first;
+//        const VECTOR2I edge(e.first, e.second);
+//        _surfaceEdges.push_back(edge);
+//    }
+//
+//    RYAO_INFO("Found {} edges on the surface", _surfaceEdges.size());
+//}
 
 void TET_Mesh::computeFs() {
     Timer functionTimer(__FUNCTION__);
@@ -950,7 +954,190 @@ bool TET_Mesh::writeSurfaceToObj(const string& filename, const TET_Mesh& tetMesh
 //
 //    return true;
 //}
-//
+
+bool TET_Mesh::readTetGenMesh(const std::string& filename,
+    std::vector<VECTOR3>& vertices,
+    std::vector<unsigned int>& faces,
+    std::vector<VECTOR4I>& tets,
+    std::vector<VECTOR2I>& edges) {
+    // erase whatever was in the vectors before
+    vertices.clear();
+    faces.clear();
+    tets.clear();
+    edges.clear();
+
+    // vertices first 
+    std::string vFile = filename + ".1.node";
+
+    RYAO_INFO("Load file {}", vFile.c_str());
+
+    // variables
+    size_t num_vertices;
+    std::string nodeLine, label;
+    std::stringstream sStream;
+    // try to open the file
+    std::ifstream finNode(vFile.c_str());
+    if (!finNode) {
+        RYAO_ERROR("'{}' file not found!", vFile.c_str());
+        return false;
+    }
+
+    // get num vertices
+    getline(finNode, nodeLine);
+    sStream << nodeLine;
+    sStream >> num_vertices;
+    sStream >> label; // 3
+    sStream >> label; // 0
+    sStream >> label; // 0
+    sStream.clear();
+
+    vertices.resize(num_vertices);
+
+    // read vertices
+    for (size_t i = 0; i < num_vertices; ++i) {
+        unsigned nodeInd;
+        REAL x, y, z;
+        getline(finNode, nodeLine);
+        sStream << nodeLine;
+        sStream >> nodeInd >> x >> y >> z;
+        getline(sStream, nodeLine);
+        sStream.clear();
+
+        vertices[i] = VECTOR3(x, y, z);
+    }
+
+    // close file
+    finNode.close();
+
+    RYAO_INFO("Number of vertices: {}", vertices.size());
+
+    // faces 
+    std::string fFile = filename + ".1.face";
+    RYAO_INFO("Load file {}", fFile.c_str());
+
+    size_t num_faces;
+    std::string faceLine;
+    // try to open the file
+    std::ifstream finFace(fFile.c_str());
+    if (!finFace) {
+        RYAO_ERROR("'{}' file not found!", fFile.c_str());
+        return false;
+    }
+
+    // get num vertices
+    getline(finFace, faceLine);
+    sStream << faceLine;
+    sStream >> num_faces;
+    sStream >> label; // 1
+    sStream.clear();
+
+    faces.resize(num_faces * 3);
+
+    // read vertices
+    for (size_t i = 0; i < num_faces; ++i) {
+        unsigned faceInd;
+        unsigned int v1, v2, v3;
+        int tail;
+        getline(finNode, faceLine);
+        sStream << faceLine;
+        sStream >> faceInd >> v1 >> v2 >> v3 >> tail;
+        getline(sStream, faceLine);
+        sStream.clear();
+
+        faces[3 * i + 0] = v1;
+        faces[3 * i + 1] = v2;
+        faces[3 * i + 2] = v3;
+    }
+
+    // close file
+    finFace.close();
+
+    RYAO_INFO("Number of faces: {}", faces.size() / 3);
+
+    // tets 
+    std::string tFile = filename + ".1.ele";
+    RYAO_INFO("Load file {}", tFile.c_str());
+
+    size_t num_tets;
+    std::string tetLine;
+    // try to open the file
+    std::ifstream finTet(tFile.c_str());
+    if (!finTet) {
+        RYAO_ERROR("'{}' file not found!", tFile.c_str());
+        return false;
+    }
+
+    // get num vertices
+    getline(finTet, tetLine);
+    sStream << tetLine;
+    sStream >> num_tets;
+    sStream >> label; // 1
+    sStream >> label; // 0
+    sStream.clear();
+
+    tets.resize(num_tets);
+
+    // read vertices
+    for (size_t i = 0; i < num_tets; ++i) {
+        unsigned tetInd;
+        int v1, v2, v3, v4;
+        getline(finTet, tetLine);
+        sStream << tetLine;
+        sStream >> tetInd >> v1 >> v2 >> v3 >> v4;
+        getline(sStream, tetLine);
+        sStream.clear();
+
+        tets[i] = VECTOR4I(v1, v2, v3, v4);
+    }
+
+    // close file
+    finTet.close();
+
+    RYAO_INFO("Number of Tets: {}", tets.size());
+
+    // edges 
+    std::string eFile = filename + ".1.edge";
+    RYAO_INFO("Load file {}", eFile.c_str());
+
+    size_t num_edges;
+    std::string edgeLine;
+    // try to open the file
+    std::ifstream finEdge(eFile.c_str());
+    if (!finEdge) {
+        RYAO_ERROR("'{}' file not found!", eFile.c_str());
+        return false;
+    }
+
+    // get num vertices
+    getline(finEdge, edgeLine);
+    sStream << edgeLine;
+    sStream >> num_edges;
+    sStream >> label; // 1
+    sStream.clear();
+
+    edges.resize(num_edges);
+
+    // read vertices
+    for (size_t i = 0; i < num_edges; ++i) {
+        unsigned edgeInd;
+        int v1, v2, tail;
+        getline(finEdge, edgeLine);
+        sStream << edgeLine;
+        sStream >> edgeInd >> v1 >> v2 >> tail;
+        getline(sStream, edgeLine);
+        sStream.clear();
+
+        edges[i] = VECTOR2I(v1, v2);
+    }
+
+    // close file
+    finEdge.close();
+
+    RYAO_INFO("Number of Tets: {}", edges.size());
+
+    return true;
+}
+
 //bool TET_Mesh::writeObjFile(const string& filename,
 //    const TET_Mesh& tetMesh,
 //    const bool restVertices) {
