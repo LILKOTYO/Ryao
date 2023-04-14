@@ -262,7 +262,7 @@ void AABB_Tree::findEdgeBoundingBox(const vector<int>& edgeIndices,
 }
 
 void AABB_Tree::refit() {
-    // one of these exists, right?
+    // one of these exists
     assert(_surfaceTriangles || _surfaceEdges);
 
     if (_surfaceTriangles != NULL)

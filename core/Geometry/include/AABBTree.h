@@ -49,13 +49,13 @@ public:
     // return a list of potential triangles nearby an edge, subject to a distance threshold
     void nearbyTriangles(const VECTOR2I& edge, const REAL& eps, std::vector<int>& faces) const;
 
-    // return a list of potential triangles nearby edges, subject to a distance threshold
-    void nearbyEdges(const VECTOR2I& edge, const REAL& eps, std::vector<int>& faces) const;
-
-    // return a list of potential nearby edges, subject to a distance threshold
+    // return a list of potential nearby triangles, subject to a distance threshold
     // here for debugging purposes, similar to the edge based one, but doesn't
     // need to reference points in _vertices
     void nearbyTriangles(const VECTOR3& mins, const VECTOR3& maxs, const REAL& eps, std::vector<int>& faces) const;
+
+    // return a list of potential triangles nearby edges, subject to a distance threshold
+    void nearbyEdges(const VECTOR2I& edge, const REAL& eps, std::vector<int>& faces) const;
 
     // get the root node
     const AABB_Node& root() const { return *_root; };
