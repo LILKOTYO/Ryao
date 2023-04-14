@@ -1,7 +1,7 @@
 #ifndef CYLINDER_H
 #define CYLINDER_H
 
-#include <KINEMATIC_SHAPE.h>
+#include "KINEMATIC_SHAPE.h"
 
 namespace Ryao {
 

@@ -1,7 +1,7 @@
 #ifndef AABB_TREE_H
 #define AABB_TREE_H
 
-#include <KINEMATIC_SHAPE.h>
+#include "KINEMATIC_SHAPE.h"
 
 namespace Ryao {
 

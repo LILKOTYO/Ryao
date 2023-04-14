@@ -16,7 +16,7 @@
 #ifndef LINE_INTERSECT_H
 #define LINE_INTERSECT_H
 
-#include <Platform/include/RYAO.h>
+#include "Platform/include/RYAO.h"
 
 void IntersectLineSegments(const VECTOR3& a0, const VECTOR3& a1,
     const VECTOR3& b0, const VECTOR3& b1,

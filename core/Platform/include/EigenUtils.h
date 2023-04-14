@@ -1,7 +1,7 @@
 #ifndef EIGENUTILS_H
 #define EIGENUTILS_H
 
-#include <RYAO.h>
+#include "RYAO.h"
 
 namespace Ryao {
 // clamp the eigenvalues of a 9x9 to semi-positive-definite

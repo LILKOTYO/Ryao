@@ -1,15 +1,15 @@
 #ifndef VIEWERTETMESH_H
 #define VIEWERTETMESH_H
 
+#include "RYAO.h"
+#include "Shader.h"
+#include "Logger.h"
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <Shader.h>
-#include <Logger.h>
 #include <string>
 #include <vector>
-#include <RYAO.h>
 
 namespace Ryao {
 

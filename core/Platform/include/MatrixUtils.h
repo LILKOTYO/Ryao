@@ -1,7 +1,7 @@
 #ifndef MATRIXUTIL_H
 #define MATRIXUTIL_H
 
-#include <RYAO.h>
+#include "RYAO.h"
 
 namespace Ryao {
 

@@ -1,7 +1,7 @@
 #ifndef RANDOMUTILS_H
 #define RANDOMUTILS_H
 
-#include <RYAO.h>
+#include "RYAO.h"
 #include <random>
 
 namespace Ryao {

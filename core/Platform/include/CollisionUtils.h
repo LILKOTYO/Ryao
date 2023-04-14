@@ -1,7 +1,7 @@
 #ifndef COLLISIONUTILS_H
 #define COLLISIONUTILS_H
 
-#include <RYAO.h>
+#include "RYAO.h"
 #include <vector>
 
 namespace Ryao {

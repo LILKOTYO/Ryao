@@ -1,7 +1,7 @@
 #ifndef CUBE_H
 #define CUBE_H
 
-#include <KINEMATIC_SHAPE.h>
+#include "KINEMATIC_SHAPE.h"
 
 namespace Ryao {
 

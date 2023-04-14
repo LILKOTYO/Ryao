@@ -1,7 +1,7 @@
 #ifndef SPHERE_H
 #define SPHERE_H
 
-#include <KINEMATIC_SHAPE.h>
+#include "KINEMATIC_SHAPE.h"
 
 namespace Ryao {
 // positions are defined using R * S * x + t,

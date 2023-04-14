@@ -8,7 +8,7 @@ add_library(${PROJECT_NAME} ${SRCFILES})
 add_library(Ryao::Platform ALIAS ${PROJECT_NAME})
 
 target_include_directories( ${PROJECT_NAME} 
-	PUBLIC ${PROJECT_SOURCE_DIR}/include
+	PUBLIC ${PROJECT_SOURCE_DIR}/include/
 )
 
 # add package
