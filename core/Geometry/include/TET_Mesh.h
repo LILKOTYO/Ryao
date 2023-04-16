@@ -19,8 +19,7 @@ namespace Ryao {
         TET_Mesh() = default;
         TET_Mesh(const vector<VECTOR3>& restVertices,
             const vector<VECTOR3I>& faces,
-            const vector<VECTOR4I>& tets,
-            const vector<VECTOR2I>& edges);
+            const vector<VECTOR4I>& tets);
         virtual ~TET_Mesh();
 
         /////////////////////////////////////////////////////////////////////////////////////////
@@ -217,7 +216,7 @@ namespace Ryao {
          */
         static bool readTetGenMesh(const std::string& filename,
             std::vector<VECTOR3>& vertices,
-            std::vector<unsigned int>& faces,
+            std::vector<VECTOR3I>& faces,
             std::vector<VECTOR4I>& tets,
             std::vector<VECTOR2I>& edges);
         /**
@@ -316,7 +315,7 @@ namespace Ryao {
         // find what's on the surface
         void computeSurfaceVertices();
         //void computeSurfaceTriangles();
-        //void computeSurfaceEdges();
+        void computeSurfaceEdges();
         void computeSurfaceAreas();
         void computeSurfaceTriangleNeighbors();
         void computeSurfaceEdgeTriangleNeighbors();

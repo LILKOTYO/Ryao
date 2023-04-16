@@ -27,13 +27,11 @@ using namespace std;
 
 TET_Mesh::TET_Mesh(const vector<VECTOR3>& restVertices,
     const vector<VECTOR3I>& faces,
-    const vector<VECTOR4I>& tets,
-    const vector<VECTOR2I>& edges) :
+    const vector<VECTOR4I>& tets) :
     _vertices(restVertices),
     _restVertices(restVertices),
     _surfaceTriangles(faces), 
-    _tets(tets),
-    _surfaceEdges(edges) {
+    _tets(tets) {
     _restTetVolumes = computeTetVolumes(_restVertices);
     _restOneRingVolumes = computeOneRingVolumes(_restVertices);
     _DmInvs = computeDmInvs();
@@ -48,7 +46,7 @@ TET_Mesh::TET_Mesh(const vector<VECTOR3>& restVertices,
 
     //computeSurfaceTriangles();
     computeSurfaceVertices();
-    //computeSurfaceEdges();
+    computeSurfaceEdges();
     computeSurfaceAreas();
     computeSurfaceTriangleNeighbors();
     computeSurfaceEdgeTriangleNeighbors();
@@ -86,7 +84,6 @@ TET_Mesh::TET_Mesh(const vector<VECTOR3>& restVertices,
     // verified on the bunny drop scene 
     //_vertexFaceEnergy = new VOLUME::MCADAMS_COLLISION(stiffness, _collisionEps);
     //_edgeEdgeEnergy = new VOLUME::EDGE_HYBRID_COLLISION(stiffness, _collisionEps);
-
 }
 
 TET_Mesh::~TET_Mesh() {
@@ -485,43 +482,43 @@ void TET_Mesh::computeSurfaceVertices() {
     RYAO_INFO("Found {} vertices on the surface", _surfaceVertices.size());
 }
 
-//void TET_Mesh::computeSurfaceEdges() {
-//    if (_surfaceTriangles.size() == 0)
-//        RYAO_ERROR("Did not generate surface triangles!");
-//
-//    // hash all the edges, so we don't store any repeats
-//    map<pair<int, int>, bool> edgeHash;
-//    for (size_t x = 0; x < _surfaceTriangles.size(); x++) {
-//        for (int y = 0; y < 3; y++) {
-//            const int v0 = _surfaceTriangles[x][y];
-//            const int v1 = _surfaceTriangles[x][(y + 1) % 3];
-//
-//            // store them in sorted order
-//            pair<int, int> edge;
-//            if (v0 > v1) {
-//                edge.first = v1;
-//                edge.second = v0;
-//            }
-//            else {
-//                edge.first = v0;
-//                edge.second = v1;
-//            }
-//
-//            // hash it out
-//            edgeHash[edge] = true;
-//        }
-//    }
-//
-//    // store all the unique hashes
-//    _surfaceEdges.clear();
-//    for (auto iter = edgeHash.begin(); iter != edgeHash.end(); iter++) {
-//        const pair<int, int> e = iter->first;
-//        const VECTOR2I edge(e.first, e.second);
-//        _surfaceEdges.push_back(edge);
-//    }
-//
-//    RYAO_INFO("Found {} edges on the surface", _surfaceEdges.size());
-//}
+void TET_Mesh::computeSurfaceEdges() {
+    if (_surfaceTriangles.size() == 0)
+        RYAO_ERROR("Did not generate surface triangles!");
+
+    // hash all the edges, so we don't store any repeats
+    map<pair<int, int>, bool> edgeHash;
+    for (size_t x = 0; x < _surfaceTriangles.size(); x++) {
+        for (int y = 0; y < 3; y++) {
+            const int v0 = _surfaceTriangles[x][y];
+            const int v1 = _surfaceTriangles[x][(y + 1) % 3];
+
+            // store them in sorted order
+            pair<int, int> edge;
+            if (v0 > v1) {
+                edge.first = v1;
+                edge.second = v0;
+            }
+            else {
+                edge.first = v0;
+                edge.second = v1;
+            }
+
+            // hash it out
+            edgeHash[edge] = true;
+        }
+    }
+
+    // store all the unique hashes
+    _surfaceEdges.clear();
+    for (auto iter = edgeHash.begin(); iter != edgeHash.end(); iter++) {
+        const pair<int, int> e = iter->first;
+        const VECTOR2I edge(e.first, e.second);
+        _surfaceEdges.push_back(edge);
+    }
+
+    RYAO_INFO("Found {} edges on the surface", _surfaceEdges.size());
+}
 
 void TET_Mesh::computeFs() {
     Timer functionTimer(__FUNCTION__);
@@ -957,7 +954,7 @@ bool TET_Mesh::writeSurfaceToObj(const string& filename, const TET_Mesh& tetMesh
 
 bool TET_Mesh::readTetGenMesh(const std::string& filename,
     std::vector<VECTOR3>& vertices,
-    std::vector<unsigned int>& faces,
+    std::vector<VECTOR3I>& faces,
     std::vector<VECTOR4I>& tets,
     std::vector<VECTOR2I>& edges) {
     // erase whatever was in the vectors before
@@ -1031,28 +1028,26 @@ bool TET_Mesh::readTetGenMesh(const std::string& filename,
     sStream >> label; // 1
     sStream.clear();
 
-    faces.resize(num_faces * 3);
+    faces.resize(num_faces);
 
     // read vertices
     for (size_t i = 0; i < num_faces; ++i) {
         unsigned faceInd;
         unsigned int v1, v2, v3;
         int tail;
-        getline(finNode, faceLine);
+        getline(finFace, faceLine);
         sStream << faceLine;
         sStream >> faceInd >> v1 >> v2 >> v3 >> tail;
         getline(sStream, faceLine);
         sStream.clear();
 
-        faces[3 * i + 0] = v1;
-        faces[3 * i + 1] = v2;
-        faces[3 * i + 2] = v3;
+        faces[i] = VECTOR3I(v1, v2, v3);
     }
 
     // close file
     finFace.close();
 
-    RYAO_INFO("Number of faces: {}", faces.size() / 3);
+    RYAO_INFO("Number of faces: {}", faces.size());
 
     // tets 
     std::string tFile = filename + ".1.ele";
@@ -1184,7 +1179,7 @@ vector<VECTOR3> TET_Mesh::normalizeVertices(const vector<VECTOR3>& vertices) {
         normalized[x] -= mins;
         normalized[x] *= maxLengthInv;
 
-        normalized[x] += VECTOR3(0.5, 0.5, 0.5);
+        normalized[x] -= VECTOR3(0.5, 0.5, 0.5);
     }
 
     return normalized;
