@@ -32,10 +32,11 @@ TET_Mesh::TET_Mesh(const vector<VECTOR3>& restVertices,
     _restVertices(restVertices),
     _surfaceTriangles(faces), 
     _tets(tets) {
-    _restTetVolumes = computeTetVolumes(_restVertices);
-    _restOneRingVolumes = computeOneRingVolumes(_restVertices);
-    _DmInvs = computeDmInvs();
-    _pFpxs = computePFpxs();
+    Timer functionTimer(__FUNCTION__);
+    computeTetVolumes(_restVertices, _restTetVolumes);
+    computeOneRingVolumes(_restVertices, _restTetVolumes, _restOneRingVolumes);
+    computeDmInvs(_DmInvs);
+    computePFpxs(_pFpxs);
 
     const int totalTets = _tets.size();
     _Fs.resize(totalTets);
@@ -91,8 +92,10 @@ TET_Mesh::~TET_Mesh() {
     //delete _edgeEdgeEnergy;
 }
 
-vector<REAL> TET_Mesh::computeTetVolumes(const vector<VECTOR3>& vertices) {
-    vector<REAL> tetVolumes(_tets.size());
+void TET_Mesh::computeTetVolumes(const vector<VECTOR3>& vertices, vector<REAL>& tetVolumes) {
+    Timer functionTimer(__FUNCTION__);
+    tetVolumes.clear();
+    tetVolumes.resize(_tets.size());
     for (size_t i = 0; i < _tets.size(); i++) {
         const VECTOR4I& tet = _tets[i];
         vector<VECTOR3> tetVertices;
@@ -105,7 +108,6 @@ vector<REAL> TET_Mesh::computeTetVolumes(const vector<VECTOR3>& vertices) {
         }
         assert(tetVolumes[i] >= 0.0);
     }
-    return tetVolumes;
 }
 
 REAL TET_Mesh::computeTetVolume(const vector<VECTOR3>& tetVertices) {
@@ -115,11 +117,14 @@ REAL TET_Mesh::computeTetVolume(const vector<VECTOR3>& tetVertices) {
     return diff3.dot((diff1).cross(diff2)) / 6.0;
 }
 
-vector<REAL> TET_Mesh::computeOneRingVolumes(const vector<VECTOR3>& vertices) {
-    const vector<REAL> tetVolumes = computeTetVolumes(vertices);
+void TET_Mesh::computeOneRingVolumes(const vector<VECTOR3>& vertices, 
+    const vector<REAL>& tetVolumes, vector<REAL>& oneRingVolumes) {
     unsigned int size = vertices.size();
 
-    vector<REAL> oneRingVolumes(size);
+    oneRingVolumes.clear();
+    oneRingVolumes.resize(size);
+    
+    // Just to be on the safe side, the elements in oneRingVolumes should have been initialized to 0.
     for (unsigned int x = 0; x < size; x++)
         oneRingVolumes[x] = 0.0;
 
@@ -128,12 +133,12 @@ vector<REAL> TET_Mesh::computeOneRingVolumes(const vector<VECTOR3>& vertices) {
         for (int y = 0; y < 4; y++)
             oneRingVolumes[_tets[x][y]] += quarter;
     }
-
-    return oneRingVolumes;
 }
 
-vector<MATRIX3> TET_Mesh::computeDmInvs() {
-    vector<MATRIX3> DmInvs(_tets.size());
+void TET_Mesh::computeDmInvs(vector<MATRIX3>& DmInvs) {
+    DmInvs.clear();
+    DmInvs.resize(_tets.size());
+
     for (size_t i = 0; i < _tets.size(); i++) {
         const VECTOR4I& tet = _tets[i];
         MATRIX3 Dm;
@@ -142,11 +147,11 @@ vector<MATRIX3> TET_Mesh::computeDmInvs() {
         Dm.col(2) = _vertices[tet[3]] - _vertices[tet[0]];
         DmInvs[i] = Dm.inverse();
     }
-    return DmInvs;
 }
 
 /**
     * @brief compute change-of-basis from deformation gradient F to positions x for a single DmInv
+    * check the Appendix E of Dynamic deformables 
     *
     * @param DmInv
     * @return MATRIX9x12
@@ -207,29 +212,29 @@ static MATRIX9x12 computePFpx(const MATRIX3& DmInv) {
     return PFPu;
 }
 
-vector<MATRIX9x12> TET_Mesh::computePFpxs() {
-    vector<MATRIX9x12> pFpxs(_tets.size());
+void TET_Mesh::computePFpxs(vector<MATRIX9x12>& pFpxs) {
+    pFpxs.clear();
+    pFpxs.resize(_tets.size());
     for (size_t i = 0; i < _tets.size(); i++)
         pFpxs[i] = computePFpx(_DmInvs[i]);
-    return pFpxs;
 }
 
 // used by computeSurfaceTriangles as a comparator between two triangles
 // to order the map
-struct triangleCompare {
-    bool operator()(const VECTOR3I& a, const VECTOR3I& b) const {
-        if (a[0] < b[0])    return true;
-        if (a[0] > b[0])    return false;
-
-        if (a[1] < b[1])    return true;
-        if (a[1] > b[1])    return false;
-
-        if (a[2] < b[2])    return true;
-        if (a[2] > b[2])    return false;
-
-        return false;
-    }
-};
+//struct triangleCompare {
+//    bool operator()(const VECTOR3I& a, const VECTOR3I& b) const {
+//        if (a[0] < b[0])    return true;
+//        if (a[0] > b[0])    return false;
+//
+//        if (a[1] < b[1])    return true;
+//        if (a[1] > b[1])    return false;
+//
+//        if (a[2] < b[2])    return true;
+//        if (a[2] > b[2])    return false;
+//
+//        return false;
+//    }
+//};
 
 //void TET_Mesh::computeSurfaceTriangles() {
 //    map<VECTOR3I, int, triangleCompare> faceCounts;
@@ -526,7 +531,7 @@ void TET_Mesh::computeFs() {
 
 #pragma omp parallel
 #pragma omp for schedule(static)
-    for (size_t x = 0; x < _tets.size(); x++)
+    for (int x = 0; x < _tets.size(); x++)
         _Fs[x] = computeF(x);
 
     _svdsComputed = false;
@@ -538,7 +543,7 @@ void TET_Mesh::computeFdots(const VECTOR& velocity) {
 
 #pragma omp parallel
 #pragma omp for schedule(static)
-    for (size_t x = 0; x < _tets.size(); x++) {
+    for (int x = 0; x < _tets.size(); x++) {
         const VECTOR4I& tet = _tets[x];
         VECTOR3 v[4];
         for (int y = 0; y < 4; y++) {
@@ -563,7 +568,7 @@ void TET_Mesh::computeSVDs() {
 
 #pragma omp parallel
 #pragma omp for schedule(static)
-    for (size_t x = 0; x < _tets.size(); x++)
+    for (int x = 0; x < _tets.size(); x++)
         svd_rv(_Fs[x], _Us[x], _Sigmas[x], _Vs[x]);
 
     _svdsComputed = true;
@@ -1853,7 +1858,6 @@ VECTOR3 TET_Mesh::pointPlaneProjection(const vector<VECTOR3>& plane, const VECTO
 void TET_Mesh::computeSurfaceVertexOneRings() {
     _insideSurfaceVertexOneRing.clear();
     for (unsigned int x = 0; x < _surfaceEdges.size(); x++) {
-        // gonna be lazy for a moment here
         const VECTOR2I edge = _surfaceEdges[x];
         _insideSurfaceVertexOneRing[pair<int, int>(edge[0], edge[1])] = true;
         _insideSurfaceVertexOneRing[pair<int, int>(edge[1], edge[0])] = true;

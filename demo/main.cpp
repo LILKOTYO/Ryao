@@ -89,6 +89,9 @@ int main()
     viewer.addViewerTriMesh(trim3);
 
     viewer.launch();
+
+    Ryao::Timer::printTimings();
+
     //std::vector<VECTOR3> vertices;
     //std::vector<unsigned int> faces;
     //std::vector<VECTOR4I> tets;

@@ -283,34 +283,36 @@ namespace Ryao {
         static REAL computeTetVolume(const vector<VECTOR3>& tetVertices);
 
         /**
-         * @brief compute volumes for tets -- works for rest and deformed, just pass it _restVertices or _vertices
-         *
+         * @berif compute volumes for tets -- works for rest and deformed, just pass it 
+         * _restVertices or _vertices, _restTetVolumes.
+         * 
          * @param vertices
-         * @return vector<REAL>
+         * @param tetVoumes
          */
-        vector<REAL> computeTetVolumes(const vector<VECTOR3>& vertices);
+        void computeTetVolumes(const vector<VECTOR3>& vertices, vector<REAL>& tetVolumes);
 
         /**
-         * @brief compute volumes for each vertex one-ring -- works for rest and deformed, just pass it _restVertices or _vertices
-         *
+         * @brief compute volumes in a one ring for a vertex -- works for rest and deformed.
+         * 
          * @param vertices
-         * @return vector<REAL>
+         * @param tetVolumes
+         * @param oneRingVolumes
          */
-        vector<REAL> computeOneRingVolumes(const vector<VECTOR3>& vertices);
+        void computeOneRingVolumes(const vector<VECTOR3>& vertices, const vector<REAL>& tetVolumes, vector<REAL>& oneRingVolumes);
 
         /**
          * @brief compute material inverses for deformation gradient
          *
-         * @return vector<MATRIX3>
+         * @param DmInvs
          */
-        vector<MATRIX3> computeDmInvs();
+        void computeDmInvs(vector<MATRIX3>& DmInvs);
 
         /**
          * @brief compute the change-of-basis from deformation gradient F to positions, x
          *
          * @return vector<MATRIX9x12>
          */
-        vector<MATRIX9x12> computePFpxs();
+        void computePFpxs(vector<MATRIX9x12>& pFpxs);
 
         // find what's on the surface
         void computeSurfaceVertices();
