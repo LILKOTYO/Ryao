@@ -2,7 +2,9 @@
 
 namespace Ryao {
 namespace VOLUME {
-    /**
+HYPERELASTIC::~HYPERELASTIC() {}
+
+/**
  * @brief If nothing is provided, then just recombine everything into F and call that version of Psi.
  *          Tips: At least one of these two psi() functions must be overrided in the child class.
  *

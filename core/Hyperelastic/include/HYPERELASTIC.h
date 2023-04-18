@@ -9,7 +9,7 @@ namespace VOLUME {
 
 class HYPERELASTIC {
 public:
-    virtual ~HYPERELASTIC() = 0;
+    virtual ~HYPERELASTIC();
 
     // Computes the strain energy density Psi
     virtual REAL psi(const MATRIX3& F) const;

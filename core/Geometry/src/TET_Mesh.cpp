@@ -9,7 +9,7 @@
 #include "Platform/include/Logger.h"
 #include <float.h>
 // DEBUG: only here specifically to debug collisions
-//#include <ARAP.h>
+#include "Hyperelastic/include/ARAP.h"
 //#include <Vertex_Face_Collision.h>
 //#include <Vertex_Face_Sqrt_Collision.h>
 //#include <Mcadams_Collision.h>
