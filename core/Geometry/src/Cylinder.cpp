@@ -11,7 +11,7 @@ Cylinder::Cylinder(const VECTOR3& center, const REAL& radius, const REAL& height
     _rotation = MATRIX3::Identity();
     _translation = center;
     _scaleInverse = _scale.inverse();
-
+    _renderType = RenderType::DRAWELEMENT;
     _name = string("CYLINDER");
 }
 

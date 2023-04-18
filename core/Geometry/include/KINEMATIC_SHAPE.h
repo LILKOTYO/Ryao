@@ -64,13 +64,15 @@ public:
         VECTOR3& normalLocal) const = 0;
 
     virtual void generateViewerMesh(std::vector<TriVertex>& vertices, std::vector<unsigned int>& indices) = 0;
+
+    RenderType getRenderType() const { return _renderType; };
 protected:
     //VECTOR3 _center;
     MATRIX3 _scale;
     MATRIX3 _scaleInverse;
     MATRIX3 _rotation;
     VECTOR3 _translation;
-
+    RenderType _renderType;
     std::string _name;
 
 };

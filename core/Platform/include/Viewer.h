@@ -91,6 +91,8 @@ public:
     void addViewerSphere(const VECTOR3& center, const REAL& scale, Material& material);
 
 	void init();
+    void registerShapeToViewer();
+    void registerTETMeshToViewer();
 	void launch();
 private:
 	// data 

@@ -30,7 +30,7 @@ public:
         _shaderFill(Shader("shaders/ViewerTriMeshFill.vert", "shaders/ViewerTriMeshFill.frag")),
         _shaderLine(Shader("shaders/ViewerMeshLine.vert", "shaders/ViewerMeshLine.frag")) {
         // now that we have all the required data, set the vertex buffers and its attribute pointers.
-        RYAO_INFO("Load Viewer Mesh ...");
+        RYAO_INFO("Load Viewer Tri Mesh ...");
         if (_renderType == DRAWARRAY)
             SetupViewerMeshArray();
         if (_renderType == DRAWELEMENT)

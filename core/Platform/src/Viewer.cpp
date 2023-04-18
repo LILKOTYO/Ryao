@@ -120,6 +120,8 @@ void Viewer::launch() {
         // input
         // -----
         // frame frequency
+        _simulation->stepSimulation();
+
         float currentFrame = glfwGetTime();
         _deltaTime = currentFrame - _lastTime;
         _lastTime = currentFrame;
@@ -140,10 +142,10 @@ void Viewer::launch() {
                 _viewerTriMeshList[i]->Draw(_camera, _lightDir, _lightPoint, _SCR_WIDTH, _SCR_HEIGHT);
         }
 
-        //if (_viewerTetMeshList.size() > 0) {
-        //    for (int i = 0; i < _viewerTetMeshList.size(); i++)
-        //        _viewerTetMeshList[i]->Draw(_camera, _viewerTetMeshList[i]->, _SCR_WIDTH, _SCR_HEIGHT);
-        //}
+        if (_viewerTetMeshList.size() > 0) {
+            for (int i = 0; i < _viewerTetMeshList.size(); i++)
+                _viewerTetMeshList[i]->Draw(_camera, _simulation->getTetMeshVertices(), _SCR_WIDTH, _SCR_HEIGHT);
+        }
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
@@ -195,6 +197,46 @@ void Viewer::addViewerSphere(const VECTOR3 &center, const REAL &scale, Material 
     _simulation->addSphere(center, scale, sphereV, sphereI);
     ViewerTriMesh* sphere = new ViewerTriMesh(sphereV, sphereI, material, DRAWELEMENT);
     addViewerTriMesh(sphere);
+}
+
+void Viewer::registerShapeToViewer() {
+    if (_simulation == nullptr) {
+        RYAO_ERROR("Set the viewer's simulation first!");
+        return;
+    }
+    std::vector<KINEMATIC_SHAPE*> shapeList = _simulation->getShapeList();
+    if (shapeList.size() == 0) {
+        RYAO_ERROR("No shape in the simulation!");
+        return;
+    }
+    VECTOR3 ambi(0.2, 0.3, 0.3);
+    VECTOR3 diff(0.2, 0.3, 0.3);
+    VECTOR3 spec(0.2, 0.3, 0.3);
+    Material material(ambi, diff, spec, 0.3);
+    for (int i = 0; i < shapeList.size(); i++) {
+        vector<TriVertex> V;
+        vector<unsigned int> I;
+        shapeList[i]->generateViewerMesh(V, I);
+        ViewerTriMesh* shape = new ViewerTriMesh(V, I, material, shapeList[i]->getRenderType());
+        addViewerTriMesh(shape);
+    }
+}
+
+void Viewer::registerTETMeshToViewer() {
+    if (_simulation == nullptr) {
+        RYAO_ERROR("Set the viewer's simulation first!");
+        return;
+    }
+    VECTOR3 ambi(0.2, 0.3, 0.3);
+    VECTOR3 diff(0.2, 0.3, 0.3);
+    VECTOR3 spec(0.2, 0.3, 0.3);
+    Material material(ambi, diff, spec, 0.3);
+    vector<TetVertex> V;
+    vector<unsigned int> I;
+    _simulation->getTETMeshRenderData(V, I);
+
+    ViewerTetMesh* tetmesh = new ViewerTetMesh(V, I, material);
+    addViewerTetMesh(tetmesh);
 }
 
 }

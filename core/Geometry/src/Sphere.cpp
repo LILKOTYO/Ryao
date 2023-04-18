@@ -16,7 +16,7 @@ Sphere::Sphere(const VECTOR3& center, const REAL& scale) {
     _scaleInverse = _scale.inverse();
     _slices = 50;
     _stacks = 50;
-
+    _renderType = RenderType::DRAWELEMENT;
     _name = string("SPHERE");
 }
 

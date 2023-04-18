@@ -16,7 +16,7 @@ Cube::Cube(const VECTOR3& center, const REAL& scale) {
     _rotation = MATRIX3::Identity();
     _translation = center;
     _scaleInverse = _scale.inverse();
-
+    _renderType = RenderType::DRAWARRAY;
     _name = string("CUBE");
 }
 

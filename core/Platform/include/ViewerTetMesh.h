@@ -31,7 +31,7 @@ namespace Ryao {
             _shaderFill(Shader("shaders/ViewerTetMeshFill.vert", "shaders/ViewerTetMeshFill.frag")),
             _shaderLine(Shader("shaders/ViewerMeshLine.vert", "shaders/ViewerMeshLine.frag")) {
             // now that we have all the required data, set the vertex buffers and its attribute pointers.
-            RYAO_INFO("Load Viewer Mesh ...");
+            RYAO_INFO("Load Viewer TET Mesh ...");
             SetupViewerMesh();
             RYAO_INFO("Successfully Loaded Viewer Mesh! ");
         }
