@@ -27,7 +27,7 @@ int main()
     simulation->addCube(VECTOR3(1.0, 0.0, 0.0), 0.5);
     simulation->addCylinder(VECTOR3(-1.0, 0.0, 0.0), 0.3, 1.0, 180);
     simulation->addSphere(VECTOR3(0.0, 1.0, 0.0), 0.3);
-    simulation->setTetMesh("../../../../resources/tetgen/bunny");
+    simulation->setTetMesh("../../../resources/tetgen/bunny");
 
     viewer.setSimulation(simulation);
 

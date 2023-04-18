@@ -288,7 +288,7 @@ void TET_Mesh::computePFpxs(vector<MATRIX9x12>& pFpxs) {
 //}
 
 void TET_Mesh::computeSurfaceEdgeTriangleNeighbors() {
-    // translate the VEC2I into a index
+    // translate the VEC2I into an index
     map<pair<int, int>, int> edgeToIndex;
     for (size_t x = 0; x < _surfaceEdges.size(); x++) {
         pair<int, int> toHash;
