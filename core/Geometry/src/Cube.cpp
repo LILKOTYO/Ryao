@@ -171,7 +171,9 @@ void Cube::generateViewerMesh(vector<TriVertex>& vertices, vector<unsigned int>&
     translate.x = _translation[0];
     translate.y = _translation[1];
     translate.z = _translation[2];
-
+    glm::vec3 p(0.5, 0.5, 0.5);
+    glm::vec3 n(0.9, 0.8, 0.7);
+    TriVertex v(p, n);
     // front
     vertices.push_back(TriVertex(glm::vec3(-0.5, -0.5, 0.5), glm::vec3(0.0, 0.0, 1.0)));
     vertices.push_back(TriVertex(glm::vec3(0.5, -0.5, 0.5), glm::vec3(0.0, 0.0, 1.0)));

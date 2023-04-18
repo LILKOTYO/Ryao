@@ -41,14 +41,14 @@ struct TriVertex {
 	// normal 
 	glm::vec3 normal;
 	// constructor
-	TriVertex(glm::vec3& p, glm::vec3& n) : position(p), normal(n) {}
+	TriVertex(glm::vec3 p, glm::vec3 n) : position(p), normal(n) {}
 };
 
 struct TetVertex {
 	// position
 	glm::vec3 position;
 	// constructor
-	TetVertex(glm::vec3& p) : position(p) {}
+	TetVertex(glm::vec3 p) : position(p) {}
 };
 
 struct LightDir {
@@ -59,7 +59,7 @@ struct LightDir {
 	VECTOR3 specular;
 
 	// constructor
-	LightDir(VECTOR3& dir, VECTOR3& ambi, VECTOR3& diff, VECTOR3& spec)
+	LightDir(VECTOR3 dir, VECTOR3 ambi, VECTOR3 diff, VECTOR3 spec)
 		: direction(dir), ambient(ambi), diffuse(diff), specular(spec) {
 	}
 };
@@ -76,7 +76,7 @@ struct LightPoint {
 	float quadratic;
 
 	// constructor
-	LightPoint(VECTOR3& pos, VECTOR3& ambi, VECTOR3& diff, VECTOR3& spec, float con, float lin, float qua)
+	LightPoint(VECTOR3 pos, VECTOR3 ambi, VECTOR3 diff, VECTOR3 spec, float con, float lin, float qua)
 		: position(pos), ambient(ambi), diffuse(diff), specular(spec),
 		constant(con), linear(lin), quadratic(qua) { 
 	}
@@ -89,7 +89,7 @@ struct Material {
 	float shininess;
 
 	// contructor
-	Material(VECTOR3& ambi, VECTOR3& diff, VECTOR3& spec, float shin)
+	Material(VECTOR3 ambi, VECTOR3 diff, VECTOR3 spec, float shin)
 		: ambient(ambi), diffuse(diff), specular(spec), shininess(shin) {
 	}
 };

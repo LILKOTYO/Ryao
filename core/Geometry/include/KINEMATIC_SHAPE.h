@@ -1,7 +1,8 @@
 #ifndef KINEMATIC_SHAPE_H
 #define KINEMATIC_SHAPE_H
 
-#include <Platform/include/RYAO.h>
+#include "Platform/include/RYAO.h"
+#include "Platform/include/Logger.h"
 #include <vector>
 #include <string>
 

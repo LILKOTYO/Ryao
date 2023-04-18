@@ -1,5 +1,4 @@
 #include <Cylinder.h>
-#include <Platform/include/Logger.h>
 using namespace std;
 
 namespace Ryao {

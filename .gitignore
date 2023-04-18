@@ -3,6 +3,8 @@ debug/
 .DS_Store
 .vscode
 .vs
+.cache
+.idea
 .clang-format
 *.aux
 *.log

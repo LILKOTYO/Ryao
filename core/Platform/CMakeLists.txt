@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.20)
+
 project(RyaoPlatform)
 
 # add the sources
@@ -8,7 +10,9 @@ add_library(${PROJECT_NAME} ${SRCFILES})
 add_library(Ryao::Platform ALIAS ${PROJECT_NAME})
 
 target_include_directories( ${PROJECT_NAME} 
-	PUBLIC ${PROJECT_SOURCE_DIR}/include/
+	PUBLIC 
+	${PROJECT_SOURCE_DIR}/include/
+	${PROJECT_SOURCE_DIR}/../
 )
 
 # add package
@@ -27,5 +31,5 @@ target_link_libraries(${PROJECT_NAME} PRIVATE glad::glad)
 find_package(glm CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE glm::glm)
 
-find_package (OpenMP REQUIRED)
+find_package(OpenMP REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE OpenMP::OpenMP_CXX)

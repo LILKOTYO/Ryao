@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.20)
+
 project(RyaoGeometry)
 
 # add the sources
@@ -20,5 +22,5 @@ target_link_libraries(${PROJECT_NAME} PRIVATE spdlog::spdlog spdlog::spdlog_head
 find_package(Eigen3 CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE Eigen3::Eigen)
 
-find_package (OpenMP REQUIRED)
+find_package(OpenMP REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE OpenMP::OpenMP_CXX)
