@@ -1,7 +1,7 @@
 #include <Viewer.h>
 
 namespace Ryao {
-
+using namespace std;
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
 // ---------------------------------------------------------------------------------------------------------
 void Viewer::processInput() {
@@ -154,6 +154,47 @@ void Viewer::launch() {
 
 void Viewer::setReferencePlane(int size) { 
     _referencePlane = new ReferencePlane(size);
+}
+
+void Viewer::setSimulation(Ryao::Simulation *sim) {
+    _simulation = sim;
+}
+
+void Viewer::addViewerCube(const VECTOR3 &center, const REAL &scale, Material& material) {
+    if (_simulation == nullptr) {
+        RYAO_ERROR("Set the viewer's simulation first!");
+        return;
+    }
+    vector<TriVertex> cubeV;
+    vector<unsigned int> cubeI;
+    _simulation->addCube(center, scale, cubeV, cubeI);
+    ViewerTriMesh* cube = new ViewerTriMesh(cubeV, cubeI, material, DRAWARRAY);
+    addViewerTriMesh(cube);
+}
+
+void Viewer::addViewerCylinder(const VECTOR3 &center, const REAL &radius, const REAL &height, int segment,
+                               Material &material) {
+    if (_simulation == nullptr) {
+        RYAO_ERROR("Set the viewer's simulation first!");
+        return;
+    }
+    vector<TriVertex> cylinderV;
+    vector<unsigned int> cylinderI;
+    _simulation->addCylinder(center, radius, height, segment, cylinderV, cylinderI);
+    ViewerTriMesh* cylinder = new ViewerTriMesh(cylinderV, cylinderI, material, DRAWELEMENT);
+    addViewerTriMesh(cylinder);
+}
+
+void Viewer::addViewerSphere(const VECTOR3 &center, const REAL &scale, Material &material) {
+    if (_simulation == nullptr) {
+        RYAO_ERROR("Set the viewer's simulation first!");
+        return;
+    }
+    vector<TriVertex> sphereV;
+    vector<unsigned int> sphereI;
+    _simulation->addSphere(center, scale, sphereV, sphereI);
+    ViewerTriMesh* sphere = new ViewerTriMesh(sphereV, sphereI, material, DRAWELEMENT);
+    addViewerTriMesh(sphere);
 }
 
 }

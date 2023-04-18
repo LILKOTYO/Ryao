@@ -1,4 +1,5 @@
 #include <Cube.h>
+#include "Platform/include/Timer.h"
 
 using namespace std;
 
@@ -164,16 +165,14 @@ void Cube::generateViewerMesh(vector<TriVertex>& vertices, vector<unsigned int>&
     
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
-            scale[i][j] = _scale(i, j);
-            rotate[i][j] = _rotation(i, j);
+            scale[i][j] = (float)_scale(i, j);
+            rotate[i][j] = (float)_rotation(i, j);
         }
     }
-    translate.x = _translation[0];
-    translate.y = _translation[1];
-    translate.z = _translation[2];
-    glm::vec3 p(0.5, 0.5, 0.5);
-    glm::vec3 n(0.9, 0.8, 0.7);
-    TriVertex v(p, n);
+    translate.x = (float)_translation[0];
+    translate.y = (float)_translation[1];
+    translate.z = (float)_translation[2];
+
     // front
     vertices.push_back(TriVertex(glm::vec3(-0.5, -0.5, 0.5), glm::vec3(0.0, 0.0, 1.0)));
     vertices.push_back(TriVertex(glm::vec3(0.5, -0.5, 0.5), glm::vec3(0.0, 0.0, 1.0)));

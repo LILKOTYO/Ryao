@@ -32,6 +32,7 @@ public:
 			 1.0f, 0.09f, 0.032f)){
 		_window = nullptr;
 		_referencePlane = nullptr;
+        _simulation = nullptr;
 		
 		// light source init
 		// LightDir(VECTOR3& dir, VECTOR3& ambi, VECTOR3& diff, VECTOR3& spec)
@@ -55,6 +56,8 @@ public:
 			1.0f, 0.09f, 0.032f)) {
 		_window = nullptr;
 		_referencePlane = nullptr;
+        _simulation = nullptr;
+
 		_isDrag = false;
 		_lastX = 0.0;
 		_lastY = 0.0;
@@ -73,6 +76,7 @@ public:
 
 	void setReferencePlane(int size);
 	void setisDrag(bool flag);
+    void setSimulation(Simulation* sim);
 
 	double* getLastX();
 	double* getLastY();
@@ -82,6 +86,9 @@ public:
 	void addViewerTriMesh(ViewerTriMesh* vTriMesh)	{ _viewerTriMeshList.push_back(vTriMesh); }
 	void addShader(Shader* shader)			{ _shaderList.push_back(shader); }
 	void addArrow(Arrow* arrow)				{ _arrowList.push_back(arrow); }
+    void addViewerCube(const VECTOR3& center, const REAL& scale, Material& material);
+    void addViewerCylinder(const VECTOR3& center, const REAL& radius, const REAL& height, int segment, Material& material);
+    void addViewerSphere(const VECTOR3& center, const REAL& scale, Material& material);
 
 	void init();
 	void launch();
@@ -93,6 +100,7 @@ private:
 	std::vector<Arrow*> _arrowList;
 
 	// widgets
+    Simulation* _simulation;
 	ReferencePlane* _referencePlane;
 	Camera _camera;
 	GLFWwindow* _window;

@@ -14,6 +14,7 @@
 #include <Cube.h>
 #include <Cylinder.h>
 #include <Sphere.h>
+#include <Simulation.h>
 #include <TET_Mesh.h>
 
 int main()
@@ -25,6 +26,9 @@ int main()
     viewer.init();
 
     viewer.setReferencePlane(20);
+
+    Ryao::Simulation simulation;
+    viewer.setSimulation(&simulation);
 
     std::vector<TetVertex> vertices;
     std::vector<unsigned int> indices;
@@ -58,35 +62,11 @@ int main()
     Ryao::ViewerTetMesh* tetm = new Ryao::ViewerTetMesh(vertices, indices, material);
     viewer.addViewerTetMesh(tetm);
 
-    std::vector<TriVertex> cubeV;
-    std::vector<unsigned int> cubeI;
+    viewer.addViewerCube(VECTOR3(1.0, 0.0, 0.0), 0.5, material);
 
-    Ryao::Cube cube(VECTOR3(1.0, 0.0, 0.0), 0.5);
+    viewer.addViewerCylinder(VECTOR3(-1.0, 0.0, 0.0), 0.25, 1.0, 180, material);
 
-    cube.generateViewerMesh(cubeV, cubeI);
-
-    Ryao::ViewerTriMesh* trim1 = new Ryao::ViewerTriMesh(cubeV, cubeI, material, DRAWARRAY);
-    viewer.addViewerTriMesh(trim1);
-
-    std::vector<TriVertex> cylinderV;
-    std::vector<unsigned int> cylinderI;
-
-    Ryao::Cylinder cylinder(VECTOR3(-1.0, 0.0, 0.0), 0.25, 1.0, 180);
-    
-    cylinder.generateViewerMesh(cylinderV, cylinderI);
-
-    Ryao::ViewerTriMesh* trim2 = new Ryao::ViewerTriMesh(cylinderV, cylinderI, material, DRAWELEMENT);
-    viewer.addViewerTriMesh(trim2);
-
-    std::vector<TriVertex> sphereV;
-    std::vector<unsigned int> sphereI;
-
-    Ryao::Sphere sphere(VECTOR3(0.0, 1.0, 0.0), 0.3);
-
-    sphere.generateViewerMesh(sphereV, sphereI);
-
-    Ryao::ViewerTriMesh* trim3 = new Ryao::ViewerTriMesh(sphereV, sphereI, material, DRAWELEMENT);
-    viewer.addViewerTriMesh(trim3);
+    viewer.addViewerSphere(VECTOR3(0.0, 1.0, 0.0), 0.3, material);
 
     viewer.launch();
 
