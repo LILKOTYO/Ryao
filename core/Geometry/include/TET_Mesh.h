@@ -2,6 +2,7 @@
 #define TET_MESH_H
 
 #include "Platform/include/RYAO.h"
+#include "Hyperelastic/include/HYPERELASTIC.h"
 //#include <HYPERELASTIC.h>
 //#include <Vertex_Face_Collision.h>
 //#include <Edge_Collision.h>

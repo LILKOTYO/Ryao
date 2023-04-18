@@ -44,6 +44,7 @@ target_link_libraries(${PROJECT_NAME}
     PUBLIC
     Ryao::Platform
     Ryao::Geometry
+    Ryao::Hyperelastic
 )
 
 find_package(spdlog CONFIG REQUIRED)

@@ -222,7 +222,7 @@ void Viewer::registerShapeToViewer() {
     }
 }
 
-void Viewer::registerTETMeshToViewer() {
+void Viewer:: registerTETMeshToViewer() {
     if (_simulation == nullptr) {
         RYAO_ERROR("Set the viewer's simulation first!");
         return;
