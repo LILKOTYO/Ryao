@@ -10,6 +10,7 @@
 #include "Hyperelastic/include/StVK.h"
 #include "Hyperelastic/include/ARAP.h"
 #include "Hyperelastic/include/SNH.h"
+#include "Hyperelastic/include/SNHWithBarrier.h"
 #include <string>
 
 namespace Ryao {
