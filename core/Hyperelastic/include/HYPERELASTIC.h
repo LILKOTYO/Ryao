@@ -3,6 +3,7 @@
 
 #include "Platform/include/RYAO.h"
 #include "Platform/include/MatrixUtils.h"
+#include "Platform/include/EigenUtils.h"
 
 namespace Ryao {
 namespace VOLUME {

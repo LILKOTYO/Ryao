@@ -7,6 +7,9 @@
 #include "Geometry/include/Sphere.h"
 #include "Geometry/include/TET_Mesh.h"
 #include "Platform/include/Logger.h"
+#include "Hyperelastic/include/StVK.h"
+#include "Hyperelastic/include/ARAP.h"
+#include "Hyperelastic/include/SNH.h"
 #include <string>
 
 namespace Ryao {

@@ -10,8 +10,6 @@
 #include <Logger.h>
 #include <Timer.h>
 #include <Simulation.h>
-#include <HYPERELASTIC.h>
-#include <ARAP.h>
 
 int main()
 {
@@ -33,10 +31,7 @@ int main()
 
     viewer.registerShapeToViewer();
     viewer.registerTETMeshToViewer();
-    Ryao::VOLUME::HYPERELASTIC* energy = new Ryao::VOLUME::ARAP(2.0, 2.0);
-    MATRIX3 F;
-    F << 1.0, 2.0, 3.0, 2.0, 3.0, 1.0, 3.0, 2.0, 1.0;
-    energy->clampedHessian(F);
+
     viewer.launch();
 
     Ryao::Timer::printTimings();
