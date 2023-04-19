@@ -40,6 +40,12 @@ add_custom_command(
         ${PROJECT_SOURCE_DIR}/../shaders ${PROJECT_BINARY_DIR}/bin/${CMAKE_BUILD_TYPE}/shaders
     )
 
+add_custom_command(
+        TARGET ${PROJECT_NAME}  POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${PROJECT_SOURCE_DIR}/../shaders ${PROJECT_BINARY_DIR}/bin/shaders
+)
+
 target_link_libraries(${PROJECT_NAME}
     PUBLIC
     Ryao::Platform
