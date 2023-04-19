@@ -1,9 +1,10 @@
 #include "ARAP.h"
 
-using namespace std;
-
 namespace Ryao {
 namespace VOLUME {
+
+using namespace std;
+
 ARAP::ARAP(const REAL &mu, const REAL &lambda)
     : _mu(mu), _lambda(lambda) {}
 

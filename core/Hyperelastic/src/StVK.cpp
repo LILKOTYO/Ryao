@@ -2,7 +2,7 @@
 
 namespace Ryao {
 namespace VOLUME {
-    using namespace std;
+using namespace std;
 
 StVK::StVK(const REAL &mu, const REAL &lambda)
     : _mu(mu), _lambda(lambda) {}
@@ -137,4 +137,5 @@ bool StVK::PK1NeedsSVD() const {
     return false;
 }
 
+}
 }

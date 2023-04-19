@@ -11,6 +11,7 @@
 #include "Hyperelastic/include/ARAP.h"
 #include "Hyperelastic/include/SNH.h"
 #include "Hyperelastic/include/SNHWithBarrier.h"
+#include "Hyperelastic/include/NeoHookeanBW.h"
 #include <string>
 
 namespace Ryao {

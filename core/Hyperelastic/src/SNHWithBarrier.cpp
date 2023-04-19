@@ -2,6 +2,7 @@
 
 namespace Ryao {
 namespace VOLUME {
+using namespace std;
 
 SNHWithBarrier::SNHWithBarrier(const REAL& mu, const REAL& lambda)
 // reparamaterizing to be consistent with linear, see Section 3.4
@@ -144,7 +145,7 @@ MATRIX9 SNHWithBarrier::clampedHessian(const MATRIX3 &U, const VECTOR3 &Sigma, c
     return eigenvectors * eigenvalues.asDiagonal() * eigenvectors.transpose();
 }
 
-std::string SNHWithBarrier::name() const {
+string SNHWithBarrier::name() const {
     return "Stable_Neo_Hookean_With_Barrier";
 }
 
