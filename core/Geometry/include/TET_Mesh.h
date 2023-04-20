@@ -6,6 +6,9 @@
 #include "Hyperelastic/include/VertexFaceCollision.h"
 #include "Hyperelastic/include/McadamsCollision.h"
 #include "Hyperelastic/include/VertexFaceSqrtCollision.h"
+#include "Hyperelastic/include/EdgeCollision.h"
+#include "Hyperelastic/include/EdgeSqrtCollision.h"
+#include "Hyperelastic/include/EdgeHybridCollision.h"
 //#include <HYPERELASTIC.h>
 //#include <Vertex_Face_Collision.h>
 //#include <Edge_Collision.h>
