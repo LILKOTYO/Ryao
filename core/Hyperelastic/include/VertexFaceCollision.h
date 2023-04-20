@@ -4,6 +4,7 @@
 #include "Platform/include/RYAO.h"
 #include "Platform/include/MatrixUtils.h"
 #include "Platform/include/CollisionUtils.h"
+#include "Platform/include/EigenUtils.h"
 #include <vector>
 
 namespace Ryao {

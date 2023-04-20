@@ -1,5 +1,4 @@
 #include "TET_Mesh.h"
-//#include <HYPERELASTIC.h>
 #include "LineIntersect.h"
 #include "Platform/include/Timer.h"
 #include "Platform/include/CollisionUtils.h"
@@ -9,13 +8,7 @@
 #include "Platform/include/Logger.h"
 #include <float.h>
 // DEBUG: only here specifically to debug collisions
-#include "Hyperelastic/include/ARAP.h"
-//#include <Vertex_Face_Collision.h>
-//#include <Vertex_Face_Sqrt_Collision.h>
-//#include <Mcadams_Collision.h>
-//#include <Edge_Collision.h>
-//#include <Edge_Hybrid_Collision.h>
-//#include <Edge_Sqrt_Collision.h>
+
 
 // add back the bug where the force points in the wrong direction when two colliding edges
 // are on triangles that are intersecting
