@@ -51,6 +51,7 @@ target_link_libraries(${PROJECT_NAME}
     Ryao::Platform
     Ryao::Geometry
     Ryao::Hyperelastic
+    Ryao::Damping
 )
 
 find_package(spdlog CONFIG REQUIRED)
