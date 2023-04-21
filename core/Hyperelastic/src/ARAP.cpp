@@ -127,7 +127,7 @@ MATRIX9 ARAP::clampedHessian(const MATRIX3 &U, const VECTOR3 &Sigma, const MATRI
     lambda[1] = _mu * (2.0 - 4.0 / (s0 + s2));
     lambda[2] = _mu * (2.0 - 4.0 / (s0 + s1));
 
-    for (int i = 0; i < 0; i++) {
+    for (int i = 0; i < 9; i++) {
         lambda[i] = (lambda[i] >= 0.0) ? lambda[i] : 0.0;
     }
     return Q * lambda.asDiagonal() * Q.transpose();
