@@ -8,6 +8,7 @@ add_subdirectory(core/Platform)
 add_subdirectory(core/Geometry)
 add_subdirectory(core/Hyperelastic)
 add_subdirectory(core/Damping)
+add_subdirectory(core/Solver)
 
 # demo project
 add_subdirectory(demo)

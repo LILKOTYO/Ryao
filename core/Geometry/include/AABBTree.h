@@ -6,8 +6,8 @@
 namespace Ryao {
 
 // tree nodes for AABB_Tree
-struct AABB_Node {
-    AABB_Node(const std::vector<int>& inputPrimitiveIndices,
+struct AABBNode {
+    AABBNode(const std::vector<int>& inputPrimitiveIndices,
         const VECTOR3& inputMin, const VECTOR3& inputMax,
         const int& inputDepth) :
         mins(inputMin), maxs(inputMax),
@@ -18,7 +18,7 @@ struct AABB_Node {
     VECTOR3 mins, maxs;
 
     // if we are an interior node, here are the children
-    AABB_Node* child[2] = { NULL, NULL };
+    AABBNode* child[2] = { NULL, NULL };
 
     // indices of triangles in _surfaceTriangles, or edges in _surfaceEdges
     // enclosed by the AABB
@@ -37,11 +37,11 @@ struct AABB_Node {
 // that do something similar, but nothing that did quite what I want. Right now collision
 // detection is consuming 90% of the running time, so anything is better than nothing.
 /////////////////////////////////////////////////////////////////////////////////////////////
-class AABB_Tree {
+class AABBTree {
 public:
-    AABB_Tree(const std::vector<VECTOR3>& vertices, const std::vector<VECTOR3I>* surfaceTriangles);
-    AABB_Tree(const std::vector<VECTOR3>& vertices, const std::vector<VECTOR2I>* surfaceEdges);
-    ~AABB_Tree();
+    AABBTree(const std::vector<VECTOR3>& vertices, const std::vector<VECTOR3I>* surfaceTriangles);
+    AABBTree(const std::vector<VECTOR3>& vertices, const std::vector<VECTOR2I>* surfaceEdges);
+    ~AABBTree();
 
     // return a list of potential triangles nearby a vertex, subject to a distance threshold     
     void nearbyTriangles(const VECTOR3& vertex, const REAL& eps, std::vector<int>& faces) const;
@@ -58,7 +58,7 @@ public:
     void nearbyEdges(const VECTOR2I& edge, const REAL& eps, std::vector<int>& faces) const;
 
     // get the root node
-    const AABB_Node& root() const { return *_root; };
+    const AABBNode& root() const { return *_root; };
 
     // refit the bounding boxes, presumably because the vertices moved
     void refit();
@@ -71,13 +71,13 @@ private:
     void buildEdgeRoot();
 
     // let's cleean up after ourselves
-    void deleteTree(AABB_Node* node);
+    void deleteTree(AABBNode* node);
 
     // given a triangle node, let's build it's children
-    void buildTriangleChildren(AABB_Node* node, const int depth);
+    void buildTriangleChildren(AABBNode* node, const int depth);
 
-    // given an edge node, let's build it's children
-    void buildEdgeChildren(AABB_Node* node, const int depth);
+    // given an edge node, let's build its children
+    void buildEdgeChildren(AABBNode* node, const int depth);
 
     // cut the list of triangles into two childe lists
     void buildTriangleChildLists(const REAL& cuttingPlane, const int& axis,
@@ -98,32 +98,32 @@ private:
         VECTOR3& mins, VECTOR3& maxs) const;
 
     // recursively refit the triangles
-    void refitTriangles(AABB_Node* node);
+    void refitTriangles(AABBNode* node);
 
     // recursively refit the edges
-    void refitEdges(AABB_Node* node);
+    void refitEdges(AABBNode* node);
 
     // return a list of potential edges nearby a vertex, subject to a distance threshold
-    void nearbyEdges(const AABB_Node* node, const VECTOR2I& edge,
+    void nearbyEdges(const AABBNode* node, const VECTOR2I& edge,
         const REAL& eps, std::vector<int>& edges) const;
 
     // return a list of potential triangles nearby a vertex, subject to a distance threshold
-    void nearbyTriangles(const AABB_Node* node, const VECTOR3& vertex,
+    void nearbyTriangles(const AABBNode* node, const VECTOR3& vertex,
         const REAL& eps, std::vector<int>& faces) const;
 
     // return a list of potential triangles nearby a box specified by min and max,
     // subject to a distance threshold
-    void nearbyTriangles(const AABB_Node* node, const VECTOR3& mins, const VECTOR3& maxs,
+    void nearbyTriangles(const AABBNode* node, const VECTOR3& mins, const VECTOR3& maxs,
         const REAL& eps, std::vector<int>& faces) const;
 
     // are we inside this AABB, subject to the distance threshold?
-    bool insideAABB(const AABB_Node* node, const VECTOR3& vertex, const REAL& eps) const;
+    bool insideAABB(const AABBNode* node, const VECTOR3& vertex, const REAL& eps) const;
 
     // are these two AABBs overlapping, subject to the distance threshold?
-    bool overlappingAABBs(const AABB_Node* node, const VECTOR3& mins, const VECTOR3& maxs, const REAL& eps) const;
+    bool overlappingAABBs(const AABBNode* node, const VECTOR3& mins, const VECTOR3& maxs, const REAL& eps) const;
 
     // do the AABB of this node and the AABB of the edge overlap?
-    bool overlappingAABBs(const AABB_Node* node, const VECTOR2I& edge, const REAL& eps) const;
+    bool overlappingAABBs(const AABBNode* node, const VECTOR2I& edge, const REAL& eps) const;
 
     const std::vector<VECTOR3>& _vertices;
 

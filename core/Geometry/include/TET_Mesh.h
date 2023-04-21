@@ -10,10 +10,7 @@
 #include "Hyperelastic/include/EdgeSqrtCollision.h"
 #include "Hyperelastic/include/EdgeHybridCollision.h"
 #include "Damping/include/Damping.h"
-//#include <HYPERELASTIC.h>
-//#include <Vertex_Face_Collision.h>
-//#include <Edge_Collision.h>
-//#include <Damping.h>
+#include "Damping/include/GreenDamping.h"
 
 #include <map>
 #include <vector>
@@ -132,21 +129,21 @@ public:
     void setCollisionPairs(const vector<pair<int, int>>& vertexFace, const vector<pair<int, int>>& edgeEdge);
 
     // compute hyperelastic quantities
-    //REAL computeHyperelasticEnergy(const VOLUME::HYPERELASTIC& hyperelastic) const;
-    //VECTOR computeHyperelasticForces(const VOLUME::HYPERELASTIC& hyperelastic) const;
-    //virtual SPARSE_MATRIX computeHyperelasticClampedHessian(const VOLUME::HYPERELASTIC& hyperelastic) const;
-    //virtual SPARSE_MATRIX computeHyperelasticHessian(const VOLUME::HYPERELASTIC& hyperelastic) const;
+    REAL computeHyperelasticEnergy(const VOLUME::HYPERELASTIC& hyperelastic) const;
+    VECTOR computeHyperelasticForces(const VOLUME::HYPERELASTIC& hyperelastic) const;
+    virtual SPARSE_MATRIX computeHyperelasticClampedHessian(const VOLUME::HYPERELASTIC& hyperelastic) const;
+    virtual SPARSE_MATRIX computeHyperelasticHessian(const VOLUME::HYPERELASTIC& hyperelastic) const;
 
     // compute damping quantities
-    //VECTOR computeDampingForces(const VOLUME::Damping& damping) const;
-    //virtual SPARSE_MATRIX computeDampingHessian(const VOLUME::Damping& damping) const;
+    VECTOR computeDampingForces(const VOLUME::Damping& damping) const;
+    virtual SPARSE_MATRIX computeDampingHessian(const VOLUME::Damping& damping) const;
 
     // compute x-based collision quantities
-    //VECTOR computeVertexFaceCollisionForces() const;
-    //SPARSE_MATRIX computeVertexFaceCollisionClampedHessian() const;
-    //REAL computeEdgeEdgeCollisionEnergy() const;
-    //VECTOR computeEdgeEdgeCollisionForces() const;
-    //SPARSE_MATRIX computeEdgeEdgeCollisionClampedHessian() const;
+    VECTOR computeVertexFaceCollisionForces() const;
+    SPARSE_MATRIX computeVertexFaceCollisionClampedHessian() const;
+    REAL computeEdgeEdgeCollisionEnergy() const;
+    VECTOR computeEdgeEdgeCollisionForces() const;
+    SPARSE_MATRIX computeEdgeEdgeCollisionClampedHessian() const;
 
     /**
      * @brief compute elastic and damping forces at the same time
@@ -155,8 +152,8 @@ public:
      * @param damping
      * @return VECTOR
      */
-    //virtual VECTOR computeInternalForce(const VOLUME::HYPERELASTIC& hyperelastic,
-    //    const VOLUME::Damping& damping) const;
+    virtual VECTOR computeInternalForce(const VOLUME::HYPERELASTIC& hyperelastic,
+        const VOLUME::Damping& damping) const;
 
 
     /**
@@ -172,23 +169,23 @@ public:
      *        I guess this function is used for self-collision.
      *
      */
-    //virtual void computeVertexFaceCollisions();
+    virtual void computeVertexFaceCollisions();
 
     /**
      * @brief find all the edge-edge collision pairs
      *
      */
-    //virtual void computeEdgeEdgeCollisions();
+    virtual void computeEdgeEdgeCollisions();
 
     // debug edge-edge collisions, load up some specific pairs
-    // void computeEdgeEdgeCollisionsDebug();
+     void computeEdgeEdgeCollisionsDebug();
 
     /**
      * @brief based on vertex-face collision pairs, build "collision tets"
      *
      * @param velocity
      */
-    //void buildVertexFaceCollisionTets(const VECTOR& velocity);
+    void buildVertexFaceCollisionTets(const VECTOR& velocity);
 
     /**
      * @brief write out the surface to OBJ triangle mesh
@@ -359,7 +356,7 @@ protected:
      * @return true
      * @return false
      */
-    //bool insideCollisionCell(const int surfaceTriangleID, const VECTOR3& vertex);
+    bool insideCollisionCell(const int surfaceTriangleID, const VECTOR3& vertex);
 
     /**
      * @brief compute distance to collision cell wall, where positive means inside and negative means outside
@@ -368,7 +365,7 @@ protected:
      * @param vertex
      * @return REAL
      */
-    //REAL distanceToCollisionCellWall(const int surfaceTriangleID, const VECTOR3& vertex);
+    REAL distanceToCollisionCellWall(const int surfaceTriangleID, const VECTOR3& vertex);
 
     /**
      * @brief compute whether one vertex is inside the vertex one right of another
@@ -444,7 +441,7 @@ protected:
     // velocity gradients
     vector<MATRIX3> _Fdots;
 
-    // list of tets that are one the surface
+    // list of tets that are one of the surface
     vector<int> _surfaceTets;
 
     // list of triangles that are one the surface
@@ -473,7 +470,7 @@ protected:
     //
     // the entries in the pair<int, int> are:
     //      unsigned int flat = edge[0] + edge[1] * _surfaceEdges.size()
-    //  why use this entries? because in this way we can find the rest distance just according to the vertices index
+    //  why use these entries? because in this way we can find the rest distance just according to the vertices index
     map<pair<unsigned int, unsigned int>, REAL> _edgeEdgeRestDistance;
 
     // how close is considered to be in collision?
@@ -500,7 +497,7 @@ protected:
     vector<VECTOR4I> _vertexFaceCollisionTets;
 
     // DEBUG: see if the collision tet exists already
-    // map<pair<int, int>, int> _vertexFaceCollisionTetsHash
+//     map<pair<int, int>, int> _vertexFaceCollisionTetsHash;
 
     // scaling term for vertex-face collision forces
     vector<REAL> _vertexFaceCollisionAreas;
@@ -513,7 +510,7 @@ protected:
     map<int, int> _volumeToSurfaceID;
 
     // constitutive model for collisions
-    //VOLUME::HYPERELASTIC* _collisionMaterial;
+    VOLUME::HYPERELASTIC* _collisionMaterial;
 
     // have your computed the SVDs since the last time you computed F?
     bool _svdsComputed;
@@ -523,9 +520,9 @@ protected:
     map<pair<int, int>, bool> _insideSurfaceVertexOneRing;
 
     // which vertex-face collision force are we using?
-    //VOLUME::Vertex_Face_Collision* _vertexFaceEnergy;
+    VOLUME::VertexFaceCollision* _vertexFaceEnergy;
 
-    //VOLUME::Edge_Collision* _edgeEdgeEnergy;
+    VOLUME::EdgeCollision* _edgeEdgeEnergy;
 
     // which vertices are inverted?
     vector<bool> _invertedVertices;

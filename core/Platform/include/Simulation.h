@@ -12,6 +12,7 @@
 #include "Hyperelastic/include/SNH.h"
 #include "Hyperelastic/include/SNHWithBarrier.h"
 #include "Hyperelastic/include/NeoHookeanBW.h"
+#include "Solver/include/SOLVER.h"
 #include <string>
 
 namespace Ryao {
