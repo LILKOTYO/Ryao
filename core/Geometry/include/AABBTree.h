@@ -136,7 +136,7 @@ private:
     const std::vector<VECTOR2I>* _surfaceEdges;
 
     // the root node of the tree
-    AABB_Node* _root;
+    AABBNode* _root;
 };
 
 }

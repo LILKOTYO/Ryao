@@ -658,7 +658,7 @@ VECTOR TET_Mesh::computeInternalForce(const VOLUME::HYPERELASTIC& hyperelastic,
     vector<VECTOR12> perElementForces(_tets.size());
 #pragma omp parallel
 #pragma  omp for schedule(static)
-    for (unsigned int tetIndex = 0; tetIndex < _tets.size(); tetIndex++) {
+    for (int tetIndex = 0; tetIndex < _tets.size(); tetIndex++) {
         const MATRIX3& U = _Us[tetIndex];
         const MATRIX3& V = _Vs[tetIndex];
         const VECTOR3& Sigma = _Sigmas[tetIndex];
