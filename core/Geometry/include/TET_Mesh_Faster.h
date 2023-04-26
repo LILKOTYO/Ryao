@@ -14,6 +14,7 @@ namespace Ryao {
 class TET_Mesh_Faster : public TET_Mesh {
 public:
     TET_Mesh_Faster(const std::vector<VECTOR3>& restVertices,
+                    const vector<VECTOR3I>& faces,
                     const std::vector<VECTOR4I>& tets);
 
     // do something so that this does not run so slow
@@ -40,14 +41,14 @@ private:
     map<pair<int, int>, int> _compressedIndex;
 
     // cache the hessian for each tet
-    mutable vector<MATRIX12> _preElementHessians;
+    mutable vector<MATRIX12> _perElementHessians;
 
     // mapping from edge index pairs to _surfaceEdges
     map<pair<int, int>, int> _edgeHash;
 
     // for each entry in the global stiffness matrix, the
     // tet indices to gather entries from
-    vector<vector<VECTOR4I>> _hessianGathers;
+    vector<vector<VECTOR3I>> _hessianGathers;
 
     // collision detection acceleration structure for triangles
     AABBTree _aabbTreeTriangles;

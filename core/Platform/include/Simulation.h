@@ -6,6 +6,7 @@
 #include "Geometry/include/Cylinder.h"
 #include "Geometry/include/Sphere.h"
 #include "Geometry/include/TET_Mesh.h"
+#include "Geometry/include/TET_Mesh_Faster.h"
 #include "Platform/include/Logger.h"
 #include "Hyperelastic/include/StVK.h"
 #include "Hyperelastic/include/ARAP.h"
