@@ -21,6 +21,8 @@ int main()
 
     viewer.setReferencePlane(20);
 
+    // add these shapes to simulation by
+    // SOLVER::addKinematicCollisionObject
     Ryao::Simulation* simulation = new Ryao::Simulation();
     simulation->addCube(VECTOR3(1.0, 0.0, 0.0), 0.5);
     simulation->addCylinder(VECTOR3(-1.0, 0.0, 0.0), 0.3, 1.0, 180);
