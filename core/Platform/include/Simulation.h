@@ -14,6 +14,7 @@
 #include "Hyperelastic/include/SNHWithBarrier.h"
 #include "Hyperelastic/include/NeoHookeanBW.h"
 #include "Solver/include/SOLVER.h"
+#include "Solver/include/BackwardEulerVelocity.h"
 #include <string>
 
 namespace Ryao {
@@ -151,7 +152,7 @@ protected:
     vector<KINEMATIC_SHAPE*> _kinematicShapes;
 
     // solver and materials
-    //TIMESTEPPER::TIMESTEPPER* _solver;
+    SOLVER::SOLVER* _solver;
     //VOLUME::HYPERELASTIC* _hyperelastic;
 
     // simulation parameters
