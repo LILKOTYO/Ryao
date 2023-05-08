@@ -16,7 +16,7 @@ namespace SOLVER {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 class BackwardEulerVelocity : public SOLVER {
 public:
-    BackwardEulerVelocity(TET_Mesh& tetMesh, VOLUME::HYPERELASTIC& hyperelastic);
+    BackwardEulerVelocity(TET_Mesh_Faster& tetMesh, VOLUME::HYPERELASTIC& hyperelastic);
 
     // take a timestep
     virtual bool solve(const bool verbose) override;

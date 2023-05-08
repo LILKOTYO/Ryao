@@ -4,7 +4,7 @@ namespace Ryao {
 namespace SOLVER {
 using namespace std;
 
-BackwardEulerVelocity::BackwardEulerVelocity(TET_Mesh& tetMesh, VOLUME::HYPERELASTIC& hyperelastic) :
+BackwardEulerVelocity::BackwardEulerVelocity(TET_Mesh_Faster& tetMesh, VOLUME::HYPERELASTIC& hyperelastic) :
     SOLVER(tetMesh, hyperelastic) {
     _rayleighAlpha = 0.01;
     _rayleighBeta = 0.01;
@@ -78,6 +78,7 @@ bool BackwardEulerVelocity::solveRayleighDamped(const bool verbose) {
     findNewSurfaceConstraints(verbose);
     buildConstraintMatrix();
 
+    // update the position so that the tetMesh can do collision detection itself
     _tetMesh.setDisplacement(_position);
     _tetMesh.computeFs();
     _tetMesh.computeSVDs();

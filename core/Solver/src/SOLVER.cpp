@@ -4,12 +4,12 @@ namespace Ryao {
 namespace SOLVER {
 using namespace std;
 
-SOLVER::SOLVER(Ryao::TET_Mesh &tetMesh, VOLUME::HYPERELASTIC &hyperelastic) :
+SOLVER::SOLVER(Ryao::TET_Mesh_Faster &tetMesh, VOLUME::HYPERELASTIC &hyperelastic) :
         _tetMesh(tetMesh), _hyperelastic(hyperelastic), _damping(NULL) {
     initialize();
 }
 
-SOLVER::SOLVER(Ryao::TET_Mesh &tetMesh, VOLUME::HYPERELASTIC &hyperelastic, VOLUME::Damping &damping) :
+SOLVER::SOLVER(Ryao::TET_Mesh_Faster &tetMesh, VOLUME::HYPERELASTIC &hyperelastic, VOLUME::Damping &damping) :
         _tetMesh(tetMesh), _hyperelastic(hyperelastic), _damping(&damping) {
     initialize();
 }
@@ -448,9 +448,9 @@ void SOLVER::computeCollisionDetection() {
     Timer functionTimer(__FUNCTION__);
 
     // if the tet mesh has an AABB accelerator, refit it
-    TET_Mesh_Faster* fast = dynamic_cast<TET_Mesh_Faster*>(&_tetMesh);
-    if (fast != NULL)
-        fast->refitAABB();
+//    auto fast = dynamic_cast<TET_Mesh_Faster*>(&_tetMesh);
+//    if (_tetMesh != NULL)
+    _tetMesh.refitAABB();
 
     // do the collision processing
     const REAL invDt = 1.0 / _dt;

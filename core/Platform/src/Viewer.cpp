@@ -132,6 +132,8 @@ void Viewer::launch() {
         glClearColor(0.6, 0.6, 0.6, 1.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+//        _simulation->stepSimulation();
+
         if (_referencePlane != nullptr) {
             //RYAO_INFO("Draw reference plane.");
             _referencePlane->Draw(_camera, _SCR_WIDTH, _SCR_HEIGHT);
@@ -146,7 +148,7 @@ void Viewer::launch() {
             for (int i = 0; i < _viewerTetMeshList.size(); i++)
                 _viewerTetMeshList[i]->Draw(_camera, _simulation->getTetMeshVertices(), _SCR_WIDTH, _SCR_HEIGHT);
         }
-
+        _simulation->stepSimulation();
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
         glfwSwapBuffers(_window);

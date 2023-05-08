@@ -106,7 +106,7 @@ public:
         if (normalizeVertices) {
             vertices = TET_Mesh::normalizeVertices(vertices);
         }
-        _tetMesh = new TET_Mesh(vertices, faces, tets);
+        _tetMesh = new TET_Mesh_Faster(vertices, faces, tets);
         _tetMeshFilename = filename;
         _normalizedVertices = normalizeVertices;
     }
@@ -156,7 +156,7 @@ protected:
     //}
 
     // scene geometry
-    TET_Mesh* _tetMesh;
+    TET_Mesh_Faster* _tetMesh;
     vector<KINEMATIC_SHAPE*> _kinematicShapes;
 
     // solver and materials
@@ -184,6 +184,11 @@ protected:
 
     // scene name, used to determine the JSON and MOV filenames
     std::string _sceneName;
+
+    // camera
+    VECTOR3 _eye;
+    VECTOR3 _lookAt;
+    VECTOR3 _up;
 };
 
 }

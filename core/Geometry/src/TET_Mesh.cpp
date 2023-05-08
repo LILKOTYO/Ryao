@@ -2098,7 +2098,7 @@ bool TET_Mesh::surfaceTriangleIsDegenerate(const int surfaceTriangleID) {
 void TET_Mesh::computeInvertedVertices() {
     Timer functionTimer(__FUNCTION__);
     // first set them all to false
-    _invertedVertices.reserve(_vertices.size());
+    _invertedVertices.resize(_vertices.size());
     for (unsigned int x = 0; x < _vertices.size(); x++)
         _invertedVertices[x] = false;
 

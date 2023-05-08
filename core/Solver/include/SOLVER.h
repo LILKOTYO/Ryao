@@ -14,8 +14,8 @@ namespace Ryao {
 namespace SOLVER {
 class SOLVER {
 public:
-    SOLVER(TET_Mesh& tetMesh, VOLUME::HYPERELASTIC& hyperelastic);
-    SOLVER(TET_Mesh& tetMesh, VOLUME::HYPERELASTIC& hyperelastic, VOLUME::Damping& damping);
+    SOLVER(TET_Mesh_Faster& tetMesh, VOLUME::HYPERELASTIC& hyperelastic);
+    SOLVER(TET_Mesh_Faster& tetMesh, VOLUME::HYPERELASTIC& hyperelastic, VOLUME::Damping& damping);
     virtual ~SOLVER();
 
     VECTOR& externalForces()             { return _externalForces; };
@@ -126,7 +126,7 @@ protected:
     REAL _residual;
     int _seenPCGIterations;
 
-    TET_Mesh& _tetMesh;
+    TET_Mesh_Faster& _tetMesh;
     VOLUME::HYPERELASTIC& _hyperelastic;
     VOLUME::Damping* _damping;
 
