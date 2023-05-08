@@ -21,7 +21,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 # source_group("Library Files" FILES ${LIBFILES})
 
 # Add default project files
-# include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../core/Platform)
+ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../core/Scene)
 # include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../core/Hyperelastic)
 # include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../core/Geometry)
 # include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../external/spectra/include)

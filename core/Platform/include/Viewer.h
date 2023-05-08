@@ -10,7 +10,7 @@
 #include "RYAO.h"
 #include "Timer.h"
 #include "Arrow.h"
-#include "Simulation.h"
+#include "Scene/Simulation.h"
 #include <vector>
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>

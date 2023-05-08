@@ -18,7 +18,7 @@ public:
     SOLVER(TET_Mesh& tetMesh, VOLUME::HYPERELASTIC& hyperelastic, VOLUME::Damping& damping);
     virtual ~SOLVER();
 
-    VECTOR& externalForce()             { return _externalForces; };
+    VECTOR& externalForces()             { return _externalForces; };
     const VECTOR& externalForce() const { return _externalForces; };
     const vector<PLANE_CONSTRAINT>& planeConstraints() const { return _planeConstraints; };
     const VOLUME::HYPERELASTIC& material() const             { return _hyperelastic; };

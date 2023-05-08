@@ -1,7 +1,7 @@
 #ifndef SIMULATION_H
 #define SIMULATION_H
 
-#include "RYAO.h"
+#include "Platform/include/RYAO.h"
 #include "Geometry/include/Cube.h"
 #include "Geometry/include/Cylinder.h"
 #include "Geometry/include/Sphere.h"
@@ -15,6 +15,7 @@
 #include "Hyperelastic/include/NeoHookeanBW.h"
 #include "Solver/include/SOLVER.h"
 #include "Solver/include/BackwardEulerVelocity.h"
+#include "Platform/include/Logger.h"
 #include <string>
 
 namespace Ryao {
@@ -30,26 +31,33 @@ public:
         _initialA = MATRIX3::Identity();
         _initialTranslation = VECTOR3::Zero();
         _gravity.setZero();
+
+        _solver = nullptr;
         _tetMesh = nullptr;
+        _hyperelastic = nullptr;
     }
 
-//    // TODO: Build the actual scene. You have to implement this!
-//    virtual bool buildScene() = 0;
-//
-//    // TODO: Describe the scene build built. You have to do this!
-//    virtual void printSceneDescription() = 0;
+    ~Simulation() {
+        delete _solver;
+        delete _tetMesh;
+        delete _hyperelastic;
+
+        for (int i = 0; i < _kinematicShapes.size(); i++) {
+            delete _kinematicShapes[i];
+        }
+    }
+
+    // TODO: Build the actual scene. You have to implement this!
+    virtual bool buildScene() = 0;
+
+    // TODO: Describe the scene build built. You have to do this!
+    virtual void printSceneDescription() = 0;
 
     // simulation loop
     virtual void stepSimulation(const bool verbose = true) {
-//        _solver->externalForces().setZero();
-//        _solver->addGravity(_gravity);
-//        _solver->solve(verbose);
-//        std::vector<VECTOR3>& vertices = _tetMesh->vertices();
-//
-//#pragma omp parallel for
-//        for (int i = 0; i < vertices.size(); i++) {
-//            vertices[i][1] -= 0.001;
-//        }
+        _solver->externalForces().setZero();
+        _solver->addGravity(_gravity);
+        _solver->solve(verbose);
 
         _frameNumber++;
     };
@@ -153,7 +161,7 @@ protected:
 
     // solver and materials
     SOLVER::SOLVER* _solver;
-    //VOLUME::HYPERELASTIC* _hyperelastic;
+    VOLUME::HYPERELASTIC* _hyperelastic;
 
     // simulation parameters
     VECTOR3 _gravity;

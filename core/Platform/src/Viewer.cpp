@@ -120,7 +120,7 @@ void Viewer::launch() {
         // input
         // -----
         // frame frequency
-        _simulation->stepSimulation();
+//        _simulation->stepSimulation();
 
         float currentFrame = glfwGetTime();
         _deltaTime = currentFrame - _lastTime;
