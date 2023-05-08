@@ -112,7 +112,7 @@ SPARSE_MATRIX TET_Mesh_Faster::computeHyperelasticClampedHessian(const VOLUME::H
     assert(_svdsComputed == true);
 #pragma omp parallel
 #pragma omp for schedule(static)
-    for (unsigned int i = 0; i < _tets.size(); i++) {
+    for (int i = 0; i < _tets.size(); i++) {
         const MATRIX3& U        = _Us[i];
         const MATRIX3& V        = _Vs[i];
         const VECTOR3& Sigma    = _Sigmas[i];
@@ -133,11 +133,11 @@ SPARSE_MATRIX TET_Mesh_Faster::computeHyperelasticClampedHessian(const VOLUME::H
     REAL* base = _sparseA.valuePtr();
 #pragma omp parallel
 #pragma omp for schedule(static)
-    for (unsigned int x = 0; x < nonZero; x++) {
+    for (int x = 0; x < nonZero; x++) {
         const vector<VECTOR3I>& gather = _hessianGathers[x];
         base[x] = 0.0;
 
-        for (unsigned int y = 0; y < gather.size(); y++) {
+        for (int y = 0; y < gather.size(); y++) {
             const VECTOR3I& lookup = gather[y];
             const int& tetIndex = lookup[0];
             const int& row = lookup[1];
@@ -152,7 +152,7 @@ SPARSE_MATRIX TET_Mesh_Faster::computeDampingHessian(const VOLUME::Damping &damp
     Timer functionTimer(string("TET_Mesh_Faster::") + __FUNCTION__);
 #pragma omp parallel
 #pragma omp for schedule(static)
-    for (unsigned int i = 0; i < _tets.size(); i++) {
+    for (int i = 0; i < _tets.size(); i++) {
         const MATRIX3& F        = _Fs[i];
         const MATRIX3& Fdot     = _Fdots[i];
         const MATRIX9x12& pFpx  = _pFpxs[i];
@@ -168,7 +168,7 @@ SPARSE_MATRIX TET_Mesh_Faster::computeDampingHessian(const VOLUME::Damping &damp
     REAL* base = _sparseA.valuePtr();
 #pragma omp parallel
 #pragma omp for schedule(static)
-    for (unsigned int x = 0; x < nonZero; x++) {
+    for (int x = 0; x < nonZero; x++) {
         const vector<VECTOR3I>& gather = _hessianGathers[x];
         base[x] = 0.0;
 

@@ -2,6 +2,7 @@
 #define RYAO_SOLVER_H
 
 #include "Geometry/include/TET_Mesh.h"
+#include "Geometry/include/TET_Mesh_Faster.h"
 #include "Geometry/include/CONSTRAINTS.h"
 #include "Geometry/include/KINEMATIC_SHAPE.h"
 #include "Hyperelastic/include/HYPERELASTIC.h"

@@ -355,11 +355,11 @@ void SOLVER::findNewSurfaceConstraints(const bool verbose) {
             VECTOR3 normal = shape->localNormalToWorld(closestNormal);
             const REAL velocitySeparation = vertexVelocity.dot(normal);
 
-            if (debug) {
-                RYAO_DEBUG("velocity:   {}", vertexVelocity.transpose());
-                RYAO_DEBUG("normal:     {}", normal.transpose());
-                RYAO_DEBUG("separation: {}", velocitySeparation);
-            }
+//            if (debug) {
+//                RYAO_DEBUG("velocity:   {}", vertexVelocity.transpose());
+//                RYAO_DEBUG("normal:     {}", normal.transpose());
+//                RYAO_DEBUG("separation: {}", velocitySeparation);
+//            }
 
             if (velocitySeparation >= -FLT_EPSILON) {
                 if (debug)
