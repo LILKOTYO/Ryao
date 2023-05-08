@@ -382,6 +382,7 @@ void SOLVER::findNewSurfaceConstraints(const bool verbose) {
     }
     if (verbose)
         RYAO_INFO("Found {} new constraints", newConstraints);
+
 }
 
 void SOLVER::updateSurfaceConstraints() {

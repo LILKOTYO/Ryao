@@ -1657,7 +1657,7 @@ VECTOR TET_Mesh::computeVertexFaceCollisionForces() const {
         const VECTOR4I& tet = _vertexFaceCollisionTets[i];
         const VECTOR12& tetForce = perElementForces[i];
         for (int x = 0; x < 4; x++) {
-            unsigned int index = 3 * tetForce[x];
+            unsigned int index = 3 * tet[x];
             forces[index] += tetForce[3 * x];
             forces[index + 1] += tetForce[3 * x + 1];
             forces[index + 2] += tetForce[3 * x + 2];

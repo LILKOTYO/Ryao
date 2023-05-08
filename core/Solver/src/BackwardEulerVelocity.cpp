@@ -59,7 +59,9 @@ bool BackwardEulerVelocity::solveRayleighDamped(const bool verbose) {
         RYAO_INFO(" BACKWARD_EULER_VELOCITY RAYLEIGH SOLVE {}", _currentTimestep);
         RYAO_INFO("==================================================");
     }
-
+    if (_currentTimestep == 141) {
+        RYAO_INFO("HERE!");
+    }
     // get the damping matrix
     // OPT TAG
     // we do not need to call this function every step

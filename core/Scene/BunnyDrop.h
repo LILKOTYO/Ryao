@@ -18,7 +18,7 @@ virtual bool buildScene() override {
     _sceneName = "bunny_drop";
 
     // read in the mesh file
-    setTetMesh("../../../resources/tetgen/elephant");
+    setTetMesh("../../../resources/tetgen/cube");
 
     using namespace Eigen;
     using namespace std;
@@ -28,7 +28,7 @@ virtual bool buildScene() override {
           * AngleAxisd(0, VECTOR3::UnitZ());
 
     // the target position
-    VECTOR3 half(0.5, 0.8, 1.0);
+    VECTOR3 half(0.5, 0.5, 1.0);
 
     _initialA           = M;
     _initialTranslation = half - M * half;
@@ -37,10 +37,10 @@ virtual bool buildScene() override {
         (_tetMesh->restVertices())[i] = _initialA * (_tetMesh->restVertices())[i] + _initialTranslation;
     }
 
-    _gravity = VECTOR3(0.0, -0.5, 0.0);
+    _gravity = VECTOR3(0.0, -1.0, 0.0);
 
     // make lambda \approx 10
-    REAL E = 3.0;
+    REAL E = 6.0;
     REAL nu = 0.45;
 
     REAL mu     = VOLUME::HYPERELASTIC::computeMu(E, nu);
