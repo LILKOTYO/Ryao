@@ -17,6 +17,12 @@ struct SpringConstraintManagement : PBDConstraintManagement {
     std::vector<float>  _compressCompliace;
 };
 
+struct VolumeConstraintManagement : PBDConstraintManagement {
+    std::vector<float>  _restVolumes;
+    std::vector<float>  _strechCompliance;
+    std::vector<float>  _compressCompliace;
+};
+
 }
 }
 

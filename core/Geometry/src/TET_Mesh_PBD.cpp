@@ -84,6 +84,13 @@ REAL TET_Mesh_PBD::computeTetVolume(const vector<VECTOR3>& tetVertices) {
     return diff3.dot((diff1).cross(diff2)) / 6.0;
 }
 
+REAL TET_Mesh_PBD::computeTetVolume(const VECTOR3 &v0, const VECTOR3 &v1, const VECTOR3 &v2, const VECTOR3 &v3) {
+    const VECTOR3 diff1 = v1 - v0;
+    const VECTOR3 diff2 = v2 - v0;
+    const VECTOR3 diff3 = v3 - v0;
+    return diff3.dot(diff1.cross(diff2)) / 6.0;
+}
+
 void TET_Mesh_PBD::computeOneRingVolumes(const vector<VECTOR3>& vertices,
                                      const vector<REAL>& tetVolumes, vector<REAL>& oneRingVolumes) {
     unsigned int size = vertices.size();

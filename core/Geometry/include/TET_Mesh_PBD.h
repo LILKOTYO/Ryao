@@ -246,7 +246,6 @@ public:
      */
     VECTOR4I buildSurfaceFlap(const int surfaceID0, const int surfaceID1) const;
 
-protected:
     /**
      * @brief compute the volume of a tet
      *
@@ -254,7 +253,9 @@ protected:
      * @return REAL
      */
     static REAL computeTetVolume(const vector<VECTOR3> &tetVertices);
+    static REAL computeTetVolume(const VECTOR3 &v0, const VECTOR3 &v1, const VECTOR3 &v2, const VECTOR3 &v3);
 
+protected:
     /**
      * @berif compute volumes for tets -- works for rest and deformed, just pass it
      * _restVertices or _vertices, _restTetVolumes.

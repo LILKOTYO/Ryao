@@ -7,7 +7,8 @@ void SpringConstraint::resetConstraint() {
 
 }
 
-void SpringConstraint::solveConstraint(PBDConstraintManagement* management, std::vector<VECTOR3>& outPositions, std::vector<float>& invMass) {
+void SpringConstraint::solveConstraint(PBDConstraintManagement* management,
+                                       std::vector<VECTOR3>& outPositions, std::vector<float>& invMass) {
     if (_involvedVertices.size() != 2) {
         RYAO_ERROR("The number vertices involved in Spring Constraint must be 2!");
         return;
@@ -21,6 +22,7 @@ void SpringConstraint::solveConstraint(PBDConstraintManagement* management, std:
     float& lambda = SpringManagement->_lambdas[_constraintIdx];
     float h = SpringManagement->_deltaT;
     float restLength = SpringManagement->_restLengths[_constraintIdx];
+
     float length = (pos1 - pos0).norm();
     float constraint = length - restLength;
     float compliance = constraint > 0 ? SpringManagement->_strechCompliance[_constraintIdx] : SpringManagement->_compressCompliace[_constraintIdx];
