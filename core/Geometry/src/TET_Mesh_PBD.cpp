@@ -40,6 +40,8 @@ TET_Mesh_PBD::TET_Mesh_PBD(const vector<VECTOR3>& restVertices,
     computeSurfaceTriangleNeighbors();
     computeSurfaceEdgeTriangleNeighbors();
 
+    fill(_mass.begin(), _mass.end(), 1.0f);
+    fill(_invMass.begin(), _invMass.end(), 1.0f);
     // set the collision eps as one centimeter
     // as when use two centimeters, one seems to get into trouble without CCD
     _collisionEps = 0.01;

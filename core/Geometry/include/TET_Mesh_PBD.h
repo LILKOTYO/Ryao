@@ -76,6 +76,11 @@ public:
     int totalVertices() const { return _vertices.size(); };
 
     const int DOFs() const { return _vertices.size() * 3; };
+
+    void setMass(unsigned int index, float value) {
+        _mass[index] = value;
+        _invMass[index] = 1.0f / value;
+    }
     //////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
@@ -359,6 +364,10 @@ protected:
      *
      */
     void computeInvertedVertices();
+
+    // mass and inv mass
+    vector<float> _mass;
+    vector<float> _invMass;
 
     // the core geometry
     vector<VECTOR3> _vertices;
