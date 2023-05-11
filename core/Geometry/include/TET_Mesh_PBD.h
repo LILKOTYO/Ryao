@@ -431,6 +431,9 @@ protected:
     // have your computed the SVDs since the last time you computed F?
     bool _svdsComputed;
 
+    // Whether a volume update has been performed
+    bool _volumesUpdated;
+
     // see if two indices in _vertices (in sorted order)
     // are within the one ring of each other
     map<pair<int, int>, bool> _insideSurfaceVertexOneRing;
