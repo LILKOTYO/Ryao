@@ -18,7 +18,7 @@ virtual bool buildScene() override {
     _sceneName = "bunny_drop";
 
     // read in the mesh file
-    setTetMesh("../../../resources/tetgen/cube");
+    setTetMesh("../../../resources/tetgen/bunny");
 
     using namespace Eigen;
     using namespace std;
