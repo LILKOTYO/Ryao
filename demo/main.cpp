@@ -10,6 +10,7 @@
 #include <Logger.h>
 #include <Timer.h>
 #include "Scene/BunnyDrop.h"
+#include "Scene/PBDBunnyDrop.h"
 
 int main()
 {
