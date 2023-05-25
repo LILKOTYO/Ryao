@@ -12,18 +12,16 @@ void PBDSolver::addConstraint(PBD::PBDConstraint *constraint, PBD::PBDConstraint
         RYAO_ERROR("Constraint or Management is nullptr!");
         return;
     }
-
+    constraint->initConstraint(_deltaT);
+    constraint->resetConstraint();
     _constraints.push_back(constraint);
-    _constraintManagements.push_back(management);
 }
 
 PBD::PBDConstraint* PBDSolver::getConstraintPtr(unsigned int index) {
     return _constraints[index];
 }
 
-PBD::PBDConstraintManagement* PBDSolver::getConstraintManagementPtr(unsigned int index) {
-    return _constraintManagements[index];
-}
+
 
 
 }

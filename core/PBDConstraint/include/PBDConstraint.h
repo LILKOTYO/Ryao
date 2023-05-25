@@ -11,6 +11,10 @@ namespace PBD {
 
 class PBDConstraint {
 public:
+    PBDConstraint() {};
+    virtual ~PBDConstraint() {};
+
+    virtual void initConstraint(float deltaT) = 0;
     virtual void resetConstraint() = 0;
     virtual void solveConstraint(PBDConstraintManagement* management, std::vector<VECTOR3>& outPositions, std::vector<float>& invMass) = 0;
 protected:

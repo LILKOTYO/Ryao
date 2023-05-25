@@ -6,10 +6,13 @@
 namespace Ryao {
 namespace PBD {
 
-class SpringConstraint : PBDConstraint {
+class SpringConstraint : public PBDConstraint {
 public:
-    void resetConstraint();
-    void solveConstraint(PBDConstraintManagement* management, std::vector<VECTOR3>& outPositions, std::vector<float>& invMass);
+    virtual void initConstraint(float deltaT);
+    virtual void resetConstraint();
+    virtual void solveConstraint(PBDConstraintManagement* management, std::vector<VECTOR3>& outPositions, std::vector<float>& invMass);
+private:
+    static SpringConstraintManagement* _management;
 };
 
 }

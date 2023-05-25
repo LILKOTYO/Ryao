@@ -3,6 +3,12 @@
 namespace Ryao {
 namespace PBD {
 
+SpringConstraintManagement* SpringConstraint::_management = new SpringConstraintManagement();
+
+void SpringConstraint::initConstraint(float deltaT) {
+    _management->_deltaT = deltaT;
+}
+
 void SpringConstraint::resetConstraint() {
 
 }

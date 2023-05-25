@@ -18,13 +18,12 @@ public:
 
     void addConstraint(PBD::PBDConstraint* constraint, PBD::PBDConstraintManagement* management);
     PBD::PBDConstraint* getConstraintPtr(unsigned int index);
-    PBD::PBDConstraintManagement* getConstraintManagementPtr(unsigned int index);
 
 private:
     TET_Mesh_PBD& _tetMesh;
     int _DOFs;
+    float _deltaT;
     std::vector<PBD::PBDConstraint*> _constraints;
-    std::vector<PBD::PBDConstraintManagement*> _constraintManagements;
 };
 
 }
