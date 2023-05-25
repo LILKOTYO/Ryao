@@ -8,11 +8,15 @@ namespace PBD {
 
 class SpringConstraint : public PBDConstraint {
 public:
-    virtual void initConstraint(float deltaT);
+    virtual void addConstraint(std::vector<unsigned int>& vertices, std::vector<VECTOR3>& pos);
     virtual void resetConstraint();
-    virtual void solveConstraint(PBDConstraintManagement* management, std::vector<VECTOR3>& outPositions, std::vector<float>& invMass);
+    virtual void solveConstraint(std::vector<VECTOR3>& outPositions, std::vector<float>& invMass, float deltaT);
 private:
-    static SpringConstraintManagement* _management;
+    REAL length(VECTOR3& p1, VECTOR3& p2);
+
+    std::vector<float>  _restLengths;
+    std::vector<float>  _strechCompliance;
+    std::vector<float>  _compressCompliace;
 };
 
 }

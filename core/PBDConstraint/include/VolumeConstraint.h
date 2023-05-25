@@ -8,8 +8,12 @@ namespace PBD {
 
 class VolumeConstraint : PBDConstraint {
 public:
-    void resetConstraint();
-    void solveConstraint(PBDConstraintManagement* management, std::vector<VECTOR3>& outPositions, std::vector<float>& invMass);
+    virtual void resetConstraint();
+    virtual void solveConstraint(std::vector<VECTOR3>& outPositions, std::vector<float>& invMass, float deltaT);
+private:
+    std::vector<float>  _restVolumes;
+    std::vector<float>  _strechCompliance;
+    std::vector<float>  _compressCompliace;
 };
 
 }

@@ -3,7 +3,6 @@
 
 #include "Platform/include/RYAO.h"
 #include "Platform/include/Logger.h"
-#include "PBDConstraintManagement.h"
 #include <vector>
 
 namespace Ryao {
@@ -14,12 +13,12 @@ public:
     PBDConstraint() {};
     virtual ~PBDConstraint() {};
 
-    virtual void initConstraint(float deltaT) = 0;
+    virtual void addConstraint(std::vector<unsigned int>& vertices, std::vector<VECTOR3>& pos);
     virtual void resetConstraint() = 0;
-    virtual void solveConstraint(PBDConstraintManagement* management, std::vector<VECTOR3>& outPositions, std::vector<float>& invMass) = 0;
+    virtual void solveConstraint(std::vector<VECTOR3>& outPositions, std::vector<float>& invMass, float deltaT) = 0;
 protected:
-    std::vector<unsigned int> _involvedVertices;
-    unsigned int _constraintIdx;
+    std::vector<float>                      _lambdas;
+    std::vector<std::vector<unsigned int>>  _involvedVertices;
 };
 
 }

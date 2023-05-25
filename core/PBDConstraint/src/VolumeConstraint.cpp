@@ -8,8 +8,8 @@ void VolumeConstraint::resetConstraint() {
 
 }
 
-void VolumeConstraint::solveConstraint(Ryao::PBD::PBDConstraintManagement *management,
-                                       std::vector<VECTOR3> &outPositions, std::vector<float> &invMass) {
+void VolumeConstraint::solveConstraint(std::vector<VECTOR3>& outPositions,
+                                       std::vector<float>& invMass, float deltaT) {
     if (_involvedVertices.size() != 4) {
         RYAO_ERROR("The number vertices involved in Volume Constraint must be 4!");
         return;

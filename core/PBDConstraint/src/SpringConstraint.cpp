@@ -3,18 +3,22 @@
 namespace Ryao {
 namespace PBD {
 
-SpringConstraintManagement* SpringConstraint::_management = new SpringConstraintManagement();
+void SpringConstraint::addConstraint(std::vector<unsigned int> &vertices, std::vector<VECTOR3>& pos) {
+    if (vertices.size() != 2) {
+        RYAO_ERROR("Each SpringConstraint should have 2 input vertices");
+        return;
+    }
+    PBDConstraint::addConstraint(vertices);
 
-void SpringConstraint::initConstraint(float deltaT) {
-    _management->_deltaT = deltaT;
+
 }
 
 void SpringConstraint::resetConstraint() {
 
 }
 
-void SpringConstraint::solveConstraint(PBDConstraintManagement* management,
-                                       std::vector<VECTOR3>& outPositions, std::vector<float>& invMass) {
+void SpringConstraint::solveConstraint(std::vector<VECTOR3>& outPositions,
+                                       std::vector<float>& invMass, float deltaT) {
     if (_involvedVertices.size() != 2) {
         RYAO_ERROR("The number vertices involved in Spring Constraint must be 2!");
         return;
@@ -40,6 +44,10 @@ void SpringConstraint::solveConstraint(PBDConstraintManagement* management,
     pos0 -= gradient * dlambda * invMass0;
     pos1 += gradient * dlambda * invMass1;
     lambda += dlambda;
+}
+
+REAL SpringConstraint::length(VECTOR3& p1, VECTOR3& p2) {
+    return (p1 - p2).norm();
 }
 
 }

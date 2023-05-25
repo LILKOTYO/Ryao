@@ -16,7 +16,7 @@ public:
     PBDSolver(TET_Mesh_PBD& tetMesh);
     ~PBDSolver() {};
 
-    void addConstraint(PBD::PBDConstraint* constraint, PBD::PBDConstraintManagement* management);
+    void addConstraints(PBD::PBDConstraint* constraint);
     PBD::PBDConstraint* getConstraintPtr(unsigned int index);
 
 private:
