@@ -10,13 +10,14 @@ class SpringConstraint : public PBDConstraint {
 public:
     virtual void addConstraint(std::vector<unsigned int>& vertices, std::vector<VECTOR3>& pos);
     virtual void resetConstraint();
-    virtual void solveConstraint(std::vector<VECTOR3>& outPositions, std::vector<float>& invMass, float deltaT);
+    virtual void solveConstraint(std::vector<VECTOR3>& outPositions, std::vector<REAL>& invMass,
+                                 std::vector<bool>& isFixed, REAL deltaT);
 private:
-    REAL length(VECTOR3& p1, VECTOR3& p2);
+    REAL Length(VECTOR3& p1, VECTOR3& p2);
 
-    std::vector<float>  _restLengths;
-    std::vector<float>  _strechCompliance;
-    std::vector<float>  _compressCompliace;
+    std::vector<REAL>  _restLengths;
+    std::vector<REAL>  _strechCompliance;
+    std::vector<REAL>  _compressCompliace;
 };
 
 }

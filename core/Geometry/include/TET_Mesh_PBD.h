@@ -27,6 +27,14 @@ public:
     /////////////////////////////////////////////////////////////////////////////////////////
     //----------------------------------accessors------------------------------------------//
     /////////////////////////////////////////////////////////////////////////////////////////
+    const vector<REAL> &mass() const { return _mass; };
+
+    vector<REAL> &mass() { return _mass; };
+
+    const vector<REAL> &invMass() const { return _invMass; };
+
+    vector<REAL> &invMass() { return _invMass; };
+
     const vector<VECTOR3> &vertices() const { return _vertices; };
 
     vector<VECTOR3> &vertices() { return _vertices; };
@@ -367,8 +375,8 @@ protected:
     void computeInvertedVertices();
 
     // mass and inv mass
-    vector<float> _mass;
-    vector<float> _invMass;
+    vector<REAL> _mass;
+    vector<REAL> _invMass;
 
     // the core geometry
     vector<VECTOR3> _vertices;

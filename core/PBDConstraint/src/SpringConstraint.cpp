@@ -8,45 +8,45 @@ void SpringConstraint::addConstraint(std::vector<unsigned int> &vertices, std::v
         RYAO_ERROR("Each SpringConstraint should have 2 input vertices");
         return;
     }
-    PBDConstraint::addConstraint(vertices);
-
-
+    PBDConstraint::addConstraint(vertices, pos);
+    REAL restLength = Length(pos[0], pos[1]);
+    _restLengths.push_back(restLength);
+    _strechCompliance.push_back(0.0);
+    _compressCompliace.push_back(0.0);
 }
 
 void SpringConstraint::resetConstraint() {
-
+    std::fill(_lambdas.begin(), _lambdas.end(), 0.0);
 }
 
-void SpringConstraint::solveConstraint(std::vector<VECTOR3>& outPositions,
-                                       std::vector<float>& invMass, float deltaT) {
-    if (_involvedVertices.size() != 2) {
-        RYAO_ERROR("The number vertices involved in Spring Constraint must be 2!");
-        return;
+void SpringConstraint::solveConstraint(std::vector<VECTOR3>& outPositions, std::vector<REAL>& invMass,
+                                       std::vector<bool>& isFixed, REAL deltaT) {
+    for (int i = 0; i < _involvedVertices.size(); i += 2) {
+        int constarintIdx = i / 2;
+        VECTOR3& pos0 = outPositions[_involvedVertices[constarintIdx][0]];
+        VECTOR3& pos1 = outPositions[_involvedVertices[constarintIdx][1]];
+        REAL invMass0 = invMass[_involvedVertices[constarintIdx][0]];
+        REAL invMass1 = invMass[_involvedVertices[constarintIdx][1]];
+        REAL& lambda = _lambdas[constarintIdx];
+        REAL restLength = _restLengths[constarintIdx];
+
+        REAL length = Length(pos0, pos1);
+        REAL constraint = length - restLength;
+        REAL compliance = constraint > 0 ? _strechCompliance[constarintIdx] : _compressCompliace[constarintIdx];
+        compliance /= deltaT * deltaT;
+
+        REAL dlambda = -(constraint + compliance * lambda) / (invMass0 + invMass1 + compliance);
+        VECTOR3 gradient = (pos1 - pos0).normalized();
+
+        if (!isFixed[_involvedVertices[constarintIdx][0]])
+            pos0 += gradient * dlambda * invMass0;
+        if (!isFixed[_involvedVertices[constarintIdx][1]])
+            pos1 -= gradient * dlambda * invMass1;
+        lambda += dlambda;
     }
-    auto SpringManagement = (SpringConstraintManagement*)management;
-
-    VECTOR3& pos0 = outPositions[_involvedVertices[0]];
-    VECTOR3& pos1 = outPositions[_involvedVertices[1]];
-    float invMass0 = invMass[_involvedVertices[0]];
-    float invMass1 = invMass[_involvedVertices[1]];
-    float& lambda = SpringManagement->_lambdas[_constraintIdx];
-    float h = SpringManagement->_deltaT;
-    float restLength = SpringManagement->_restLengths[_constraintIdx];
-
-    float length = (pos1 - pos0).norm();
-    float constraint = length - restLength;
-    float compliance = constraint > 0 ? SpringManagement->_strechCompliance[_constraintIdx] : SpringManagement->_compressCompliace[_constraintIdx];
-    compliance /= h * h;
-
-    float dlambda = -(constraint + compliance * lambda) / (invMass0 + invMass1 + compliance);
-    VECTOR3 gradient = (pos1 - pos0).normalized();
-
-    pos0 -= gradient * dlambda * invMass0;
-    pos1 += gradient * dlambda * invMass1;
-    lambda += dlambda;
 }
 
-REAL SpringConstraint::length(VECTOR3& p1, VECTOR3& p2) {
+REAL SpringConstraint::Length(VECTOR3& p1, VECTOR3& p2) {
     return (p1 - p2).norm();
 }
 

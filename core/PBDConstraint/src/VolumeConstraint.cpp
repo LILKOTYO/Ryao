@@ -4,52 +4,63 @@
 namespace Ryao {
 namespace PBD {
 
-void VolumeConstraint::resetConstraint() {
-
-}
-
-void VolumeConstraint::solveConstraint(std::vector<VECTOR3>& outPositions,
-                                       std::vector<float>& invMass, float deltaT) {
-    if (_involvedVertices.size() != 4) {
+void VolumeConstraint::addConstraint(std::vector<unsigned int>& vertices, std::vector<VECTOR3>& pos) {
+    if (vertices.size() != 4) {
         RYAO_ERROR("The number vertices involved in Volume Constraint must be 4!");
         return;
     }
-    auto VolumeManagement = (VolumeConstraintManagement*)management;
+    _involvedVertices.push_back(vertices);
+    _restVolumes.push_back(Volume(pos[vertices[0]], pos[vertices[1]], pos[vertices[2]], pos[vertices[3]]));
+    _strechCompliance.push_back(0.0);
+    _compressCompliace.push_back(0.0);
+}
 
-    VECTOR3& pos0 = outPositions[_involvedVertices[0]];
-    VECTOR3& pos1 = outPositions[_involvedVertices[1]];
-    VECTOR3& pos2 = outPositions[_involvedVertices[2]];
-    VECTOR3& pos3 = outPositions[_involvedVertices[3]];
-    float invMass0 = invMass[_involvedVertices[0]];
-    float invMass1 = invMass[_involvedVertices[1]];
-    float invMass2 = invMass[_involvedVertices[2]];
-    float invMass3 = invMass[_involvedVertices[3]];
-    float& lambda = VolumeManagement->_lambdas[_constraintIdx];
-    float h = VolumeManagement->_deltaT;
-    float restVolume = VolumeManagement->_restVolumes[_constraintIdx];
+void VolumeConstraint::resetConstraint() {
+    std::fill(_lambdas.begin(), _lambdas.end(), 0.0);
+}
 
-    float volume = TET_Mesh_PBD::computeTetVolume(pos0, pos1, pos2, pos3);
-    float constraint = volume - restVolume;
-    float compliance = constraint > 0 ? VolumeManagement->_strechCompliance[_constraintIdx] : VolumeManagement->_compressCompliace[_constraintIdx];
-    compliance /= h * h;
+void VolumeConstraint::solveConstraint(std::vector<VECTOR3>& outPositions, std::vector<REAL>& invMass,
+                                       std::vector<bool>& isFixed, REAL deltaT) {
+    for (int i = 0; i < _involvedVertices.size(); i += 4) {
+        int constraintIdx = i / 4;
+        VECTOR3& pos0 = outPositions[_involvedVertices[constraintIdx][0]];
+        VECTOR3& pos1 = outPositions[_involvedVertices[constraintIdx][1]];
+        VECTOR3& pos2 = outPositions[_involvedVertices[constraintIdx][2]];
+        VECTOR3& pos3 = outPositions[_involvedVertices[constraintIdx][3]];
+        REAL invMass0 = invMass[_involvedVertices[constraintIdx][0]];
+        REAL invMass1 = invMass[_involvedVertices[constraintIdx][1]];
+        REAL invMass2 = invMass[_involvedVertices[constraintIdx][2]];
+        REAL invMass3 = invMass[_involvedVertices[constraintIdx][3]];
+        REAL& lambda = _lambdas[constraintIdx];
+        REAL restVolume = _restVolumes[constraintIdx];
 
-    VECTOR3 gradient0 = (pos3 - pos1).cross(pos2 - pos1) / 6.0;
-    VECTOR3 gradient1 = (pos2 - pos0).cross(pos3 - pos0) / 6.0;
-    VECTOR3 gradient2 = (pos3 - pos0).cross(pos1 - pos0) / 6.0;
-    VECTOR3 gradient3 = (pos1 - pos0).cross(pos2 - pos0) / 6.0;
+        REAL volume = Volume(pos0, pos1, pos2, pos3);
+        REAL constraint = volume - restVolume;
+        REAL compliance = constraint > 0 ? _strechCompliance[constraintIdx] : _compressCompliace[constraintIdx];
+        compliance /= deltaT * deltaT;
 
-    float dCWdC = invMass0 * gradient0.squaredNorm() +
+        VECTOR3 gradient0 = (pos3 - pos1).cross(pos2 - pos1) / 6.0;
+        VECTOR3 gradient1 = (pos2 - pos0).cross(pos3 - pos0) / 6.0;
+        VECTOR3 gradient2 = (pos3 - pos0).cross(pos1 - pos0) / 6.0;
+        VECTOR3 gradient3 = (pos1 - pos0).cross(pos2 - pos0) / 6.0;
+
+        REAL dCWdC = invMass0 * gradient0.squaredNorm() +
             invMass1 * gradient1.squaredNorm() +
             invMass2 * gradient2.squaredNorm() +
             invMass3 * gradient3.squaredNorm();
 
-    float dlambda = -(constraint + compliance * lambda) / (dCWdC + compliance);
+        REAL dlambda = -(constraint + compliance * lambda) / (dCWdC + compliance);
 
-    pos0 += dlambda * invMass0 * gradient0;
-    pos1 += dlambda * invMass1 * gradient1;
-    pos2 += dlambda * invMass2 * gradient2;
-    pos3 += dlambda * invMass3 * gradient3;
-    lambda += dlambda;
+        if (!isFixed[_involvedVertices[constraintIdx][0]])
+            pos0 += dlambda * invMass0 * gradient0;
+        if (!isFixed[_involvedVertices[constraintIdx][1]])
+            pos1 += dlambda * invMass1 * gradient1;
+        if (!isFixed[_involvedVertices[constraintIdx][2]])
+            pos2 += dlambda * invMass2 * gradient2;
+        if (!isFixed[_involvedVertices[constraintIdx][3]])
+            pos3 += dlambda * invMass3 * gradient3;
+        lambda += dlambda;
+    }
 }
 
 }
