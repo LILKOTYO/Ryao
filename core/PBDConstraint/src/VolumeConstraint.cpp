@@ -40,10 +40,10 @@ void VolumeConstraint::solveConstraint(std::vector<VECTOR3>& outPositions, std::
         REAL compliance = constraint > 0 ? _strechCompliance[constraintIdx] : _compressCompliace[constraintIdx];
         compliance /= deltaT * deltaT;
 
-        VECTOR3 gradient0 = (pos3 - pos1).cross(pos2 - pos1) / 6.0;
-        VECTOR3 gradient1 = (pos2 - pos0).cross(pos3 - pos0) / 6.0;
-        VECTOR3 gradient2 = (pos3 - pos0).cross(pos1 - pos0) / 6.0;
-        VECTOR3 gradient3 = (pos1 - pos0).cross(pos2 - pos0) / 6.0;
+        VECTOR3 gradient0 = (pos3 - pos1).cross(pos2 - pos1);
+        VECTOR3 gradient1 = (pos2 - pos0).cross(pos3 - pos0);
+        VECTOR3 gradient2 = (pos3 - pos0).cross(pos1 - pos0);
+        VECTOR3 gradient3 = (pos1 - pos0).cross(pos2 - pos0);
 
         REAL dCWdC = invMass0 * gradient0.squaredNorm() +
             invMass1 * gradient1.squaredNorm() +
@@ -65,7 +65,7 @@ void VolumeConstraint::solveConstraint(std::vector<VECTOR3>& outPositions, std::
 }
 
 REAL VolumeConstraint::Volume(VECTOR3 &p1, VECTOR3 &p2, VECTOR3 &p3, VECTOR3 &p4) {
-    return ((p2 - p1).cross(p3 - p1)).dot(p4 - p1) / 6.0;
+    return ((p2 - p1).cross(p3 - p1)).dot(p4 - p1);
 }
 
 }
