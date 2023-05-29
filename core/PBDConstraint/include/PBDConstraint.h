@@ -13,13 +13,13 @@ public:
     PBDConstraint() {};
     virtual ~PBDConstraint() {};
 
-    virtual void addConstraint(std::vector<unsigned int>& vertices, std::vector<VECTOR3>& pos);
+    virtual void addConstraint(std::vector<int>& vertices, std::vector<VECTOR3>& pos);
     virtual void resetConstraint() = 0;
     virtual void solveConstraint(std::vector<VECTOR3>& outPositions, std::vector<REAL>& invMass,
                                  std::vector<bool>& isFixed, REAL deltaT) = 0;
 protected:
     std::vector<REAL>                       _lambdas;
-    std::vector<std::vector<unsigned int>>  _involvedVertices;
+    std::vector<std::vector<int>>  _involvedVertices;
 };
 
 }

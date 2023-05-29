@@ -177,7 +177,7 @@ void Viewer::setSimulation(Ryao::Simulation *sim) {
 
 void Viewer::setSimulation(Ryao::PBDSimulation *sim) {
     _pbdSimulation = sim;
-    _simulation == nullptr;
+    _simulation = nullptr;
 }
 
 void Viewer::addViewerCube(const VECTOR3 &center, const REAL &scale, Material& material) {

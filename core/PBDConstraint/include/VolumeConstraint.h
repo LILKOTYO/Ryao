@@ -6,9 +6,9 @@
 namespace Ryao {
 namespace PBD {
 
-class VolumeConstraint : PBDConstraint {
+class VolumeConstraint : public PBDConstraint {
 public:
-    virtual void addConstraint(std::vector<unsigned int>& vertices, std::vector<VECTOR3>& pos);
+    virtual void addConstraint(std::vector<int>& vertices, std::vector<VECTOR3>& pos);
     virtual void resetConstraint();
     virtual void solveConstraint(std::vector<VECTOR3>& outPositions, std::vector<REAL>& invMass,
                                  std::vector<bool>& isFixed, REAL deltaT);

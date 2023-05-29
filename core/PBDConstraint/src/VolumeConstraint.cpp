@@ -4,12 +4,13 @@
 namespace Ryao {
 namespace PBD {
 
-void VolumeConstraint::addConstraint(std::vector<unsigned int>& vertices, std::vector<VECTOR3>& pos) {
+void VolumeConstraint::addConstraint(std::vector<int>& vertices, std::vector<VECTOR3>& pos) {
     if (vertices.size() != 4) {
         RYAO_ERROR("The number vertices involved in Volume Constraint must be 4!");
         return;
     }
     _involvedVertices.push_back(vertices);
+    _lambdas.push_back(0.0);
     _restVolumes.push_back(Volume(pos[vertices[0]], pos[vertices[1]], pos[vertices[2]], pos[vertices[3]]));
     _strechCompliance.push_back(0.0);
     _compressCompliace.push_back(0.0);

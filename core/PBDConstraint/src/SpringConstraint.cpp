@@ -3,13 +3,14 @@
 namespace Ryao {
 namespace PBD {
 
-void SpringConstraint::addConstraint(std::vector<unsigned int> &vertices, std::vector<VECTOR3>& pos) {
+void SpringConstraint::addConstraint(std::vector<int> &vertices, std::vector<VECTOR3>& pos) {
     if (vertices.size() != 2) {
         RYAO_ERROR("Each SpringConstraint should have 2 input vertices");
         return;
     }
-    PBDConstraint::addConstraint(vertices, pos);
-    REAL restLength = Length(pos[0], pos[1]);
+    _involvedVertices.push_back(vertices);
+    _lambdas.push_back(0.0);
+    REAL restLength = Length(pos[vertices[0]], pos[vertices[1]]);
     _restLengths.push_back(restLength);
     _strechCompliance.push_back(0.0);
     _compressCompliace.push_back(0.0);
@@ -39,9 +40,9 @@ void SpringConstraint::solveConstraint(std::vector<VECTOR3>& outPositions, std::
         VECTOR3 gradient = (pos1 - pos0).normalized();
 
         if (!isFixed[_involvedVertices[constarintIdx][0]])
-            pos0 += gradient * dlambda * invMass0;
+            pos0 -= gradient * dlambda * invMass0;
         if (!isFixed[_involvedVertices[constarintIdx][1]])
-            pos1 -= gradient * dlambda * invMass1;
+            pos1 += gradient * dlambda * invMass1;
         lambda += dlambda;
     }
 }

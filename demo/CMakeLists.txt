@@ -53,6 +53,7 @@ target_link_libraries(${PROJECT_NAME}
     Ryao::Hyperelastic
     Ryao::Damping
     Ryao::Solver
+    Ryao::PBDConstraint
 )
 
 find_package(spdlog CONFIG REQUIRED)

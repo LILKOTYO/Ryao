@@ -67,11 +67,17 @@ void PBDSolver::updateInertia(std::vector<VECTOR3>& outPositions, std::vector<RE
         }
 
         VECTOR3& pos = outPositions[i];
+        VECTOR3 pre = pos;
         VECTOR3& vel = _velocity[i];
         REAL w = invMass[i];
 
         vel += (_gravity + _wind) * _deltaT * w;
+        vel *= 0.8;
         pos += vel * _deltaT;
+        if (pos[1] <= 0) {
+            pos = pre;
+            pos[1] = 0.0;
+        }
         _projection[i] = VECTOR3(pos[0], pos[1], pos[2]);
     }
 }
