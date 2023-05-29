@@ -144,11 +144,21 @@ void Viewer::launch() {
                 _viewerTriMeshList[i]->Draw(_camera, _lightDir, _lightPoint, _SCR_WIDTH, _SCR_HEIGHT);
         }
 
-        if (_viewerTetMeshList.size() > 0) {
-            for (int i = 0; i < _viewerTetMeshList.size(); i++)
-                _viewerTetMeshList[i]->Draw(_camera, _simulation->getTetMeshVertices(), _SCR_WIDTH, _SCR_HEIGHT);
+        if (_simulation != nullptr) {
+            if (_viewerTetMeshList.size() > 0) {
+                for (int i = 0; i < _viewerTetMeshList.size(); i++)
+                    _viewerTetMeshList[i]->Draw(_camera, _simulation->getTetMeshVertices(), _SCR_WIDTH, _SCR_HEIGHT);
+            }
+            _simulation->stepSimulation();
+        } else if (_pbdSimulation != nullptr) {
+            if (_viewerTetMeshList.size() > 0) {
+                for (int i = 0; i < _viewerTetMeshList.size(); i++)
+                    _viewerTetMeshList[i]->Draw(_camera, _pbdSimulation->getTetMeshVertices(), _SCR_WIDTH, _SCR_HEIGHT);
+            }
+            _pbdSimulation->stepSimulation();
+        } else {
+            RYAO_ERROR("No Simulation!");
         }
-        _simulation->stepSimulation();
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
         glfwSwapBuffers(_window);
@@ -162,6 +172,12 @@ void Viewer::setReferencePlane(int size) {
 
 void Viewer::setSimulation(Ryao::Simulation *sim) {
     _simulation = sim;
+    _pbdSimulation = nullptr;
+}
+
+void Viewer::setSimulation(Ryao::PBDSimulation *sim) {
+    _pbdSimulation = sim;
+    _simulation == nullptr;
 }
 
 void Viewer::addViewerCube(const VECTOR3 &center, const REAL &scale, Material& material) {
@@ -202,43 +218,73 @@ void Viewer::addViewerSphere(const VECTOR3 &center, const REAL &scale, Material 
 }
 
 void Viewer::registerShapeToViewer() {
-    if (_simulation == nullptr) {
+    if (_simulation != nullptr) {
+        std::vector<KINEMATIC_SHAPE*> shapeList = _simulation->getShapeList();
+        if (shapeList.size() == 0) {
+            RYAO_ERROR("No shape in the simulation!");
+            return;
+        }
+        VECTOR3 ambi(0.2, 0.3, 0.3);
+        VECTOR3 diff(0.2, 0.3, 0.3);
+        VECTOR3 spec(0.2, 0.3, 0.3);
+        Material material(ambi, diff, spec, 0.3);
+        for (int i = 0; i < shapeList.size(); i++) {
+            vector<TriVertex> V;
+            vector<unsigned int> I;
+            shapeList[i]->generateViewerMesh(V, I);
+            ViewerTriMesh* shape = new ViewerTriMesh(V, I, material, shapeList[i]->getRenderType());
+            addViewerTriMesh(shape);
+        }
+    } else if (_pbdSimulation != nullptr) {
+        std::vector<KINEMATIC_SHAPE*> shapeList = _pbdSimulation->getShapeList();
+        if (shapeList.size() == 0) {
+            RYAO_ERROR("No shape in the simulation!");
+            return;
+        }
+        VECTOR3 ambi(0.2, 0.3, 0.3);
+        VECTOR3 diff(0.2, 0.3, 0.3);
+        VECTOR3 spec(0.2, 0.3, 0.3);
+        Material material(ambi, diff, spec, 0.3);
+        for (int i = 0; i < shapeList.size(); i++) {
+            vector<TriVertex> V;
+            vector<unsigned int> I;
+            shapeList[i]->generateViewerMesh(V, I);
+            ViewerTriMesh* shape = new ViewerTriMesh(V, I, material, shapeList[i]->getRenderType());
+            addViewerTriMesh(shape);
+        }
+    } else {
         RYAO_ERROR("Set the viewer's simulation first!");
         return;
-    }
-    std::vector<KINEMATIC_SHAPE*> shapeList = _simulation->getShapeList();
-    if (shapeList.size() == 0) {
-        RYAO_ERROR("No shape in the simulation!");
-        return;
-    }
-    VECTOR3 ambi(0.2, 0.3, 0.3);
-    VECTOR3 diff(0.2, 0.3, 0.3);
-    VECTOR3 spec(0.2, 0.3, 0.3);
-    Material material(ambi, diff, spec, 0.3);
-    for (int i = 0; i < shapeList.size(); i++) {
-        vector<TriVertex> V;
-        vector<unsigned int> I;
-        shapeList[i]->generateViewerMesh(V, I);
-        ViewerTriMesh* shape = new ViewerTriMesh(V, I, material, shapeList[i]->getRenderType());
-        addViewerTriMesh(shape);
     }
 }
 
 void Viewer:: registerTETMeshToViewer() {
-    if (_simulation == nullptr) {
+    if (_simulation != nullptr) {
+        VECTOR3 ambi(0.2, 0.3, 0.3);
+        VECTOR3 diff(0.2, 0.3, 0.3);
+        VECTOR3 spec(0.2, 0.3, 0.3);
+        Material material(ambi, diff, spec, 0.3);
+        vector<TetVertex> V;
+        vector<unsigned int> I;
+        _simulation->getTETMeshRenderData(V, I);
+
+        ViewerTetMesh* tetmesh = new ViewerTetMesh(V, I, material);
+        addViewerTetMesh(tetmesh);
+    } else if (_pbdSimulation != nullptr) {
+        VECTOR3 ambi(0.2, 0.3, 0.3);
+        VECTOR3 diff(0.2, 0.3, 0.3);
+        VECTOR3 spec(0.2, 0.3, 0.3);
+        Material material(ambi, diff, spec, 0.3);
+        vector<TetVertex> V;
+        vector<unsigned int> I;
+        _pbdSimulation->getTETMeshRenderData(V, I);
+
+        ViewerTetMesh* tetmesh = new ViewerTetMesh(V, I, material);
+        addViewerTetMesh(tetmesh);
+    } else {
         RYAO_ERROR("Set the viewer's simulation first!");
         return;
     }
-    VECTOR3 ambi(0.2, 0.3, 0.3);
-    VECTOR3 diff(0.2, 0.3, 0.3);
-    VECTOR3 spec(0.2, 0.3, 0.3);
-    Material material(ambi, diff, spec, 0.3);
-    vector<TetVertex> V;
-    vector<unsigned int> I;
-    _simulation->getTETMeshRenderData(V, I);
-
-    ViewerTetMesh* tetmesh = new ViewerTetMesh(V, I, material);
-    addViewerTetMesh(tetmesh);
 }
 
 }

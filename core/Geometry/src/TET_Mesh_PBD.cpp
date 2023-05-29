@@ -1,12 +1,8 @@
-//
-// Created by Chengye Liao on 2023/5/11.
-//
 #include "TET_Mesh_PBD.h"
 #include "LineIntersect.h"
 #include "Platform/include/Timer.h"
 #include "Platform/include/CollisionUtils.h"
 #include "Platform/include/MatrixUtils.h"
-#include "Platform/include/EigenUtils.h"
 #include "Platform/include/RandomUtils.h"
 #include "Platform/include/Logger.h"
 #include <float.h>
@@ -40,12 +36,13 @@ TET_Mesh_PBD::TET_Mesh_PBD(const vector<VECTOR3>& restVertices,
     computeSurfaceTriangleNeighbors();
     computeSurfaceEdgeTriangleNeighbors();
 
+    _mass.resize(_vertices.size());
+    _invMass.resize(_vertices.size());
     fill(_mass.begin(), _mass.end(), 1.0f);
     fill(_invMass.begin(), _invMass.end(), 1.0f);
     // set the collision eps as one centimeter
     // as when use two centimeters, one seems to get into trouble without CCD
     _collisionEps = 0.01;
-    //_collisionMaterial = NULL; // experimental
     _svdsComputed = false;
     _volumesUpdated = false;
 

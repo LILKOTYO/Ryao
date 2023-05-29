@@ -11,6 +11,7 @@
 #include "Timer.h"
 #include "Arrow.h"
 #include "Scene/Simulation.h"
+#include "Scene/PBDSimulation.h"
 #include <vector>
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
@@ -77,6 +78,7 @@ public:
 	void setReferencePlane(int size);
 	void setisDrag(bool flag);
     void setSimulation(Simulation* sim);
+    void setSimulation(PBDSimulation* sim);
 
 	double* getLastX();
 	double* getLastY();
@@ -103,6 +105,7 @@ private:
 
 	// widgets
     Simulation* _simulation;
+    PBDSimulation* _pbdSimulation;
 	ReferencePlane* _referencePlane;
 	Camera _camera;
 	GLFWwindow* _window;

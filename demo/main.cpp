@@ -24,12 +24,19 @@ int main()
 
     // add these shapes to simulation by
     // SOLVER::addKinematicCollisionObject
-    Ryao::Simulation* simulation = new Ryao::BunnyDrop();
+
+// For implicit Euler Simulation
+//    Ryao::Simulation* simulation = new Ryao::BunnyDrop();
+//    simulation->buildScene();
+//
+//    viewer.setSimulation(simulation);
+//
+//    viewer.registerShapeToViewer();
+//    viewer.registerTETMeshToViewer();
+
+// For XPBD Simulation
+    Ryao::PBDSimulation* simulation = new Ryao::PBDBunnyDrop();
     simulation->buildScene();
-//    simulation->addCube(VECTOR3(1.0, 0.0, 0.0), 0.5);
-//    simulation->addCylinder(VECTOR3(-1.0, 0.0, 0.0), 0.3, 1.0, 180);
-//    simulation->addSphere(VECTOR3(0.0, 1.0, 0.0), 0.3);
-//    simulation->setTetMesh("../../../resources/tetgen/bunny");
 
     viewer.setSimulation(simulation);
 

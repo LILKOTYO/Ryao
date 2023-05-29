@@ -1,28 +1,26 @@
-#ifndef SIMULATION_H
-#define SIMULATION_H
+#ifndef RYAO_PBDSIMULATION_H
+#define RYAO_PBDSIMULATION_H
 
 #include "Platform/include/RYAO.h"
+#include "Platform/include/Logger.h"
 #include "Geometry/include/Cube.h"
 #include "Geometry/include/Cylinder.h"
 #include "Geometry/include/Sphere.h"
-#include "Geometry/include/TET_Mesh.h"
+#include "Geometry/include/TET_Mesh_PBD.h"
 #include "Geometry/include/TET_Mesh_Faster.h"
-#include "Hyperelastic/include/StVK.h"
-#include "Hyperelastic/include/ARAP.h"
-#include "Hyperelastic/include/SNH.h"
-#include "Hyperelastic/include/SNHWithBarrier.h"
-#include "Hyperelastic/include/NeoHookeanBW.h"
-#include "Solver/include/SOLVER.h"
-#include "Solver/include/BackwardEulerVelocity.h"
-#include "Platform/include/Logger.h"
+#include "PBDConstraint/include/PBDConstraint.h"
+#include "PBDConstraint/include/SpringConstraint.h"
+#include "PBDConstraint/include/VolumeConstraint.h"
+#include "Solver/include/PBDSolver.h"
+
 #include <string>
 
 namespace Ryao {
 
-class Simulation {
+class PBDSimulation {
 public:
     // initialize the scene
-    Simulation() {
+    PBDSimulation() {
         _pauseFrame = -2;
         _frameNumber = 0;
         _normalizedVertices = false;
@@ -36,7 +34,7 @@ public:
         _hyperelastic = nullptr;
     }
 
-    ~Simulation() {
+    ~PBDSimulation() {
         delete _solver;
         delete _tetMesh;
         delete _hyperelastic;
@@ -54,9 +52,7 @@ public:
 
     // simulation loop
     virtual void stepSimulation(const bool verbose = true) {
-        _solver->externalForces().setZero();
-        _solver->addGravity(_gravity);
-        _solver->solve(verbose);
+        _solver->Solve(_tetMesh->vertices(), _tetMesh->invMass());
 
         _frameNumber++;
     };
@@ -105,7 +101,7 @@ public:
         if (normalizeVertices) {
             vertices = TET_Mesh::normalizeVertices(vertices);
         }
-        _tetMesh = new TET_Mesh_Faster(vertices, faces, tets);
+        _tetMesh = new TET_Mesh_PBD(vertices, faces, tets);
         _tetMeshFilename = filename;
         _normalizedVertices = normalizeVertices;
     }
@@ -139,27 +135,12 @@ public:
     }
 
 protected:
-    // set the positions to previous timestep, in case the user wants to 
-    // look at that instead of the current step
-    //void setToPreviousTimestep() {
-    //    const VECTOR& old = _solver->positionOld();
-    //    _tetMesh->setDisplacement(old);
-    //}
-
-    // restore positions from previous timestep, in case the user just drew
-    // the previous timestep, but now we want the state to be consistent
-    // when drawing the next frame
-    //void restoreToCurrentTimestep() {
-    //    const VECTOR& current = _solver->position();
-    //    _tetMesh->setDisplacement(current);
-    //}
-
     // scene geometry
-    TET_Mesh_Faster* _tetMesh;
+    TET_Mesh_PBD* _tetMesh;
     vector<KINEMATIC_SHAPE*> _kinematicShapes;
 
     // solver and materials
-    SOLVER::SOLVER* _solver;
+    SOLVER::PBDSolver* _solver;
     VOLUME::HYPERELASTIC* _hyperelastic;
 
     // simulation parameters
@@ -192,4 +173,4 @@ protected:
 
 }
 
-#endif // !SIMULATION_H
+#endif //RYAO_PBDSIMULATION_H

@@ -18,7 +18,7 @@ public:
     virtual void solveConstraint(std::vector<VECTOR3>& outPositions, std::vector<REAL>& invMass,
                                  std::vector<bool>& isFixed, REAL deltaT) = 0;
 protected:
-    std::vector<REAL>                      _lambdas;
+    std::vector<REAL>                       _lambdas;
     std::vector<std::vector<unsigned int>>  _involvedVertices;
 };
 

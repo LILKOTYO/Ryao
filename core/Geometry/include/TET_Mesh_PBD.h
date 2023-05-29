@@ -1,7 +1,3 @@
-//
-// Created by Chengye Liao on 2023/5/11.
-//
-
 #ifndef RYAO_TET_MESH_PBD_H
 #define RYAO_TET_MESH_PBD_H
 

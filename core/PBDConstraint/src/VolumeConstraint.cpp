@@ -63,5 +63,9 @@ void VolumeConstraint::solveConstraint(std::vector<VECTOR3>& outPositions, std::
     }
 }
 
+REAL VolumeConstraint::Volume(VECTOR3 &p1, VECTOR3 &p2, VECTOR3 &p3, VECTOR3 &p4) {
+    return ((p2 - p1).cross(p3 - p1)).dot(p4 - p1) / 6.0;
+}
+
 }
 }
