@@ -18,7 +18,7 @@ virtual bool buildScene() override {
     _sceneName = "pbd_bunny_drop";
 
     // read in the mesh file
-    setTetMesh("../../../resources/tetgen/bunny");
+    setTetMesh("../../../resources/tetgen/cube");
 
     using namespace Eigen;
     using namespace std;
@@ -40,19 +40,8 @@ virtual bool buildScene() override {
 
     _solver = new SOLVER::PBDSolver(*_tetMesh);
 
-    _gravity = VECTOR3(0.0, -5.0, 0.0);
+    _gravity = VECTOR3(0.0, -1.0, 0.0);
     _solver->setGravity(_gravity);
-//
-//    _solver->setFixed(1, true);
-//    _solver->setFixed(10, true);
-
-    PBD::PBDConstraint* vConstraints = new PBD::VolumeConstraint();
-    for (int i = 0; i < _tetMesh->tets().size(); i++) {
-        VECTOR4I tet = _tetMesh->tet(i);
-        std::vector<int> idx = {tet[0], tet[1], tet[2], tet[3]};
-        vConstraints->addConstraint(idx, _tetMesh->vertices());
-    }
-    _solver->addRegularConstraints(vConstraints);
 
     PBD::PBDConstraint* eConstraints = new PBD::SpringConstraint();
     for (int i = 0; i < _tetMesh->edges().size(); i++) {
@@ -62,71 +51,13 @@ virtual bool buildScene() override {
     }
     _solver->addRegularConstraints(eConstraints);
 
-//    _kinematicShapes.reserve(10);
-//    vector<VECTOR3> centers;
-//    centers.reserve(10);
-
-    // floor
-//    VECTOR3 center(0.0, -10, 0.0);
-//    centers.push_back(center);
-//    addCube(centers.back(), 10);
-//    _solver->addKinematicCollisionObject(_kinematicShapes.back());
-//
-//    center = VECTOR3(-1.0, 0.0, 0.25);
-//    centers.push_back(center);
-//    addCube(centers.back(), 1.0);
-//    _kinematicShapes.back()->rotation() = AngleAxisd(M_PI * 0.25, VECTOR3::UnitZ());
-//    _solver->addKinematicCollisionObject(_kinematicShapes.back());
-//
-//    center = VECTOR3(1.0, -0.75, 0.25);
-//    centers.push_back(center);
-//    addCube(centers.back(), 1.0);
-//    _kinematicShapes.back()->rotation() = AngleAxisd(M_PI * 0.25, VECTOR3::UnitZ());
-//    _solver->addKinematicCollisionObject(_kinematicShapes.back());
-//
-//    center = VECTOR3(-1.0, -1.5, 0.25);
-//    centers.push_back(center);
-//    addCube(centers.back(), 1.0);
-//    _kinematicShapes.back()->rotation() = AngleAxisd(M_PI * 0.25, VECTOR3::UnitZ());
-//    _solver->addKinematicCollisionObject(_kinematicShapes.back());
-//
-//    center = VECTOR3(1.0, -2.25, 0.25);
-//    centers.push_back(center);
-//    addCube(centers.back(), 1.0);
-//    _kinematicShapes.back()->rotation() = AngleAxisd(M_PI * 0.25, VECTOR3::UnitZ());
-//    _solver->addKinematicCollisionObject(_kinematicShapes.back());
-//
-//    center = VECTOR3(-1.0, -3.0, 0.25);
-//    centers.push_back(center);
-//    addCube(centers.back(), 1.0);
-//    _kinematicShapes.back()->rotation() = AngleAxisd(M_PI * 0.25, VECTOR3::UnitZ());
-//    _solver->addKinematicCollisionObject(_kinematicShapes.back());
-//
-//    center = VECTOR3(1.0, -3.75, 0.25);
-//    centers.push_back(center);
-//    addCube(centers.back(), 1.0);
-//    _kinematicShapes.back()->rotation() = AngleAxisd(M_PI * 0.25, VECTOR3::UnitZ());
-//    _solver->addKinematicCollisionObject(_kinematicShapes.back());
-//
-//    center = VECTOR3(-1.0, -4.5, 0.25);
-//    centers.push_back(center);
-//    addCube(centers.back(), 1.0);
-//    _kinematicShapes.back()->rotation() = AngleAxisd(M_PI * 0.25, VECTOR3::UnitZ());
-//    _solver->addKinematicCollisionObject(_kinematicShapes.back());
-//
-//    center = VECTOR3(1.0, -5.25, 0.25);
-//    centers.push_back(center);
-//    addCube(centers.back(), 1.0);
-//    _kinematicShapes.back()->rotation() = AngleAxisd(M_PI * 0.25, VECTOR3::UnitZ());
-//    _solver->addKinematicCollisionObject(_kinematicShapes.back());
-
-    // collision constants
-//    const REAL collisionMu = 1000.0;
-//    _solver->collisionStiffness() = collisionMu;
-//    _solver->collisionDampingBeta() = 0.01;
-//
-//    _solver->vertexFaceSelfCollisionsOn() = true;
-//    _solver->edgeEdgeSelfCollisionsOn() = true;
+    PBD::PBDConstraint* vConstraints = new PBD::VolumeConstraint();
+    for (int i = 0; i < _tetMesh->tets().size(); i++) {
+        VECTOR4I tet = _tetMesh->tet(i);
+        std::vector<int> idx = {tet[0], tet[1], tet[2], tet[3]};
+        vConstraints->addConstraint(idx, _tetMesh->vertices());
+    }
+    _solver->addRegularConstraints(vConstraints);
 
     _pauseFrame = 800;
     return true;

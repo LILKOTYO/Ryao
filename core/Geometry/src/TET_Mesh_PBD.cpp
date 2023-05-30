@@ -36,11 +36,11 @@ TET_Mesh_PBD::TET_Mesh_PBD(const vector<VECTOR3>& restVertices,
     computeSurfaceAreas();
     computeSurfaceTriangleNeighbors();
     computeSurfaceEdgeTriangleNeighbors();
-
-    _mass.resize(_vertices.size());
-    _invMass.resize(_vertices.size());
-    fill(_mass.begin(), _mass.end(), 1.0f);
-    fill(_invMass.begin(), _invMass.end(), 1.0f);
+    computeMass();
+//    _mass.resize(_vertices.size());
+//    _invMass.resize(_vertices.size());
+//    fill(_mass.begin(), _mass.end(), 1.0f);
+//    fill(_invMass.begin(), _invMass.end(), 1.0f);
     // set the collision eps as one centimeter
     // as when use two centimeters, one seems to get into trouble without CCD
     _collisionEps = 0.01;
@@ -1287,6 +1287,23 @@ void TET_Mesh_PBD::computeInvertedVertices() {
     }
 
     //int totalInverted = 0;
+}
+
+void TET_Mesh_PBD::computeMass() {
+    Timer functionTimer(__FUNCTION__);
+    _mass.resize(_vertices.size());
+    _invMass.resize(_vertices.size());
+
+    for (unsigned int x = 0; x < _tets.size(); x++) {
+        const VECTOR4I tet = _tets[x];
+        const REAL volume = _tetVolumes[x];
+        for (int y = 0; y < 4; y++) {
+            _mass[tet[y]] += volume / 4.0;
+        }
+    }
+    for (unsigned int x = 0; x < _mass.size(); x++) {
+        _invMass[x] = 1.0 / _mass[x];
+    }
 }
 
 }

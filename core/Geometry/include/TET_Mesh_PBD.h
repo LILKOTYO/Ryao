@@ -375,6 +375,8 @@ protected:
      */
     void computeInvertedVertices();
 
+    void computeMass();
+
     // mass and inv mass
     vector<REAL> _mass;
     vector<REAL> _invMass;

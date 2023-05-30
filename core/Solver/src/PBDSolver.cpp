@@ -70,9 +70,8 @@ void PBDSolver::updateInertia(std::vector<VECTOR3>& outPositions, std::vector<RE
         outPositions[i] += _velocity[i] * _deltaT;
 
         if (outPositions[i][1] < 0.0) {
-            outPositions[i][0] = _prePosition[i][0];
+            outPositions[i] = _prePosition[i];
             outPositions[i][1] = 0.0;
-            outPositions[i][2] = _prePosition[i][2];
         }
     }
 }
@@ -94,9 +93,7 @@ void PBDSolver::updateSubStep(std::vector<VECTOR3> &outPositions) {
         if (_isFixed[i]) {
             continue;
         }
-        if (i == 2) {
-            RYAO_INFO("debug here");
-        }
+
         _velocity[i] = (outPositions[i] - _prePosition[i]) / _deltaT;
     }
 }

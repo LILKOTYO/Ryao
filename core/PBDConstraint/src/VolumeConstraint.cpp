@@ -22,8 +22,8 @@ void VolumeConstraint::resetConstraint() {
 
 void VolumeConstraint::solveConstraint(std::vector<VECTOR3>& outPositions, std::vector<REAL>& invMass,
                                        std::vector<bool>& isFixed, REAL deltaT) {
-    for (int i = 0; i < _involvedVertices.size(); i += 4) {
-        int constraintIdx = i / 4;
+    for (int i = 0; i < _involvedVertices.size(); i++) {
+        int constraintIdx = i;
         VECTOR3& pos0 = outPositions[_involvedVertices[constraintIdx][0]];
         VECTOR3& pos1 = outPositions[_involvedVertices[constraintIdx][1]];
         VECTOR3& pos2 = outPositions[_involvedVertices[constraintIdx][2]];
