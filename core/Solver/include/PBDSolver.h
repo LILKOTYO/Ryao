@@ -30,15 +30,14 @@ public:
 private:
     void resetConstraints();
     void updateInertia(std::vector<VECTOR3>& outPositions, std::vector<REAL>& invMass);
-    void solveConstrain(std::vector<REAL>& invMass);
-    void solveCollision(std::vector<REAL>& invMass);
+    void solveConstrain(std::vector<VECTOR3>& outPositions, std::vector<REAL>& invMass);
+    void solveCollision(std::vector<VECTOR3>& outPositions, std::vector<REAL>& invMass);
     void updateSubStep(std::vector<VECTOR3>& outPositions);
-
 
     TET_Mesh_PBD& _tetMesh;
     int _DOFs;
 
-    std::vector<VECTOR3> _projection;
+    std::vector<VECTOR3> _prePosition;
     std::vector<VECTOR3> _velocity;
     std::vector<bool> _isFixed;
 

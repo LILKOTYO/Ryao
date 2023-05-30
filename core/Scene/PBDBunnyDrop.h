@@ -55,13 +55,12 @@ virtual bool buildScene() override {
     _solver->addRegularConstraints(vConstraints);
 
     PBD::PBDConstraint* eConstraints = new PBD::SpringConstraint();
-    for (int i = 0; i < _tetMesh->surfaceEdges().size(); i++) {
-        VECTOR2I edge = _tetMesh->surfaceEdges()[i];
+    for (int i = 0; i < _tetMesh->edges().size(); i++) {
+        VECTOR2I edge = _tetMesh->edges()[i];
         std::vector<int> idx = {edge[0], edge[1]};
         eConstraints->addConstraint(idx, _tetMesh->vertices());
     }
     _solver->addRegularConstraints(eConstraints);
-
 
 //    _kinematicShapes.reserve(10);
 //    vector<VECTOR3> centers;

@@ -1,4 +1,5 @@
 #include "SpringConstraint.h"
+#include "Platform/include/RYAO.h"
 
 namespace Ryao {
 namespace PBD {
@@ -38,7 +39,9 @@ void SpringConstraint::solveConstraint(std::vector<VECTOR3>& outPositions, std::
 
         REAL dlambda = -(constraint + compliance * lambda) / (invMass0 + invMass1 + compliance);
         VECTOR3 gradient = (pos1 - pos0).normalized();
-
+//        if (_involvedVertices[constarintIdx][0] == 2 || _involvedVertices[constarintIdx][1] == 2) {
+//            RYAO_INFO("debug here");
+//        }
         if (!isFixed[_involvedVertices[constarintIdx][0]])
             pos0 -= gradient * dlambda * invMass0;
         if (!isFixed[_involvedVertices[constarintIdx][1]])
