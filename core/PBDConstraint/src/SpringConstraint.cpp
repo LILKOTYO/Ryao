@@ -1,5 +1,5 @@
 #include "SpringConstraint.h"
-#include "Platform/include/RYAO.h"
+#include "Platform/include/Timer.h"
 
 namespace Ryao {
 namespace PBD {
@@ -23,6 +23,7 @@ void SpringConstraint::resetConstraint() {
 
 void SpringConstraint::solveConstraint(std::vector<VECTOR3>& outPositions, std::vector<REAL>& invMass,
                                        std::vector<bool>& isFixed, REAL deltaT) {
+    Timer functionTimer(__FUNCTION__ );
     for (int i = 0; i < _involvedVertices.size(); i++) {
         int constarintIdx = i;
         VECTOR3& pos0 = outPositions[_involvedVertices[constarintIdx][0]];

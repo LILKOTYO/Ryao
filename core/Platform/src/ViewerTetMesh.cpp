@@ -1,4 +1,5 @@
 #include <ViewerTetMesh.h>
+#include "Timer.h"
 
 namespace Ryao {
 void ViewerTetMesh::Draw(Camera& camera, const std::vector<VECTOR3>& vertices, unsigned int width, unsigned int height) {
@@ -74,6 +75,7 @@ void ViewerTetMesh::SetupViewerMesh() {
 }
 
 void ViewerTetMesh::UpdateFrameData(const std::vector<VECTOR3>& v) {
+    Timer functionTimer(__FUNCTION__);
     glBindVertexArray(_VAO);
     glBindBuffer(GL_ARRAY_BUFFER, _VBO);
     glBufferData(GL_ARRAY_BUFFER, _vertices.size() * sizeof(TetVertex), NULL, GL_STATIC_DRAW);

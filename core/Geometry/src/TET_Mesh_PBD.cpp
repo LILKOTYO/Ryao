@@ -24,7 +24,6 @@ TET_Mesh_PBD::TET_Mesh_PBD(const vector<VECTOR3>& restVertices,
         _restVertices(restVertices),
         _surfaceTriangles(faces),
         _tets(tets) {
-    Timer functionTimer(__FUNCTION__);
     computeTetVolumes(_restVertices, _restTetVolumes);
     computeTetVolumes(_vertices, _tetVolumes);
     computeOneRingVolumes(_restVertices, _restTetVolumes, _restOneRingVolumes);
@@ -37,10 +36,7 @@ TET_Mesh_PBD::TET_Mesh_PBD(const vector<VECTOR3>& restVertices,
     computeSurfaceTriangleNeighbors();
     computeSurfaceEdgeTriangleNeighbors();
     computeMass();
-//    _mass.resize(_vertices.size());
-//    _invMass.resize(_vertices.size());
-//    fill(_mass.begin(), _mass.end(), 1.0f);
-//    fill(_invMass.begin(), _invMass.end(), 1.0f);
+
     // set the collision eps as one centimeter
     // as when use two centimeters, one seems to get into trouble without CCD
     _collisionEps = 0.01;
@@ -57,7 +53,6 @@ TET_Mesh_PBD::TET_Mesh_PBD(const vector<VECTOR3>& restVertices,
 TET_Mesh_PBD::~TET_Mesh_PBD() {}
 
 void TET_Mesh_PBD::computeTetVolumes(const vector<VECTOR3>& vertices, vector<REAL>& tetVolumes) {
-    Timer functionTimer(__FUNCTION__);
     tetVolumes.clear();
     tetVolumes.resize(_tets.size());
     for (size_t i = 0; i < _tets.size(); i++) {
@@ -1290,7 +1285,6 @@ void TET_Mesh_PBD::computeInvertedVertices() {
 }
 
 void TET_Mesh_PBD::computeMass() {
-    Timer functionTimer(__FUNCTION__);
     _mass.resize(_vertices.size());
     _invMass.resize(_vertices.size());
 
