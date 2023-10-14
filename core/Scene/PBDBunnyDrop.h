@@ -18,7 +18,7 @@ virtual bool buildScene() override {
     _sceneName = "pbd_bunny_drop";
 
     // read in the mesh file
-    setTetMesh(PROJECT_ROOT_DIR "/resources/tetgen/bunny"); 
+    setTetMesh(PROJECT_ROOT_DIR "/resources/tetgen/cube"); 
 
     using namespace Eigen;
     using namespace std;
@@ -40,7 +40,7 @@ virtual bool buildScene() override {
 
     _solver = new SOLVER::PBDSolver(*_tetMesh);
 
-    _gravity = VECTOR3(0.0, -0.9, 0.0);
+    _gravity = VECTOR3(0.0, -0.2, 0.0);
     _solver->setGravity(_gravity);
 //
 //    _solver->setFixed(1, true);

@@ -23,6 +23,7 @@ void VolumeConstraint::resetConstraint() {
 
 void VolumeConstraint::solveConstraint(std::vector<VECTOR3>& outPositions, std::vector<REAL>& invMass,
                                        std::vector<bool>& isFixed, REAL deltaT) {
+
     Timer functionTimer(__FUNCTION__);
     for (int i = 0; i < _involvedVertices.size(); i += 4) {
         int constraintIdx = i / 4;
@@ -38,14 +39,14 @@ void VolumeConstraint::solveConstraint(std::vector<VECTOR3>& outPositions, std::
         REAL restVolume = _restVolumes[constraintIdx];
 
         REAL volume = Volume(pos0, pos1, pos2, pos3);
-        REAL constraint = volume - restVolume;
+        REAL constraint = (volume - restVolume) * 6.0;
         REAL compliance = constraint > 0 ? _strechCompliance[constraintIdx] : _compressCompliace[constraintIdx];
         compliance /= deltaT * deltaT;
 
-        VECTOR3 gradient0 = (pos3 - pos1).cross(pos2 - pos1) / 6.0;
-        VECTOR3 gradient1 = (pos2 - pos0).cross(pos3 - pos0) / 6.0;
-        VECTOR3 gradient2 = (pos3 - pos0).cross(pos1 - pos0) / 6.0;
-        VECTOR3 gradient3 = (pos1 - pos0).cross(pos2 - pos0) / 6.0;
+        VECTOR3 gradient0 = (pos3 - pos1).cross(pos2 - pos1);
+        VECTOR3 gradient1 = (pos2 - pos0).cross(pos3 - pos0);
+        VECTOR3 gradient2 = (pos3 - pos0).cross(pos1 - pos0);
+        VECTOR3 gradient3 = (pos1 - pos0).cross(pos2 - pos0);
 
         REAL dCWdC = invMass0 * gradient0.squaredNorm() +
             invMass1 * gradient1.squaredNorm() +

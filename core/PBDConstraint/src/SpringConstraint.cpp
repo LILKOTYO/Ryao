@@ -13,8 +13,8 @@ void SpringConstraint::addConstraint(std::vector<int> &vertices, std::vector<VEC
     _lambdas.push_back(0.0);
     REAL restLength = Length(pos[vertices[0]], pos[vertices[1]]);
     _restLengths.push_back(restLength);
-    _strechCompliance.push_back(0.5);
-    _compressCompliace.push_back(0.5);
+    _strechCompliance.push_back(0.0);
+    _compressCompliace.push_back(0.0);
 }
 
 void SpringConstraint::resetConstraint() {
