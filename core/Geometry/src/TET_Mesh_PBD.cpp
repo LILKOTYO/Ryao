@@ -29,16 +29,14 @@ TET_Mesh_PBD::TET_Mesh_PBD(const vector<VECTOR3>& restVertices,
     computeOneRingVolumes(_restVertices, _restTetVolumes, _restOneRingVolumes);
 
     //computeSurfaceTriangles();
+    computeEdges();
     computeSurfaceVertices();
     computeSurfaceEdges();
     computeSurfaceAreas();
     computeSurfaceTriangleNeighbors();
     computeSurfaceEdgeTriangleNeighbors();
+    computeMass();
 
-    _mass.resize(_vertices.size());
-    _invMass.resize(_vertices.size());
-    fill(_mass.begin(), _mass.end(), 1.0f);
-    fill(_invMass.begin(), _invMass.end(), 1.0f);
     // set the collision eps as one centimeter
     // as when use two centimeters, one seems to get into trouble without CCD
     _collisionEps = 0.01;
@@ -279,6 +277,38 @@ void TET_Mesh_PBD::computeSurfaceAreas() {
             _restEdgeAreas[edgeIndex] += _surfaceTriangleAreas[x] / 3.0;
         }
     }
+}
+
+void TET_Mesh_PBD::computeEdges() {
+    // hash them all out
+    map<pair<int, int>, bool> foundEdges;
+    const std::vector<std::vector<int>> TET_EDGES = {{0, 1}, {0, 2}, {0, 3}, {1, 2}, {1, 3}, {2, 3}};
+    for (size_t x = 0; x < _tets.size(); x++) {
+        for (int y = 0; y < 6; y++) {
+            pair<int, int> edge(_tets[x][TET_EDGES[y][0]],
+                                _tets[x][TET_EDGES[y][1]]);
+
+            // make sure the ordering is consistent
+            if (edge.first > edge.second) {
+                const int temp = edge.first;
+                edge.first = edge.second;
+                edge.second = temp;
+            }
+
+            foundEdges[edge] = true;
+        }
+    }
+
+    // serialize
+    _edges.clear();
+    for (auto iter = foundEdges.begin(); iter != foundEdges.end(); iter++) {
+        VECTOR2I edge;
+        edge[0] = iter->first.first;
+        edge[1] = iter->first.second;
+        _edges.push_back(edge);
+    }
+
+    RYAO_INFO("Found {} edges", _edges.size());
 }
 
 void TET_Mesh_PBD::computeSurfaceVertices() {
@@ -1249,6 +1279,22 @@ void TET_Mesh_PBD::computeInvertedVertices() {
     }
 
     //int totalInverted = 0;
+}
+
+void TET_Mesh_PBD::computeMass() {
+    _mass.resize(_vertices.size());
+    _invMass.resize(_vertices.size());
+
+    for (unsigned int x = 0; x < _tets.size(); x++) {
+        const VECTOR4I tet = _tets[x];
+        const REAL volume = _tetVolumes[x];
+        for (int y = 0; y < 4; y++) {
+            _mass[tet[y]] += volume / 4.0;
+        }
+    }
+    for (unsigned int x = 0; x < _mass.size(); x++) {
+        _invMass[x] = 1.0 / _mass[x];
+    }
 }
 
 }

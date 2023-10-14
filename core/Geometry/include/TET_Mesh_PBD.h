@@ -65,6 +65,8 @@ public:
 
     const vector<VECTOR2I> &surfaceEdges() const { return _surfaceEdges; };
 
+    const vector<VECTOR2I> &edges() const { return _edges; };
+
     const vector<pair<int, int>> &vertexFaceCollisions() const { return _vertexFaceCollisions; };
 
     const vector<pair<int, int>> &edgeEdgeCollisions() const { return _edgeEdgeCollisions; };
@@ -279,6 +281,9 @@ protected:
     void computeOneRingVolumes(const vector<VECTOR3> &vertices, const vector<REAL> &tetVolumes,
                                vector<REAL> &oneRingVolumes);
 
+    // find all the edge of the mesh
+    void computeEdges();
+
     // find what's on the surface
     void computeSurfaceVertices();
 
@@ -370,6 +375,8 @@ protected:
      */
     void computeInvertedVertices();
 
+    void computeMass();
+
     // mass and inv mass
     vector<REAL> _mass;
     vector<REAL> _invMass;
@@ -378,6 +385,7 @@ protected:
     vector<VECTOR3> _vertices;
     vector<VECTOR3> _restVertices;
     vector<VECTOR4I> _tets;
+    vector<VECTOR2I> _edges;
 
     // volumes, computed by computeTetVolumes and computeOneRingVolumes
     vector<REAL> _restTetVolumes;

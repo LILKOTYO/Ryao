@@ -1,4 +1,5 @@
 #include "SpringConstraint.h"
+#include "Platform/include/Timer.h"
 
 namespace Ryao {
 namespace PBD {
@@ -12,8 +13,8 @@ void SpringConstraint::addConstraint(std::vector<int> &vertices, std::vector<VEC
     _lambdas.push_back(0.0);
     REAL restLength = Length(pos[vertices[0]], pos[vertices[1]]);
     _restLengths.push_back(restLength);
-    _strechCompliance.push_back(0.0);
-    _compressCompliace.push_back(0.0);
+    _strechCompliance.push_back(0.5);
+    _compressCompliace.push_back(0.5);
 }
 
 void SpringConstraint::resetConstraint() {
@@ -38,12 +39,14 @@ void SpringConstraint::solveConstraint(std::vector<VECTOR3>& outPositions, std::
         compliance /= deltaT * deltaT;
 
         REAL dlambda = -(constraint + compliance * lambda) / (invMass0 + invMass1 + compliance);
-        VECTOR3 gradient = (pos1 - pos0).normalized();
-
+        VECTOR3 gradient = (pos0 - pos1).normalized();
+//        if (_involvedVertices[constarintIdx][0] == 2 || _involvedVertices[constarintIdx][1] == 2) {
+//            RYAO_INFO("debug here");
+//        }
         if (!isFixed[_involvedVertices[constarintIdx][0]])
-            pos0 -= gradient * dlambda * invMass0;
+            pos0 += gradient * dlambda * invMass0;
         if (!isFixed[_involvedVertices[constarintIdx][1]])
-            pos1 += gradient * dlambda * invMass1;
+            pos1 -= gradient * dlambda * invMass1;
         lambda += dlambda;
     }
 }
