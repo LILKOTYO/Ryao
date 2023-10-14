@@ -22,6 +22,7 @@ void SpringConstraint::resetConstraint() {
 
 void SpringConstraint::solveConstraint(std::vector<VECTOR3>& outPositions, std::vector<REAL>& invMass,
                                        std::vector<bool>& isFixed, REAL deltaT) {
+    Timer functionTimer(__FUNCTION__);
     for (int i = 0; i < _involvedVertices.size(); i += 2) {
         int constarintIdx = i / 2;
         VECTOR3& pos0 = outPositions[_involvedVertices[constarintIdx][0]];

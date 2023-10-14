@@ -97,6 +97,7 @@ void PBDSolver::solveCollision(std::vector<REAL>& invMass) {
 void PBDSolver::updateSubStep(std::vector<VECTOR3> &outPositions) {
     for (int i = 0; i < _projection.size(); i++) {
         _velocity[i] += (_projection[i] - outPositions[i]) / _deltaT;
+//        _velocity[i] = (_projection[i] - outPositions[i]) / _deltaT;
         outPositions[i] = _projection[i];
     }
 }

@@ -28,8 +28,8 @@ namespace Ryao {
         // Construct
         ViewerTetMesh(std::vector<TetVertex>& vertices, std::vector<unsigned int>& indices, Material& material)
             : _vertices(vertices), _indices(indices), _material(material),
-            _shaderFill(Shader("shaders/ViewerTetMeshFill.vert", "shaders/ViewerTetMeshFill.frag")),
-            _shaderLine(Shader("shaders/ViewerMeshLine.vert", "shaders/ViewerMeshLine.frag")) {
+            _shaderFill(Shader(PROJECT_ROOT_DIR "/shaders/ViewerTetMeshFill.vert", PROJECT_ROOT_DIR "/shaders/ViewerTetMeshFill.frag")),
+            _shaderLine(Shader(PROJECT_ROOT_DIR "/shaders/ViewerMeshLine.vert", PROJECT_ROOT_DIR "/shaders/ViewerMeshLine.frag")) {
             // now that we have all the required data, set the vertex buffers and its attribute pointers.
             RYAO_INFO("Load Viewer TET Mesh ...");
             SetupViewerMesh();

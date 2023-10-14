@@ -24,7 +24,6 @@ TET_Mesh_PBD::TET_Mesh_PBD(const vector<VECTOR3>& restVertices,
         _restVertices(restVertices),
         _surfaceTriangles(faces),
         _tets(tets) {
-    Timer functionTimer(__FUNCTION__);
     computeTetVolumes(_restVertices, _restTetVolumes);
     computeTetVolumes(_vertices, _tetVolumes);
     computeOneRingVolumes(_restVertices, _restTetVolumes, _restOneRingVolumes);
@@ -56,7 +55,6 @@ TET_Mesh_PBD::TET_Mesh_PBD(const vector<VECTOR3>& restVertices,
 TET_Mesh_PBD::~TET_Mesh_PBD() {}
 
 void TET_Mesh_PBD::computeTetVolumes(const vector<VECTOR3>& vertices, vector<REAL>& tetVolumes) {
-    Timer functionTimer(__FUNCTION__);
     tetVolumes.clear();
     tetVolumes.resize(_tets.size());
     for (size_t i = 0; i < _tets.size(); i++) {
@@ -769,7 +767,6 @@ REAL TET_Mesh_PBD::distanceToCollisionCellWall(const int surfaceTriangleID, cons
 }
 
 void TET_Mesh_PBD::computeVertexFaceCollisions() {
-    Timer functionTimer(__FUNCTION__);
 
     // if a vertex is part of an inverted tet, don't have it participate
     // in a self-collision. That tet needs to get its house in order
@@ -832,7 +829,6 @@ void TET_Mesh_PBD::computeVertexFaceCollisions() {
 }
 
 void TET_Mesh_PBD::computeEdgeEdgeCollisions() {
-    Timer functionTimer(__FUNCTION__);
     _edgeEdgeCollisions.clear();
     _edgeEdgeIntersections.clear();
     _edgeEdgeCoordinates.clear();
@@ -1237,7 +1233,6 @@ bool TET_Mesh_PBD::surfaceTriangleIsDegenerate(const int surfaceTriangleID) {
 }
 
 void TET_Mesh_PBD::computeInvertedVertices() {
-    Timer functionTimer(__FUNCTION__);
     // first set them all to false
     _invertedVertices.resize(_vertices.size());
     for (unsigned int x = 0; x < _vertices.size(); x++)

@@ -19,7 +19,7 @@ public:
 
     ReferencePlane(int size)
         : _size(size), _color(glm::vec3(0.35, 0.35, 0.35)),
-        _shader(Shader("shaders/ReferencePlane.vert", "shaders/ReferencePlane.frag")) {
+        _shader(Shader(PROJECT_ROOT_DIR "/shaders/ReferencePlane.vert", PROJECT_ROOT_DIR "/shaders/ReferencePlane.frag")) {
         unsigned int num_edges = 2 * (2 * _size + 1);
         //_vertices.reserve(2 * num_edges);
         float interval = 10.0 / (float)_size;

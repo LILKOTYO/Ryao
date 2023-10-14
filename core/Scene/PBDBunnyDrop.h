@@ -18,7 +18,8 @@ virtual bool buildScene() override {
     _sceneName = "pbd_bunny_drop";
 
     // read in the mesh file
-    setTetMesh("../../../resources/tetgen/bunny");
+    setTetMesh(PROJECT_ROOT_DIR "/resources/tetgen/cube"); // MSVC
+    //setTetMesh("../../../resources/tetgen/cube"); // Clion
 
     using namespace Eigen;
     using namespace std;

@@ -3,6 +3,7 @@
 
 #include "Platform/include/RYAO.h"
 #include "Platform/include/Logger.h"
+#include "Platform/include/Timer.h"
 #include <vector>
 
 namespace Ryao {

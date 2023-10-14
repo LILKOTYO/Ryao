@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.20)
 project(Ryao)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
+add_definitions(-DPROJECT_ROOT_DIR="${CMAKE_SOURCE_DIR}")
 # engine ilbrary
 add_subdirectory(core/Platform)
 add_subdirectory(core/Geometry)

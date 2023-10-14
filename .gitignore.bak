@@ -1,6 +1,5 @@
 build/
 debug/
-vsBuild/
 .DS_Store
 .vscode
 .vs

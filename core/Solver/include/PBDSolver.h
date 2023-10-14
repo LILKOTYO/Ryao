@@ -3,6 +3,7 @@
 
 #include "Platform/include/RYAO.h"
 #include "Platform/include/Logger.h"
+#include "Platform/include/Timer.h"
 #include "Geometry/include/TET_Mesh_PBD.h"
 #include "PBDConstraint/include/PBDConstraint.h"
 #include "PBDConstraint/include/SpringConstraint.h"

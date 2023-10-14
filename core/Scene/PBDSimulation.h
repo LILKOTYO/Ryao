@@ -113,13 +113,17 @@ public:
         }
         V.clear();
         I.clear();
-        const std::vector<VECTOR3> vertices = _tetMesh->vertices();
-        const std::vector<VECTOR3I> indices = _tetMesh->surfaceTriangles();
-        for (int i = 0; i < vertices.size(); i++) {
+        const std::vector<VECTOR3>& vertices = _tetMesh->vertices();
+        const std::vector<VECTOR3I>& indices = _tetMesh->surfaceTriangles();
+        size_t vSize = vertices.size();
+        size_t iSize = indices.size();
+        V.reserve(vSize);
+        I.reserve(iSize * 3);
+        for (int i = 0; i < vSize; i++) {
             VECTOR3 p = vertices[i];
             V.push_back(TetVertex(glm::vec3(p[0], p[1], p[2])));
         }
-        for (int i = 0; i < indices.size(); i++) {
+        for (int i = 0; i < iSize; i++) {
             I.push_back(indices[i][0]);
             I.push_back(indices[i][1]);
             I.push_back(indices[i][2]);
