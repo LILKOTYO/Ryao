@@ -13,8 +13,8 @@ void VolumeConstraint::addConstraint(std::vector<int>& vertices, std::vector<VEC
     _involvedVertices.push_back(vertices);
     _lambdas.push_back(0.0);
     _restVolumes.push_back(Volume(pos[vertices[0]], pos[vertices[1]], pos[vertices[2]], pos[vertices[3]]));
-    _strechCompliance.push_back(0.0);
-    _compressCompliace.push_back(0.0);
+    _strechCompliance.push_back(0.5);
+    _compressCompliace.push_back(0.5);
 }
 
 void VolumeConstraint::resetConstraint() {
@@ -25,8 +25,7 @@ void VolumeConstraint::solveConstraint(std::vector<VECTOR3>& outPositions, std::
                                        std::vector<bool>& isFixed, REAL deltaT) {
 
     Timer functionTimer(__FUNCTION__);
-    for (int i = 0; i < _involvedVertices.size(); i += 4) {
-        int constraintIdx = i / 4;
+    for (int constraintIdx = 0; constraintIdx < _involvedVertices.size(); constraintIdx++) {
         VECTOR3& pos0 = outPositions[_involvedVertices[constraintIdx][0]];
         VECTOR3& pos1 = outPositions[_involvedVertices[constraintIdx][1]];
         VECTOR3& pos2 = outPositions[_involvedVertices[constraintIdx][2]];
@@ -39,6 +38,7 @@ void VolumeConstraint::solveConstraint(std::vector<VECTOR3>& outPositions, std::
         REAL restVolume = _restVolumes[constraintIdx];
 
         REAL volume = Volume(pos0, pos1, pos2, pos3);
+        //RYAO_INFO("Tet{}: Volume {}, restVolume {}", constraintIdx, volume, restVolume);
         REAL constraint = (volume - restVolume) * 6.0;
         REAL compliance = constraint > 0 ? _strechCompliance[constraintIdx] : _compressCompliace[constraintIdx];
         compliance /= deltaT * deltaT;
@@ -53,8 +53,12 @@ void VolumeConstraint::solveConstraint(std::vector<VECTOR3>& outPositions, std::
             invMass2 * gradient2.squaredNorm() +
             invMass3 * gradient3.squaredNorm();
 
+        if (dCWdC < 1e-5)
+            continue;
+
         REAL dlambda = -(constraint + compliance * lambda) / (dCWdC + compliance);
 
+        lambda += dlambda;
         if (!isFixed[_involvedVertices[constraintIdx][0]])
             pos0 += dlambda * invMass0 * gradient0;
         if (!isFixed[_involvedVertices[constraintIdx][1]])
@@ -63,7 +67,6 @@ void VolumeConstraint::solveConstraint(std::vector<VECTOR3>& outPositions, std::
             pos2 += dlambda * invMass2 * gradient2;
         if (!isFixed[_involvedVertices[constraintIdx][3]])
             pos3 += dlambda * invMass3 * gradient3;
-        lambda += dlambda;
     }
 }
 

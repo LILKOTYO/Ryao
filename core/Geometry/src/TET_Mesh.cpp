@@ -1126,7 +1126,7 @@ bool TET_Mesh::readTetGenMesh(const std::string& filename,
     // close file
     finEdge.close();
 
-    RYAO_INFO("Number of Tets: {}", edges.size());
+    RYAO_INFO("Number of Edges: {}", edges.size());
 
     return true;
 }

@@ -25,7 +25,7 @@ void PBDSolver::initialize() {
 
     _name = string("PBDSolver");
     _subStep = 10;
-    _deltaT = 1.0 / 60.0;
+    _deltaT = 1.0 / 30.0;
     _subDeltaT = _deltaT / 10.0;
 }
 
@@ -62,6 +62,7 @@ void PBDSolver::resetConstraints() {
 }
 
 void PBDSolver::updateInertia(std::vector<VECTOR3>& outPositions, std::vector<REAL>& invMass) {
+    Timer functionTimer(__FUNCTION__);
     for (unsigned int i = 0; i < outPositions.size(); ++i) {
         if (_isFixed[i]) {
             continue;
@@ -90,25 +91,25 @@ void PBDSolver::solveCollision(std::vector<VECTOR3>& outPositions, std::vector<R
 }
 
 void PBDSolver::updateStep(std::vector<VECTOR3> &outPositions) {
+    Timer functionTimer(__FUNCTION__);
     for (int i = 0; i < _prePosition.size(); i++) {
         if (_isFixed[i]) {
             continue;
         }
         _velocity[i] = (outPositions[i] - _prePosition[i]) / _subDeltaT;
-        //if (i == 0)
-        //    RYAO_INFO("velocity: {}, {}, {}", _velocity[i][0], _velocity[i][1], _velocity[i][2]);
-//        _velocity[i] = (_projection[i] - outPositions[i]) / _deltaT;
-        //outPositions[i] = _projection[i];
     }
 }
 
 void PBDSolver::Solve(std::vector<VECTOR3>& outPositions, std::vector<REAL>& invMass) {
 
-    for (int i = 0; i < _subStep; i++) {
+    for (int i = 0; i < 30; i++) {
         updateInertia(outPositions, invMass);
         resetConstraints();
-        solveConstrain(outPositions, invMass);
-        solveCollision(outPositions, invMass);
+        for (int j = 0; j < _subStep; j++)
+        {
+            solveConstrain(outPositions, invMass);
+            solveCollision(outPositions, invMass);
+        }
         updateStep(outPositions);
     }
 }

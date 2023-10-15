@@ -13,8 +13,8 @@ void SpringConstraint::addConstraint(std::vector<int> &vertices, std::vector<VEC
     _lambdas.push_back(0.0);
     REAL restLength = Length(pos[vertices[0]], pos[vertices[1]]);
     _restLengths.push_back(restLength);
-    _strechCompliance.push_back(0.0);
-    _compressCompliace.push_back(0.0);
+    _strechCompliance.push_back(1.0);
+    _compressCompliace.push_back(1.0);
 }
 
 void SpringConstraint::resetConstraint() {
@@ -24,8 +24,7 @@ void SpringConstraint::resetConstraint() {
 void SpringConstraint::solveConstraint(std::vector<VECTOR3>& outPositions, std::vector<REAL>& invMass,
                                        std::vector<bool>& isFixed, REAL deltaT) {
     Timer functionTimer(__FUNCTION__);
-    for (int i = 0; i < _involvedVertices.size(); i += 2) {
-        int constarintIdx = i / 2;
+    for (int constarintIdx = 0; constarintIdx < _involvedVertices.size(); constarintIdx++) {
         VECTOR3& pos0 = outPositions[_involvedVertices[constarintIdx][0]];
         VECTOR3& pos1 = outPositions[_involvedVertices[constarintIdx][1]];
         REAL invMass0 = invMass[_involvedVertices[constarintIdx][0]];
