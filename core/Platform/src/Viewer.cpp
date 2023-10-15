@@ -51,14 +51,18 @@ void Viewer::init() {
 
     // glfw: initialize and configure
     // ------------------------------
-    glfwInit();
+    if (!glfwInit()) {
+		RYAO_ERROR("Failed to initialize GLFW");
+		return;
+	}
+
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     // glfw window creation
     // --------------------
-    _window = glfwCreateWindow(_SCR_WIDTH, _SCR_HEIGHT, "Ryao Viewer", NULL, NULL);
+    _window = glfwCreateWindow(_SCR_WIDTH, _SCR_HEIGHT, "Ryao Viewer", nullptr, nullptr);
     if (_window == NULL) {
         RYAO_ERROR("Failed to create GLFW window");
         glfwTerminate();
@@ -121,7 +125,6 @@ void Viewer::launch() {
         // -----
         // frame frequency
 //        _simulation->stepSimulation();
-
         float currentFrame = glfwGetTime();
         _deltaTime = currentFrame - _lastTime;
         _lastTime = currentFrame;
