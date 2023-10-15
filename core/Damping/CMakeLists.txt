@@ -6,7 +6,7 @@ project(RyaoDamping)
 file(GLOB SRCFILES src/*.cpp)
 file(GLOB HFILES include/*.h)
 
-add_library(${PROJECT_NAME} ${SRCFILES})
+add_library(${PROJECT_NAME} ${SRCFILES} ${HFILES})
 add_library(Ryao::Damping ALIAS ${PROJECT_NAME})
 
 target_include_directories( ${PROJECT_NAME}

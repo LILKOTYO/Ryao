@@ -101,7 +101,6 @@ void PBDSolver::updateStep(std::vector<VECTOR3> &outPositions) {
 }
 
 void PBDSolver::Solve(std::vector<VECTOR3>& outPositions, std::vector<REAL>& invMass) {
-
     for (int i = 0; i < 30; i++) {
         updateInertia(outPositions, invMass);
         resetConstraints();
