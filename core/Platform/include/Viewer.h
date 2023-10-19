@@ -12,9 +12,14 @@
 #include "Arrow.h"
 #include "Scene/Simulation.h"
 #include "Scene/PBDSimulation.h"
+
 #include <vector>
+
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
 
 namespace Ryao {
 
