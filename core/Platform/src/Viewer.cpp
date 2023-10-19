@@ -49,12 +49,13 @@ void Viewer::cameraProcessMouseScroll(double yoffset) {
 void Viewer::init() {
 	RYAO_INFO("Viewer Initializing ...");
 
+#pragma region OpenGL3
     // glfw: initialize and configure
     // ------------------------------
     if (!glfwInit()) {
-		RYAO_ERROR("Failed to initialize GLFW");
-		return;
-	}
+        RYAO_ERROR("Failed to initialize GLFW");
+        return;
+    }
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -114,6 +115,26 @@ void Viewer::init() {
     }
 
     glEnable(GL_DEPTH_TEST);
+#pragma endregion
+
+#pragma region ImGUI
+
+    if (_useGUI) {
+        // Setup Dear ImGui context
+        IMGUI_CHECKVERSION();
+        ImGui::CreateContext();
+        ImGuiIO& io = ImGui::GetIO(); (void)io;
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
+        ImGui::StyleColorsDark();
+
+        // Setup Platform/Renderer backends
+        ImGui_ImplGlfw_InitForOpenGL(_window, true);          // Second param install_callback=true will install GLFW callbacks and chain to existing ones.
+        ImGui_ImplOpenGL3_Init("#version 130");
+    }
+
+#pragma endregion
     
     RYAO_INFO("Viewer initialization finshed! ");
 }
@@ -130,12 +151,6 @@ void Viewer::launch() {
         _lastTime = currentFrame;
 
         processInput();
-
-        // render command
-        glClearColor(0.6, 0.6, 0.6, 1.0);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-//        _simulation->stepSimulation();
 
         if (_referencePlane != nullptr) {
             //RYAO_INFO("Draw reference plane.");
@@ -162,10 +177,27 @@ void Viewer::launch() {
         } else {
             RYAO_ERROR("No Simulation!");
         }
-        // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
+        // glfw: poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
-        glfwSwapBuffers(_window);
         glfwPollEvents();
+
+        if (_useGUI) {
+            bool showImgui = true;
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
+            ImGui::ShowDemoWindow(&showImgui); // Show demo window! :)
+
+            ImGui::Render();
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        }
+        else {
+            // render command
+            glfwSwapBuffers(_window);
+            glClearColor(0.6, 0.6, 0.6, 1.0);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        }
+
     }
 }
 
@@ -181,6 +213,15 @@ void Viewer::setSimulation(Ryao::Simulation *sim) {
 void Viewer::setSimulation(Ryao::PBDSimulation *sim) {
     _pbdSimulation = sim;
     _simulation = nullptr;
+}
+
+void Viewer::setUseGUI(bool flag) {
+    if (_window == nullptr)
+	    _useGUI = flag;
+    else {
+        RYAO_ERROR("Set use GUI before init!");
+        return;
+    }
 }
 
 void Viewer::addViewerCube(const VECTOR3 &center, const REAL &scale, Material& material) {

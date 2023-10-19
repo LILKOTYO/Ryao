@@ -39,6 +39,7 @@ public:
 		_window = nullptr;
 		_referencePlane = nullptr;
         _simulation = nullptr;
+		_pbdSimulation = nullptr;
 		
 		// light source init
 		// LightDir(VECTOR3& dir, VECTOR3& ambi, VECTOR3& diff, VECTOR3& spec)
@@ -47,6 +48,7 @@ public:
 		_lastY = 0.0;
 		_lastTime = 0.0;
 		_deltaTime = 0.0;
+		_useGUI = false;
 	}
 
 	Viewer(unsigned int width, unsigned int height, float fov, Camera& camera)
@@ -63,15 +65,23 @@ public:
 		_window = nullptr;
 		_referencePlane = nullptr;
         _simulation = nullptr;
+		_pbdSimulation = nullptr;
 
 		_isDrag = false;
 		_lastX = 0.0;
 		_lastY = 0.0;
 		_lastTime = 0.0;
 		_deltaTime = 0.0;
+		_useGUI = false;
 	}
 
 	~Viewer() {
+		if (_useGUI) {
+			ImGui_ImplOpenGL3_Shutdown();
+			ImGui_ImplGlfw_Shutdown();
+			ImGui::DestroyContext();
+		}
+
 		glfwTerminate();
 	}
 
@@ -84,6 +94,7 @@ public:
 	void setisDrag(bool flag);
     void setSimulation(Simulation* sim);
     void setSimulation(PBDSimulation* sim);
+	void setUseGUI(bool flag);
 
 	double* getLastX();
 	double* getLastY();
@@ -125,6 +136,7 @@ private:
 	float _lastTime;
 	bool _isDrag;
 	double _lastX, _lastY;
+	bool _useGUI;
 
 };
 
