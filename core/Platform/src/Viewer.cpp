@@ -20,6 +20,8 @@ void Viewer::processInput() {
         _camera.ProcessKeyboard(UPLIFT, _deltaTime);
     if (glfwGetKey(_window, GLFW_KEY_Q) == GLFW_PRESS)
         _camera.ProcessKeyboard(DECLINE, _deltaTime);
+    if (glfwGetKey(_window, GLFW_KEY_SPACE) == GLFW_PRESS)
+        _pause = !_pause;
 }
 
 void Viewer::setisDrag(bool flag) {
@@ -157,23 +159,25 @@ void Viewer::launch() {
             _referencePlane->Draw(_camera, _SCR_WIDTH, _SCR_HEIGHT);
         }
         
-        if (_viewerTriMeshList.size() > 0) {
-            for (int i = 0; i < _viewerTriMeshList.size(); i++) 
-                _viewerTriMeshList[i]->Draw(_camera, _lightDir, _lightPoint, _SCR_WIDTH, _SCR_HEIGHT);
+        if (_viewerStaticMeshList.size() > 0) {
+            for (int i = 0; i < _viewerStaticMeshList.size(); i++)
+                _viewerStaticMeshList[i]->Draw(_camera, _lightDir, _lightPoint, _SCR_WIDTH, _SCR_HEIGHT);
         }
 
         if (_simulation != nullptr) {
-            if (_viewerTetMeshList.size() > 0) {
-                for (int i = 0; i < _viewerTetMeshList.size(); i++)
-                    _viewerTetMeshList[i]->Draw(_camera, _simulation->getTetMeshVertices(), _SCR_WIDTH, _SCR_HEIGHT);
+            if (_viewerDynamicMeshList.size() > 0) {
+                for (int i = 0; i < _viewerDynamicMeshList.size(); i++)
+                    _viewerDynamicMeshList[i]->Draw(_camera, _simulation->getTetMeshVertices(), _SCR_WIDTH, _SCR_HEIGHT);
             }
-            _simulation->stepSimulation();
+            if (!_pause)
+                _simulation->stepSimulation();
         } else if (_pbdSimulation != nullptr) {
-            if (_viewerTetMeshList.size() > 0) {
-                for (int i = 0; i < _viewerTetMeshList.size(); i++)
-                    _viewerTetMeshList[i]->Draw(_camera, _pbdSimulation->getTetMeshVertices(), _SCR_WIDTH, _SCR_HEIGHT);
+            if (_viewerDynamicMeshList.size() > 0) {
+                for (int i = 0; i < _viewerDynamicMeshList.size(); i++)
+                    _viewerDynamicMeshList[i]->Draw(_camera, _pbdSimulation->getTetMeshVertices(), _SCR_WIDTH, _SCR_HEIGHT);
             }
-            _pbdSimulation->stepSimulation();
+            if (!_pause)
+                _pbdSimulation->stepSimulation();
         } else {
             RYAO_ERROR("No Simulation!");
         }
@@ -233,7 +237,7 @@ void Viewer::addViewerCube(const VECTOR3 &center, const REAL &scale, Material& m
     vector<unsigned int> cubeI;
     _simulation->addCube(center, scale, cubeV, cubeI);
     ViewerTriMesh* cube = new ViewerTriMesh(cubeV, cubeI, material, DRAWARRAY);
-    addViewerTriMesh(cube);
+    addViewerStaticMesh(cube);
 }
 
 void Viewer::addViewerCylinder(const VECTOR3 &center, const REAL &radius, const REAL &height, int segment,
@@ -246,7 +250,7 @@ void Viewer::addViewerCylinder(const VECTOR3 &center, const REAL &radius, const 
     vector<unsigned int> cylinderI;
     _simulation->addCylinder(center, radius, height, segment, cylinderV, cylinderI);
     ViewerTriMesh* cylinder = new ViewerTriMesh(cylinderV, cylinderI, material, DRAWELEMENT);
-    addViewerTriMesh(cylinder);
+    addViewerStaticMesh(cylinder);
 }
 
 void Viewer::addViewerSphere(const VECTOR3 &center, const REAL &scale, Material &material) {
@@ -258,7 +262,7 @@ void Viewer::addViewerSphere(const VECTOR3 &center, const REAL &scale, Material 
     vector<unsigned int> sphereI;
     _simulation->addSphere(center, scale, sphereV, sphereI);
     ViewerTriMesh* sphere = new ViewerTriMesh(sphereV, sphereI, material, DRAWELEMENT);
-    addViewerTriMesh(sphere);
+    addViewerStaticMesh(sphere);
 }
 
 void Viewer::registerShapeToViewer() {
@@ -277,7 +281,7 @@ void Viewer::registerShapeToViewer() {
             vector<unsigned int> I;
             shapeList[i]->generateViewerMesh(V, I);
             ViewerTriMesh* shape = new ViewerTriMesh(V, I, material, shapeList[i]->getRenderType());
-            addViewerTriMesh(shape);
+            addViewerStaticMesh(shape);
         }
     } else if (_pbdSimulation != nullptr) {
         std::vector<KINEMATIC_SHAPE*> shapeList = _pbdSimulation->getShapeList();
@@ -294,7 +298,7 @@ void Viewer::registerShapeToViewer() {
             vector<unsigned int> I;
             shapeList[i]->generateViewerMesh(V, I);
             ViewerTriMesh* shape = new ViewerTriMesh(V, I, material, shapeList[i]->getRenderType());
-            addViewerTriMesh(shape);
+            addViewerStaticMesh(shape);
         }
     } else {
         RYAO_ERROR("Set the viewer's simulation first!");
@@ -302,7 +306,7 @@ void Viewer::registerShapeToViewer() {
     }
 }
 
-void Viewer:: registerTETMeshToViewer() {
+void Viewer::registerDynamicMeshToViewer() {
     if (_simulation != nullptr) {
         VECTOR3 ambi(0.2, 0.3, 0.3);
         VECTOR3 diff(0.2, 0.3, 0.3);
@@ -310,10 +314,10 @@ void Viewer:: registerTETMeshToViewer() {
         Material material(ambi, diff, spec, 0.3);
         vector<TetVertex> V;
         vector<unsigned int> I;
-        _simulation->getTETMeshRenderData(V, I);
+        _simulation->getDynamicMeshRenderData(V, I);
 
         ViewerTetMesh* tetmesh = new ViewerTetMesh(V, I, material);
-        addViewerTetMesh(tetmesh);
+        addViewerDynamicMesh(tetmesh);
     } else if (_pbdSimulation != nullptr) {
         VECTOR3 ambi(0.2, 0.3, 0.3);
         VECTOR3 diff(0.2, 0.3, 0.3);
@@ -321,10 +325,10 @@ void Viewer:: registerTETMeshToViewer() {
         Material material(ambi, diff, spec, 0.3);
         vector<TetVertex> V;
         vector<unsigned int> I;
-        _pbdSimulation->getTETMeshRenderData(V, I);
+        _pbdSimulation->getDynamicMeshRenderData(V, I);
 
         ViewerTetMesh* tetmesh = new ViewerTetMesh(V, I, material);
-        addViewerTetMesh(tetmesh);
+        addViewerDynamicMesh(tetmesh);
     } else {
         RYAO_ERROR("Set the viewer's simulation first!");
         return;

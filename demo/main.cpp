@@ -42,7 +42,7 @@ int main()
     viewer.setSimulation(simulation);
 
     viewer.registerShapeToViewer();
-    viewer.registerTETMeshToViewer();
+    viewer.registerDynamicMeshToViewer();
 
     viewer.launch();
 

@@ -110,7 +110,7 @@ public:
         _normalizedVertices = normalizeVertices;
     }
 
-    void getTETMeshRenderData(std::vector<TetVertex>& V, std::vector<unsigned int>& I) {
+    void getDynamicMeshRenderData(std::vector<TetVertex>& V, std::vector<unsigned int>& I) {
         if (_tetMesh == nullptr) {
             RYAO_ERROR("No tet mesh is loaded!");
             return;

@@ -73,6 +73,7 @@ public:
 		_lastTime = 0.0;
 		_deltaTime = 0.0;
 		_useGUI = false;
+		_pause = false;
 	}
 
 	~Viewer() {
@@ -100,8 +101,8 @@ public:
 	double* getLastY();
 	bool getisDrag();
 
-	void addViewerTetMesh(ViewerTetMesh* vTetMesh)	{ _viewerTetMeshList.push_back(vTetMesh); }
-	void addViewerTriMesh(ViewerTriMesh* vTriMesh)	{ _viewerTriMeshList.push_back(vTriMesh); }
+	void addViewerDynamicMesh(ViewerTetMesh* dMesh)	{ _viewerDynamicMeshList.push_back(dMesh); }
+	void addViewerStaticMesh(ViewerTriMesh* sMesh)	{ _viewerStaticMeshList.push_back(sMesh); }
 	void addShader(Shader* shader)			{ _shaderList.push_back(shader); }
 	void addArrow(Arrow* arrow)				{ _arrowList.push_back(arrow); }
     void addViewerCube(const VECTOR3& center, const REAL& scale, Material& material);
@@ -110,12 +111,12 @@ public:
 
 	void init();
     void registerShapeToViewer();
-    void registerTETMeshToViewer();
+    void registerDynamicMeshToViewer();
 	void launch();
 private:
 	// data 
-	std::vector<ViewerTriMesh*> _viewerTriMeshList;
-	std::vector<ViewerTetMesh*> _viewerTetMeshList;
+	std::vector<ViewerTetMesh*> _viewerDynamicMeshList;
+	std::vector<ViewerTriMesh*> _viewerStaticMeshList;
 	std::vector<Shader*> _shaderList;
 	std::vector<Arrow*> _arrowList;
 
@@ -137,6 +138,7 @@ private:
 	bool _isDrag;
 	double _lastX, _lastY;
 	bool _useGUI;
+	bool _pause;
 
 };
 
