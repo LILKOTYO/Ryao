@@ -3,19 +3,19 @@
 namespace Ryao {
 namespace SOLVER {
 
-PBDSolver::PBDSolver(TETMeshPBD& tetMesh) : _tetMesh(tetMesh) {
-    initialize();
+PBDSolver::PBDSolver(const TETMeshPBD& tetMesh) {
+    initialize(tetMesh);
 }
 
-void PBDSolver::initialize() {
+void PBDSolver::initialize(const TETMeshPBD& tetMesh) {
     _constraints = std::vector<PBD::PBDConstraint*>();
     _collisions = std::vector<PBD::PBDConstraint*>();
 
-    _DOFs = _tetMesh.DOFs();
-    _velocity.resize(_tetMesh.totalVertices());
-    _velocity.assign(_tetMesh.totalVertices(), VECTOR3(0.0, 0.0, 0.0));
-    _prePosition.resize(_tetMesh.totalVertices());
-    _prePosition.assign(_tetMesh.totalVertices(), VECTOR3(0.0, 0.0, 0.0));
+    _DOFs = tetMesh.DOFs();
+    _velocity.resize(tetMesh.totalVertices());
+    _velocity.assign(tetMesh.totalVertices(), VECTOR3(0.0, 0.0, 0.0));
+    _prePosition.resize(tetMesh.totalVertices());
+    _prePosition.assign(tetMesh.totalVertices(), VECTOR3(0.0, 0.0, 0.0));
 
     _isFixed.resize(_DOFs);
     _isFixed.assign(_DOFs, false);

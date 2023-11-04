@@ -14,9 +14,9 @@ namespace SOLVER {
 
 class PBDSolver {
 public:
-    PBDSolver(TETMeshPBD& tetMesh);
+    PBDSolver(const TETMeshPBD& tetMesh);
     ~PBDSolver() {};
-    void initialize();
+    void initialize(const TETMeshPBD& tetMesh);
 
     void addRegularConstraints(PBD::PBDConstraint* constraint);
 
@@ -35,7 +35,6 @@ private:
     void solveCollision(std::vector<VECTOR3>& outPositions, std::vector<REAL>& invMass);
     void updateStep(std::vector<VECTOR3>& outPositions);
 
-    TETMeshPBD& _tetMesh;
     int _DOFs;
 
     std::vector<VECTOR3> _prePosition;
