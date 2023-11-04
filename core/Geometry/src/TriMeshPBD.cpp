@@ -839,7 +839,7 @@ namespace Ryao {
         _invMass.resize(_vertices.size());
 
         for (unsigned int x = 0; x < _faces.size(); x++) {
-            const VECTOR4I face = _faces[x];
+            const VECTOR3I face = _faces[x];
             const REAL area = _areas[x];
             for (int y = 0; y < 3; y++) {
                 _mass[face[y]] += area / 3.0;
