@@ -261,17 +261,9 @@ namespace Ryao {
         // find all the edge of the mesh
         void computeEdges();
 
-        // find what's on the surface
-        void computeSurfaceVertices();
-
-        //void computeSurfaceTriangles();
-        void computeSurfaceEdges();
-
-        void computeSurfaceAreas();
+        void computeTriangleAreas();
 
         void computeSurfaceTriangleNeighbors();
-
-        void computeSurfaceEdgeTriangleNeighbors();
 
         /**
          * @brief compute a triangle area
@@ -297,12 +289,12 @@ namespace Ryao {
          * @brief see if the vertex is inside the collision cell described in
          *        Chapter 11: Collision Processing, [Kim and Eberle 2020]
          *
-         * @param surfaceTriangleID
+         * @param triangleID
          * @param vertex
          * @return true
          * @return false
          */
-        bool insideCollisionCell(const int surfaceTriangleID, const VECTOR3& vertex);
+        bool insideCollisionCell(const int triangleID, const VECTOR3& vertex);
 
         /**
          * @brief compute distance to collision cell wall, where positive means inside and negative means outside
@@ -311,13 +303,7 @@ namespace Ryao {
          * @param vertex
          * @return REAL
          */
-        REAL distanceToCollisionCellWall(const int surfaceTriangleID, const VECTOR3& vertex);
-
-        /**
-         * @brief compute whether one vertex is inside the vertex one right of another
-         *
-         */
-        void computeSurfaceVertexOneRings();
+        REAL distanceToCollisionCellWall(const int triangleID, const VECTOR3& vertex);
 
         /**
          * @brief are these two surface triangles neighbors?
@@ -346,12 +332,6 @@ namespace Ryao {
          */
         bool surfaceTriangleIsDegenerate(const int surfaceTriangleID);
 
-        /**
-         * @brief compute which vertices are attached to inverted tets.
-         *
-         */
-        void computeInvertedVertices();
-
         void computeMass();
 
         // mass and inv mass
@@ -367,7 +347,6 @@ namespace Ryao {
         // volumes, computed by computeTetVolumes and computeOneRingVolumes
         vector<REAL> _areas;
         vector<REAL> _restOneRingAreas;
-        VECTOR _restEdgeAreas;
 
         // for each surface triangle, what's the index of the neighboring triangles?
         vector<VECTOR3I> _surfaceTriangleNeighbors;
