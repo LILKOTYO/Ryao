@@ -4,7 +4,7 @@
 #include "Platform/include/RYAO.h"
 #include "Platform/include/Logger.h"
 #include "Platform/include/Timer.h"
-#include "Geometry/include/TET_Mesh_PBD.h"
+#include "Geometry/include/TETMeshPBD.h"
 #include "PBDConstraint/include/PBDConstraint.h"
 #include "PBDConstraint/include/SpringConstraint.h"
 #include "PBDConstraint/include/VolumeConstraint.h"
@@ -14,7 +14,7 @@ namespace SOLVER {
 
 class PBDSolver {
 public:
-    PBDSolver(TET_Mesh_PBD& tetMesh);
+    PBDSolver(TETMeshPBD& tetMesh);
     ~PBDSolver() {};
     void initialize();
 
@@ -35,7 +35,7 @@ private:
     void solveCollision(std::vector<VECTOR3>& outPositions, std::vector<REAL>& invMass);
     void updateStep(std::vector<VECTOR3>& outPositions);
 
-    TET_Mesh_PBD& _tetMesh;
+    TETMeshPBD& _tetMesh;
     int _DOFs;
 
     std::vector<VECTOR3> _prePosition;

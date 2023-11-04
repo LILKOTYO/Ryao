@@ -4,12 +4,12 @@ namespace Ryao {
 namespace SOLVER {
 using namespace std;
 
-SOLVER::SOLVER(Ryao::TET_Mesh_Faster &tetMesh, VOLUME::HYPERELASTIC &hyperelastic) :
+SOLVER::SOLVER(Ryao::TETMeshFaster &tetMesh, VOLUME::HYPERELASTIC &hyperelastic) :
         _tetMesh(tetMesh), _hyperelastic(hyperelastic), _damping(NULL) {
     initialize();
 }
 
-SOLVER::SOLVER(Ryao::TET_Mesh_Faster &tetMesh, VOLUME::HYPERELASTIC &hyperelastic, VOLUME::Damping &damping) :
+SOLVER::SOLVER(Ryao::TETMeshFaster &tetMesh, VOLUME::HYPERELASTIC &hyperelastic, VOLUME::Damping &damping) :
         _tetMesh(tetMesh), _hyperelastic(hyperelastic), _damping(&damping) {
     initialize();
 }

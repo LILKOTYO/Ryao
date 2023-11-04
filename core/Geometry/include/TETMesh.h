@@ -1,7 +1,16 @@
-#ifndef RYAO_TET_MESH_PBD_H
-#define RYAO_TET_MESH_PBD_H
+#ifndef TETMesh_H
+#define TETMesh_H
 
 #include "Platform/include/RYAO.h"
+#include "Hyperelastic/include/HYPERELASTIC.h"
+#include "Hyperelastic/include/VertexFaceCollision.h"
+#include "Hyperelastic/include/McadamsCollision.h"
+#include "Hyperelastic/include/VertexFaceSqrtCollision.h"
+#include "Hyperelastic/include/EdgeCollision.h"
+#include "Hyperelastic/include/EdgeSqrtCollision.h"
+#include "Hyperelastic/include/EdgeHybridCollision.h"
+#include "Damping/include/Damping.h"
+#include "Damping/include/GreenDamping.h"
 
 #include <map>
 #include <vector>
@@ -10,84 +19,52 @@ namespace Ryao {
 
 using namespace std;
 
-class TET_Mesh_PBD {
+class TETMesh {
 public:
-    TET_Mesh_PBD() = default;
-
-    TET_Mesh_PBD(const vector<VECTOR3> &restVertices,
-             const vector<VECTOR3I> &faces,
-             const vector<VECTOR4I> &tets);
-
-    virtual ~TET_Mesh_PBD();
+    TETMesh() = default;
+    TETMesh(const vector<VECTOR3>& restVertices,
+        const vector<VECTOR3I>& faces,
+        const vector<VECTOR4I>& tets);
+    virtual ~TETMesh();
 
     /////////////////////////////////////////////////////////////////////////////////////////
     //----------------------------------accessors------------------------------------------//
     /////////////////////////////////////////////////////////////////////////////////////////
-    const vector<REAL> &mass() const { return _mass; };
-
-    vector<REAL> &mass() { return _mass; };
-
-    const vector<REAL> &invMass() const { return _invMass; };
-
-    vector<REAL> &invMass() { return _invMass; };
-
-    const vector<VECTOR3> &vertices() const { return _vertices; };
-
-    vector<VECTOR3> &vertices() { return _vertices; };
-
-    const vector<VECTOR3> &restVertices() const { return _restVertices; };
-
-    vector<VECTOR3> &restVertices() { return _restVertices; };
-
-    const vector<VECTOR4I> &tets() const { return _tets; };
-
-    vector<VECTOR4I> &tets() { return _tets; };
-
-    const vector<REAL> &restOneRingVolumes() const { return _restOneRingVolumes; };
-
-    vector<REAL> &restOneRingVolumes() { return _restOneRingVolumes; };
-
-    const VECTOR3 &vertex(const int index) const { return _vertices[index]; };
-
-    VECTOR3 &vertex(const int index) { return _vertices[index]; };
-
-    const REAL &collisionEps() const { return _collisionEps; };
-
-    const VECTOR3 &restVertex(const int index) const { return _restVertices[index]; };
-
-    const VECTOR4I &tet(const int tetIndex) const { return _tets[tetIndex]; };
-
-    const vector<int> &surfaceTets() const { return _surfaceTets; };
-
-    const vector<int> &surfaceVertices() const { return _surfaceVertices; };
-
-    const vector<VECTOR3I> &surfaceTriangles() const { return _surfaceTriangles; };
-
-    const vector<VECTOR2I> &surfaceEdges() const { return _surfaceEdges; };
-
-    const vector<VECTOR2I> &edges() const { return _edges; };
-
-    const vector<pair<int, int>> &vertexFaceCollisions() const { return _vertexFaceCollisions; };
-
-    const vector<pair<int, int>> &edgeEdgeCollisions() const { return _edgeEdgeCollisions; };
-
-    const vector<bool> &edgeEdgeIntersections() const { return _edgeEdgeIntersections; };
-
-    const vector<pair<VECTOR2, VECTOR2>> &edgeEdgeCoordinates() const { return _edgeEdgeCoordinates; };
-
-    const vector<REAL> &surfaceTriangleAreas() const { return _surfaceTriangleAreas; };
-
-    const vector<VECTOR3I> &surfaceTriangleNeighbors() const { return _surfaceTriangleNeighbors; };
+    const vector<VECTOR3>& vertices() const { return _vertices; };
+    vector<VECTOR3>& vertices() { return _vertices; };
+    const vector<VECTOR3>& restVertices() const { return _restVertices; };
+    vector<VECTOR3>& restVertices() { return _restVertices; };
+    const vector<VECTOR4I>& tets() const { return _tets; };
+    vector<VECTOR4I>& tets() { return _tets; };
+    const vector<VECTOR4I>& vertexFaceCollisionTets() const { return _vertexFaceCollisionTets; };
+    vector<VECTOR4I>& vertexFaceCollisionTets() { return _vertexFaceCollisionTets; };
+    const vector<REAL>& restOneRingVolumes() const { return _restOneRingVolumes; };
+    vector<REAL>& restOneRingVolumes() { return _restOneRingVolumes; };
+    const VECTOR3& vertex(const int index) const { return _vertices[index]; };
+    VECTOR3& vertex(const int index) { return _vertices[index]; };
+    const REAL& collisionEps() const { return _collisionEps; };
+    const VECTOR3& restVertex(const int index) const { return _restVertices[index]; };
+    const VECTOR4I& tet(const int tetIndex) const { return _tets[tetIndex]; };
+    const vector<int>& surfaceTets() const { return _surfaceTets; };
+    const vector<int>& surfaceVertices() const { return _surfaceVertices; };
+    const vector<VECTOR3I>& surfaceTriangles() const { return _surfaceTriangles; };
+    const vector<VECTOR2I>& surfaceEdges() const { return _surfaceEdges; };
+    const vector<pair<int, int>>& vertexFaceCollisions() const { return _vertexFaceCollisions; };
+    const vector<pair<int, int>>& edgeEdgeCollisions() const { return _edgeEdgeCollisions; };
+    const vector<bool>& edgeEdgeIntersections() const { return _edgeEdgeIntersections; };
+    const vector<pair<VECTOR2, VECTOR2>>& edgeEdgeCoordinates() const { return _edgeEdgeCoordinates; };
+    const vector<REAL>& surfaceTriangleAreas() const { return _surfaceTriangleAreas; };
+    const vector<VECTOR3I>& surfaceTriangleNeighbors() const { return _surfaceTriangleNeighbors; };
 
     int totalVertices() const { return _vertices.size(); };
-
     const int DOFs() const { return _vertices.size() * 3; };
-
-    void setMass(unsigned int index, float value) {
-        _mass[index] = value;
-        _invMass[index] = 1.0f / value;
-    }
     //////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        // get deformation gradient, and its SVD
+    MATRIX3 computeF(const int tetIndex) const;
+    void computeFs();
+    void computeFdots(const VECTOR& velocity);
+    void computeSVDs();
 
     /**
      * @brief get volume-weighted global translation
@@ -123,26 +100,25 @@ public:
      *
      * @param delta
      */
-    void setDisplacement(const VECTOR &delta);
+    void setDisplacement(const VECTOR& delta);
 
     /**
      * @brief set the vertex positions directly exactly
      *
      * @param positions
      */
-    void setPositions(const VECTOR &positions);
+    void setPositions(const VECTOR& positions);
 
     /**
      * @brief add the followingdeltas to the positions
      *
      * @param delta
      */
-    void addDisplacement(const VECTOR &delta);
+    void addDisplacement(const VECTOR& delta);
 
     // set collision eps to something new
-    void setCollisionEps(const REAL &eps);
-
-    void setCollisionStiffness(const REAL &stiffness);
+    void setCollisionEps(const REAL& eps);
+    void setCollisionStiffness(const REAL& stiffness);
 
     /**
      * @brief set collision pairs, for replays
@@ -150,7 +126,35 @@ public:
      * @param vertexFace
      * @param edgeEdge
      */
-    void setCollisionPairs(const vector<pair<int, int>> &vertexFace, const vector<pair<int, int>> &edgeEdge);
+    void setCollisionPairs(const vector<pair<int, int>>& vertexFace, const vector<pair<int, int>>& edgeEdge);
+
+    // compute hyperelastic quantities
+    REAL computeHyperelasticEnergy(const VOLUME::HYPERELASTIC& hyperelastic) const;
+    VECTOR computeHyperelasticForces(const VOLUME::HYPERELASTIC& hyperelastic) const;
+    virtual SPARSE_MATRIX computeHyperelasticClampedHessian(const VOLUME::HYPERELASTIC& hyperelastic) const;
+    virtual SPARSE_MATRIX computeHyperelasticHessian(const VOLUME::HYPERELASTIC& hyperelastic) const;
+
+    // compute damping quantities
+    VECTOR computeDampingForces(const VOLUME::Damping& damping) const;
+    virtual SPARSE_MATRIX computeDampingHessian(const VOLUME::Damping& damping) const;
+
+    // compute x-based collision quantities
+    VECTOR computeVertexFaceCollisionForces() const;
+    SPARSE_MATRIX computeVertexFaceCollisionClampedHessian() const;
+    REAL computeEdgeEdgeCollisionEnergy() const;
+    VECTOR computeEdgeEdgeCollisionForces() const;
+    SPARSE_MATRIX computeEdgeEdgeCollisionClampedHessian() const;
+
+    /**
+     * @brief compute elastic and damping forces at the same time
+     *
+     * @param hyperelastic
+     * @param damping
+     * @return VECTOR
+     */
+    virtual VECTOR computeInternalForce(const VOLUME::HYPERELASTIC& hyperelastic,
+        const VOLUME::Damping& damping) const;
+
 
     /**
      * @brief get the bounding box for the current mesh
@@ -158,7 +162,7 @@ public:
      * @param mins
      * @param maxs
      */
-    void getBoundingBox(VECTOR3 &mins, VECTOR3 &maxs) const;
+    void getBoundingBox(VECTOR3& mins, VECTOR3& maxs) const;
 
     /**
      * @brief find all the vertex-face collision pairs, using the InFaceRegion test
@@ -174,14 +178,35 @@ public:
     virtual void computeEdgeEdgeCollisions();
 
     // debug edge-edge collisions, load up some specific pairs
-    void computeEdgeEdgeCollisionsDebug();
+     void computeEdgeEdgeCollisionsDebug();
 
     /**
      * @brief based on vertex-face collision pairs, build "collision tets"
      *
      * @param velocity
      */
-    void buildVertexFaceCollisionTets(const VECTOR &velocity);
+    void buildVertexFaceCollisionTets(const VECTOR& velocity);
+
+    /**
+     * @brief write out the surface to OBJ triangle mesh
+     *
+     * @param filename
+     * @param tetMesh
+     * @return true
+     * @return false
+     */
+    static bool writeSurfaceToObj(const string& filename, const TETMesh& tetMesh);
+
+    /**
+     * @brief read in OBJ-style tet mesh file
+     *
+     * @param filename
+     * @param vertices
+     * @param tets
+     * @return true
+     * @return false
+     */
+    //static bool readObjFile(const string& filename, vector<VECTOR3>& vertices, vector<VECTOR4I>& tets);
 
     /**
      * @berif   read in the model file generated by tetgen.
@@ -194,11 +219,21 @@ public:
      *
      * @return true: read model file successfully
      */
-    static bool readTetGenMesh(const std::string &filename,
-                               std::vector<VECTOR3> &vertices,
-                               std::vector<VECTOR3I> &faces,
-                               std::vector<VECTOR4I> &tets,
-                               std::vector<VECTOR2I> &edges);
+    static bool readTetGenMesh(const std::string& filename,
+        std::vector<VECTOR3>& vertices,
+        std::vector<VECTOR3I>& faces,
+        std::vector<VECTOR4I>& tets,
+        std::vector<VECTOR2I>& edges);
+    /**
+     * @brief write out OBJ-style tet mesh file, the bool tells whether to write the rest or deformed vertices
+     *
+     * @param filename
+     * @param tetMesh
+     * @param restVertices
+     * @return true
+     * @return false
+     */
+    //static bool writeObjFile(const string& filename, const TETMesh& tetMesh, const bool restVertices);
 
     /**
      * @brief normalize vertices so that they're in a unit box, centered at (0.5, 0.5, 0.5)
@@ -206,7 +241,7 @@ public:
      * @param vertices
      * @return vector<VECTOR3>
      */
-    static vector<VECTOR3> normalizeVertices(const vector<VECTOR3> &vertices);
+    static vector<VECTOR3> normalizeVertices(const vector<VECTOR3>& vertices);
 
     /**
      * @brief compute distance between a point and triangle
@@ -217,8 +252,8 @@ public:
      * @param v
      * @return REAL
      */
-    static REAL pointTriangleDistance(const VECTOR3 &v0, const VECTOR3 &v1,
-                                      const VECTOR3 &v2, const VECTOR3 &v);
+    static REAL pointTriangleDistance(const VECTOR3& v0, const VECTOR3& v1,
+        const VECTOR3& v2, const VECTOR3& v);
 
     /**
      * @brief see if the projection of v onto the plane of v0,v1,v2 is inside the triangle
@@ -231,8 +266,8 @@ public:
      * @return true
      * @return false
      */
-    static bool pointProjectsInsideTriangle(const VECTOR3 &v0, const VECTOR3 &v1,
-                                            const VECTOR3 &v2, const VECTOR3 &v);
+    static bool pointProjectsInsideTriangle(const VECTOR3& v0, const VECTOR3& v1,
+        const VECTOR3& v2, const VECTOR3& v);
 
     /**
      * @brief copmute the dihedral angle between surface faces
@@ -243,25 +278,15 @@ public:
      */
     REAL surfaceFaceDihedralAngle(const int surfaceID0, const int surfaceID1) const;
 
-    /**
-     * @brief build a consistent tet/flap ordering from two surface triangles
-     *
-     * @param surfaceID0
-     * @param surfaceID1
-     * @return VECTOR4I
-     */
-    VECTOR4I buildSurfaceFlap(const int surfaceID0, const int surfaceID1) const;
-
+protected:
     /**
      * @brief compute the volume of a tet
      *
      * @param tetVertices
      * @return REAL
      */
-    static REAL computeTetVolume(const vector<VECTOR3> &tetVertices);
-    static REAL computeTetVolume(const VECTOR3 &v0, const VECTOR3 &v1, const VECTOR3 &v2, const VECTOR3 &v3);
+    static REAL computeTetVolume(const vector<VECTOR3>& tetVertices);
 
-protected:
     /**
      * @berif compute volumes for tets -- works for rest and deformed, just pass it
      * _restVertices or _vertices, _restTetVolumes.
@@ -269,7 +294,7 @@ protected:
      * @param vertices
      * @param tetVoumes
      */
-    void computeTetVolumes(const vector<VECTOR3> &vertices, vector<REAL> &tetVolumes);
+    void computeTetVolumes(const vector<VECTOR3>& vertices, vector<REAL>& tetVolumes);
 
     /**
      * @brief compute volumes in a one ring for a vertex -- works for rest and deformed.
@@ -278,22 +303,28 @@ protected:
      * @param tetVolumes
      * @param oneRingVolumes
      */
-    void computeOneRingVolumes(const vector<VECTOR3> &vertices, const vector<REAL> &tetVolumes,
-                               vector<REAL> &oneRingVolumes);
+    void computeOneRingVolumes(const vector<VECTOR3>& vertices, const vector<REAL>& tetVolumes, vector<REAL>& oneRingVolumes);
 
-    // find all the edge of the mesh
-    void computeEdges();
+    /**
+     * @brief compute material inverses for deformation gradient
+     *
+     * @param DmInvs
+     */
+    void computeDmInvs(vector<MATRIX3>& DmInvs);
+
+    /**
+     * @brief compute the change-of-basis from deformation gradient F to positions, x
+     *
+     * @return vector<MATRIX9x12>
+     */
+    void computePFpxs(vector<MATRIX9x12>& pFpxs);
 
     // find what's on the surface
     void computeSurfaceVertices();
-
     //void computeSurfaceTriangles();
     void computeSurfaceEdges();
-
     void computeSurfaceAreas();
-
     void computeSurfaceTriangleNeighbors();
-
     void computeSurfaceEdgeTriangleNeighbors();
 
     /**
@@ -302,10 +333,10 @@ protected:
      * @param triangle
      * @return REAL
      */
-    static REAL triangleArea(const vector<VECTOR3> &triangle);
+    static REAL triangleArea(const vector<VECTOR3>& triangle);
 
     // get the  normal to a plane, specified by three points
-    static VECTOR3 planeNormal(const vector<VECTOR3> &plane);
+    static VECTOR3 planeNormal(const vector<VECTOR3>& plane);
 
     /**
      * @brief project point onto plane, specific by three points
@@ -314,7 +345,7 @@ protected:
      * @param point
      * @return VECTOR3
      */
-    static VECTOR3 pointPlaneProjection(const vector<VECTOR3> &plane, const VECTOR3 &point);
+    static VECTOR3 pointPlaneProjection(const vector<VECTOR3>& plane, const VECTOR3& point);
 
     /**
      * @brief see if the vertex is inside the collision cell described in
@@ -325,7 +356,7 @@ protected:
      * @return true
      * @return false
      */
-    bool insideCollisionCell(const int surfaceTriangleID, const VECTOR3 &vertex);
+    bool insideCollisionCell(const int surfaceTriangleID, const VECTOR3& vertex);
 
     /**
      * @brief compute distance to collision cell wall, where positive means inside and negative means outside
@@ -334,7 +365,7 @@ protected:
      * @param vertex
      * @return REAL
      */
-    REAL distanceToCollisionCellWall(const int surfaceTriangleID, const VECTOR3 &vertex);
+    REAL distanceToCollisionCellWall(const int surfaceTriangleID, const VECTOR3& vertex);
 
     /**
      * @brief compute whether one vertex is inside the vertex one right of another
@@ -351,6 +382,15 @@ protected:
      * @return false
      */
     bool areSurfaceTriangleNeighbors(const int id0, const int id1) const;
+
+    /**
+     * @brief build a consistent tet/flap ordering from two surface triangles
+     *
+     * @param surfaceID0
+     * @param surfaceID1
+     * @return VECTOR4I
+     */
+    VECTOR4I buildSurfaceFlap(const int surfaceID0, const int surfaceID1) const;
 
     /**
      * @brief compute the normal of the surface triangle at _surfaceTriangles[triangleID]
@@ -375,29 +415,36 @@ protected:
      */
     void computeInvertedVertices();
 
-    void computeMass();
-
-    // mass and inv mass
-    vector<REAL> _mass;
-    vector<REAL> _invMass;
-
     // the core geometry
-    vector<VECTOR3> _vertices;
-    vector<VECTOR3> _restVertices;
-    vector<VECTOR4I> _tets;
-    vector<VECTOR2I> _edges;
+    vector<VECTOR3>     _vertices;
+    vector<VECTOR3>     _restVertices;
+    vector<VECTOR4I>    _tets;
 
     // volumes, computed by computeTetVolumes and computeOneRingVolumes
-    vector<REAL> _restTetVolumes;
-    vector<REAL> _tetVolumes;
-    vector<REAL> _restOneRingVolumes;
-    vector<REAL> _restOneRingAreas;
-    VECTOR _restEdgeAreas;
+    vector<REAL>    _restTetVolumes;
+    vector<REAL>    _restOneRingVolumes;
+    vector<REAL>    _restOneRingAreas;
+    VECTOR          _restEdgeAreas;
+
+    // support for computing deformation gradient F
+    vector<MATRIX3> _DmInvs;
+
+    // change-of-basis to go from deformation gradient (F) to positions (x)
+    vector<MATRIX9x12> _pFpxs;
+
+    // deformation gradients, and their SVDs
+    vector<MATRIX3> _Fs;
+    vector<MATRIX3> _Us;
+    vector<VECTOR3> _Sigmas;
+    vector<MATRIX3> _Vs;
+
+    // velocity gradients
+    vector<MATRIX3> _Fdots;
 
     // list of tets that are one of the surface
     vector<int> _surfaceTets;
 
-    // list of triangles that are one of the surface
+    // list of triangles that are one the surface
     // each triplet is ordered counter-clockwise, facing outwards
     // the VECTOR3I indexes into _vertices
     vector<VECTOR3I> _surfaceTriangles;
@@ -446,23 +493,41 @@ protected:
     // are the edge-edge collisions still separate, or is there already a face-edge intersection?
     vector<bool> _edgeEdgeIntersections;
 
+    // list of "collision tets" formed by vertex-face pairs
+    vector<VECTOR4I> _vertexFaceCollisionTets;
+
+    // DEBUG: see if the collision tet exists already
+//     map<pair<int, int>, int> _vertexFaceCollisionTetsHash;
+
+    // scaling term for vertex-face collision forces
+    vector<REAL> _vertexFaceCollisionAreas;
+
+    // scaling term for edge-edge collision forces
+    vector<REAL> _edgeEdgeCollisionAreas;
+
     // convert tet mesh vertexID into a surface mesh vertexID
     // convert index into _vertices into index into _surfaceVertices
     map<int, int> _volumeToSurfaceID;
 
+    // constitutive model for collisions
+    VOLUME::HYPERELASTIC* _collisionMaterial;
+
     // have your computed the SVDs since the last time you computed F?
     bool _svdsComputed;
-
-    // Whether a volume update has been performed
-    bool _volumesUpdated;
 
     // see if two indices in _vertices (in sorted order)
     // are within the one ring of each other
     map<pair<int, int>, bool> _insideSurfaceVertexOneRing;
 
+    // which vertex-face collision force are we using?
+    VOLUME::VertexFaceCollision* _vertexFaceEnergy;
+
+    VOLUME::EdgeCollision* _edgeEdgeEnergy;
+
     // which vertices are inverted?
     vector<bool> _invertedVertices;
 };
-}
 
-#endif //RYAO_TET_MESH_PBD_H
+} // Ryao
+
+#endif

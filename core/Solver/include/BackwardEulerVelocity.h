@@ -3,7 +3,7 @@
 
 #include "SOLVER.h"
 #include "Damping/include/GreenDamping.h"
-#include "Geometry/include/TET_Mesh_Faster.h"
+#include "Geometry/include/TETMeshFaster.h"
 
 namespace Ryao {
 namespace SOLVER {
@@ -16,7 +16,7 @@ namespace SOLVER {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 class BackwardEulerVelocity : public SOLVER {
 public:
-    BackwardEulerVelocity(TET_Mesh_Faster& tetMesh, VOLUME::HYPERELASTIC& hyperelastic);
+    BackwardEulerVelocity(TETMeshFaster& tetMesh, VOLUME::HYPERELASTIC& hyperelastic);
 
     // take a timestep
     virtual bool solve(const bool verbose) override;

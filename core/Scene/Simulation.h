@@ -5,8 +5,8 @@
 #include "Geometry/include/Cube.h"
 #include "Geometry/include/Cylinder.h"
 #include "Geometry/include/Sphere.h"
-#include "Geometry/include/TET_Mesh.h"
-#include "Geometry/include/TET_Mesh_Faster.h"
+#include "Geometry/include/TETMesh.h"
+#include "Geometry/include/TETMeshFaster.h"
 #include "Hyperelastic/include/StVK.h"
 #include "Hyperelastic/include/ARAP.h"
 #include "Hyperelastic/include/SNH.h"
@@ -101,11 +101,11 @@ public:
         std::vector<VECTOR4I> tets;
         std::vector<VECTOR2I> edges;
 
-        TET_Mesh::readTetGenMesh(filename, vertices, faces, tets, edges);
+        TETMesh::readTetGenMesh(filename, vertices, faces, tets, edges);
         if (normalizeVertices) {
-            vertices = TET_Mesh::normalizeVertices(vertices);
+            vertices = TETMesh::normalizeVertices(vertices);
         }
-        _tetMesh = new TET_Mesh_Faster(vertices, faces, tets);
+        _tetMesh = new TETMeshFaster(vertices, faces, tets);
         _tetMeshFilename = filename;
         _normalizedVertices = normalizeVertices;
     }
@@ -155,7 +155,7 @@ protected:
     //}
 
     // scene geometry
-    TET_Mesh_Faster* _tetMesh;
+    TETMeshFaster* _tetMesh;
     vector<KINEMATIC_SHAPE*> _kinematicShapes;
 
     // solver and materials

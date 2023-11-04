@@ -1,13 +1,13 @@
-#include "TET_Mesh_Faster.h"
+#include "TETMeshFaster.h"
 
 
 namespace Ryao {
 using namespace std;
 
-TET_Mesh_Faster::TET_Mesh_Faster(const vector<VECTOR3>& restVertices,
+TETMeshFaster::TETMeshFaster(const vector<VECTOR3>& restVertices,
                                  const vector<VECTOR3I>& faces,
                                  const vector<VECTOR4I>& tets) :
-    TET_Mesh(restVertices, faces, tets),
+    TETMesh(restVertices, faces, tets),
     // build collision detection data structures
     _aabbTreeTriangles(_vertices, &_surfaceTriangles),
     _aabbTreeEdges(_vertices, &_surfaceEdges) {
@@ -55,7 +55,7 @@ TET_Mesh_Faster::TET_Mesh_Faster(const vector<VECTOR3>& restVertices,
     }
 }
 
-void TET_Mesh_Faster::computeCompressedIndices() {
+void TETMeshFaster::computeCompressedIndices() {
     Timer functionTimer(__FUNCTION__);
 
     RYAO_INFO("Hashing indices ...");
@@ -107,8 +107,8 @@ void TET_Mesh_Faster::computeCompressedIndices() {
     RYAO_INFO("Done.");
 }
 
-SPARSE_MATRIX TET_Mesh_Faster::computeHyperelasticClampedHessian(const VOLUME::HYPERELASTIC &hyperelastic) const {
-    Timer functionTimer(string("TET_Mesh_Faster::") + __FUNCTION__);
+SPARSE_MATRIX TETMeshFaster::computeHyperelasticClampedHessian(const VOLUME::HYPERELASTIC &hyperelastic) const {
+    Timer functionTimer(string("TETMeshFaster::") + __FUNCTION__);
     assert(_svdsComputed == true);
 #pragma omp parallel
 #pragma omp for schedule(static)
@@ -148,8 +148,8 @@ SPARSE_MATRIX TET_Mesh_Faster::computeHyperelasticClampedHessian(const VOLUME::H
     return _sparseA;
 }
 
-SPARSE_MATRIX TET_Mesh_Faster::computeDampingHessian(const VOLUME::Damping &damping) const {
-    Timer functionTimer(string("TET_Mesh_Faster::") + __FUNCTION__);
+SPARSE_MATRIX TETMeshFaster::computeDampingHessian(const VOLUME::Damping &damping) const {
+    Timer functionTimer(string("TETMeshFaster::") + __FUNCTION__);
 #pragma omp parallel
 #pragma omp for schedule(static)
     for (int i = 0; i < _tets.size(); i++) {
@@ -183,7 +183,7 @@ SPARSE_MATRIX TET_Mesh_Faster::computeDampingHessian(const VOLUME::Damping &damp
     return _sparseA;
 }
 
-void TET_Mesh_Faster::computeVertexFaceCollisions() {
+void TETMeshFaster::computeVertexFaceCollisions() {
     Timer functionTimer(__FUNCTION__);
 
     // if a vertex is part of an inverted tet, don't have it participate
@@ -257,8 +257,8 @@ for (unsigned int i = 0; i < _vertexFaceCollisions.size(); i++) {
 #endif
 }
 
-void TET_Mesh_Faster::computeEdgeEdgeCollisions() {
-    Timer functionTimer(string("TET_Mesh_Faster::") + __FUNCTION__);
+void TETMeshFaster::computeEdgeEdgeCollisions() {
+    Timer functionTimer(string("TETMeshFaster::") + __FUNCTION__);
 
     _edgeEdgeCollisions.clear();
     _edgeEdgeIntersections.clear();

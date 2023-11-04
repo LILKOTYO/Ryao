@@ -6,8 +6,8 @@
 #include "Geometry/include/Cube.h"
 #include "Geometry/include/Cylinder.h"
 #include "Geometry/include/Sphere.h"
-#include "Geometry/include/TET_Mesh_PBD.h"
-#include "Geometry/include/TET_Mesh_Faster.h"
+#include "Geometry/include/TETMeshPBD.h"
+#include "Geometry/include/TETMeshFaster.h"
 #include "PBDConstraint/include/PBDConstraint.h"
 #include "PBDConstraint/include/SpringConstraint.h"
 #include "PBDConstraint/include/VolumeConstraint.h"
@@ -97,11 +97,11 @@ public:
         std::vector<VECTOR4I> tets;
         std::vector<VECTOR2I> edges;
 
-        TET_Mesh::readTetGenMesh(filename, vertices, faces, tets, edges);
+        TETMesh::readTetGenMesh(filename, vertices, faces, tets, edges);
         if (normalizeVertices) {
-            vertices = TET_Mesh::normalizeVertices(vertices);
+            vertices = TETMesh::normalizeVertices(vertices);
         }
-        _tetMesh = new TET_Mesh_PBD(vertices, faces, tets);
+        _tetMesh = new TETMeshPBD(vertices, faces, tets);
         _tetMeshFilename = filename;
         _normalizedVertices = normalizeVertices;
     }
@@ -140,7 +140,7 @@ public:
 
 protected:
     // scene geometry
-    TET_Mesh_PBD* _tetMesh;
+    TETMeshPBD* _tetMesh;
     vector<KINEMATIC_SHAPE*> _kinematicShapes;
 
     // solver and materials

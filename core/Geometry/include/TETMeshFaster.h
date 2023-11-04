@@ -1,7 +1,7 @@
-#ifndef RYAO_TET_MESH_FASTER_H
-#define RYAO_TET_MESH_FASTER_H
+#ifndef RYAO_TETMeshFaster_H
+#define RYAO_TETMeshFaster_H
 
-#include "TET_Mesh.h"
+#include "TETMesh.h"
 #include "AABBTree.h"
 #include "Platform/include/MatrixUtils.h"
 #include "Platform/include/CollisionUtils.h"
@@ -11,9 +11,9 @@
 
 namespace Ryao {
 
-class TET_Mesh_Faster : public TET_Mesh {
+class TETMeshFaster : public TETMesh {
 public:
-    TET_Mesh_Faster(const std::vector<VECTOR3>& restVertices,
+    TETMeshFaster(const std::vector<VECTOR3>& restVertices,
                     const vector<VECTOR3I>& faces,
                     const std::vector<VECTOR4I>& tets);
 
@@ -59,4 +59,4 @@ private:
 
 }
 
-#endif //RYAO_TET_MESH_FASTER_H
+#endif //RYAO_TETMeshFaster_H

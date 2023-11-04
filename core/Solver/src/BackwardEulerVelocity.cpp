@@ -4,7 +4,7 @@ namespace Ryao {
 namespace SOLVER {
 using namespace std;
 
-BackwardEulerVelocity::BackwardEulerVelocity(TET_Mesh_Faster& tetMesh, VOLUME::HYPERELASTIC& hyperelastic) :
+BackwardEulerVelocity::BackwardEulerVelocity(TETMeshFaster& tetMesh, VOLUME::HYPERELASTIC& hyperelastic) :
     SOLVER(tetMesh, hyperelastic) {
     _rayleighAlpha = 0.01;
     _rayleighBeta = 0.01;

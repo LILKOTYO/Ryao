@@ -3,7 +3,7 @@
 namespace Ryao {
 namespace SOLVER {
 
-PBDSolver::PBDSolver(TET_Mesh_PBD& tetMesh) : _tetMesh(tetMesh) {
+PBDSolver::PBDSolver(TETMeshPBD& tetMesh) : _tetMesh(tetMesh) {
     initialize();
 }
 

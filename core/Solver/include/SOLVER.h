@@ -1,8 +1,8 @@
 #ifndef RYAO_SOLVER_H
 #define RYAO_SOLVER_H
 
-#include "Geometry/include/TET_Mesh.h"
-#include "Geometry/include/TET_Mesh_Faster.h"
+#include "Geometry/include/TETMesh.h"
+#include "Geometry/include/TETMeshFaster.h"
 #include "Geometry/include/CONSTRAINTS.h"
 #include "Geometry/include/KINEMATIC_SHAPE.h"
 #include "Hyperelastic/include/HYPERELASTIC.h"
@@ -14,8 +14,8 @@ namespace Ryao {
 namespace SOLVER {
 class SOLVER {
 public:
-    SOLVER(TET_Mesh_Faster& tetMesh, VOLUME::HYPERELASTIC& hyperelastic);
-    SOLVER(TET_Mesh_Faster& tetMesh, VOLUME::HYPERELASTIC& hyperelastic, VOLUME::Damping& damping);
+    SOLVER(TETMeshFaster& tetMesh, VOLUME::HYPERELASTIC& hyperelastic);
+    SOLVER(TETMeshFaster& tetMesh, VOLUME::HYPERELASTIC& hyperelastic, VOLUME::Damping& damping);
     virtual ~SOLVER();
 
     VECTOR& externalForces()             { return _externalForces; };
@@ -26,7 +26,7 @@ public:
     const string& name() const                               { return _name; };
     const REAL dt() const                                    { return _dt; };
 
-    const TET_Mesh& tetMesh() const         { return _tetMesh; };
+    const TETMesh& tetMesh() const         { return _tetMesh; };
     const VECTOR position() const           { return _position; };
     const VECTOR positionOld() const        { return _positionOld; };
     const VECTOR velocity() const           { return _velocity; };
@@ -126,7 +126,7 @@ protected:
     REAL _residual;
     int _seenPCGIterations;
 
-    TET_Mesh_Faster& _tetMesh;
+    TETMeshFaster& _tetMesh;
     VOLUME::HYPERELASTIC& _hyperelastic;
     VOLUME::Damping* _damping;
 
