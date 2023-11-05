@@ -202,14 +202,10 @@ namespace Ryao {
 
     bool TriMeshPBD::readTetGenMesh(const std::string& filename,
         std::vector<VECTOR3>& vertices,
-        std::vector<VECTOR3I>& faces,
-        std::vector<VECTOR4I>& tets,
-        std::vector<VECTOR2I>& edges) {
+        std::vector<VECTOR3I>& faces) {
         // erase whatever was in the vectors before
         vertices.clear();
         faces.clear();
-        tets.clear();
-        edges.clear();
 
         // vertices first
         std::string vFile = filename + ".1.node";
@@ -296,87 +292,6 @@ namespace Ryao {
         finFace.close();
 
         RYAO_INFO("Number of faces: {}", faces.size());
-
-        // tets
-        std::string tFile = filename + ".1.ele";
-        RYAO_INFO("Load file {}", tFile.c_str());
-
-        size_t num_tets;
-        std::string tetLine;
-        // try to open the file
-        std::ifstream finTet(tFile.c_str());
-        if (!finTet) {
-            RYAO_ERROR("'{}' file not found!", tFile.c_str());
-            return false;
-        }
-
-        // get num vertices
-        getline(finTet, tetLine);
-        sStream << tetLine;
-        sStream >> num_tets;
-        sStream >> label; // 1
-        sStream >> label; // 0
-        sStream.clear();
-
-        tets.resize(num_tets);
-
-        // read vertices
-        for (size_t i = 0; i < num_tets; ++i) {
-            unsigned tetInd;
-            int v1, v2, v3, v4;
-            getline(finTet, tetLine);
-            sStream << tetLine;
-            sStream >> tetInd >> v1 >> v2 >> v3 >> v4;
-            getline(sStream, tetLine);
-            sStream.clear();
-
-            tets[i] = VECTOR4I(v1, v2, v3, v4);
-        }
-
-        // close file
-        finTet.close();
-
-        RYAO_INFO("Number of Tets: {}", tets.size());
-
-        // edges
-        std::string eFile = filename + ".1.edge";
-        RYAO_INFO("Load file {}", eFile.c_str());
-
-        size_t num_edges;
-        std::string edgeLine;
-        // try to open the file
-        std::ifstream finEdge(eFile.c_str());
-        if (!finEdge) {
-            RYAO_ERROR("'{}' file not found!", eFile.c_str());
-            return false;
-        }
-
-        // get num vertices
-        getline(finEdge, edgeLine);
-        sStream << edgeLine;
-        sStream >> num_edges;
-        sStream >> label; // 1
-        sStream.clear();
-
-        edges.resize(num_edges);
-
-        // read vertices
-        for (size_t i = 0; i < num_edges; ++i) {
-            unsigned edgeInd;
-            int v1, v2, tail;
-            getline(finEdge, edgeLine);
-            sStream << edgeLine;
-            sStream >> edgeInd >> v1 >> v2 >> tail;
-            getline(sStream, edgeLine);
-            sStream.clear();
-
-            edges[i] = VECTOR2I(v1, v2);
-        }
-
-        // close file
-        finEdge.close();
-
-        RYAO_INFO("Number of Tets: {}", edges.size());
 
         return true;
     }

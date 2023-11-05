@@ -7,7 +7,9 @@
 #include "Geometry/include/Cylinder.h"
 #include "Geometry/include/Sphere.h"
 #include "Geometry/include/TETMeshPBD.h"
+#include "Geometry/include/TriMeshPBD.h"
 #include "Geometry/include/TETMeshFaster.h"
+#include "Geometry/include/FileIO.h"
 #include "PBDConstraint/include/PBDConstraint.h"
 #include "PBDConstraint/include/SpringConstraint.h"
 #include "PBDConstraint/include/VolumeConstraint.h"
@@ -91,19 +93,32 @@ public:
         _kinematicShapes.push_back(sphere);
     }
 
-    void setTetMesh(const std::string& filename, const bool normalizeVertices = true) {
+    void setTetMesh(const std::string& filename, const bool normalize = true) {
         std::vector<VECTOR3> vertices;
         std::vector<VECTOR3I> faces;
         std::vector<VECTOR4I> tets;
         std::vector<VECTOR2I> edges;
 
-        TETMesh::readTetGenMesh(filename, vertices, faces, tets, edges);
-        if (normalizeVertices) {
-            vertices = TETMesh::normalizeVertices(vertices);
+        readTetGenMesh(filename, vertices, faces, tets, edges);
+        if (normalize) {
+            vertices = normalizeVertices(vertices);
         }
         _tetMesh = new TETMeshPBD(vertices, faces, tets);
         _tetMeshFilename = filename;
-        _normalizedVertices = normalizeVertices;
+        _normalizedVertices = normalize;
+    }
+
+    void setTriMesh(const std::string& filename, const bool normalize = true) {
+        std::vector<VECTOR3> vertices;
+        std::vector<VECTOR3I> faces;
+
+        readObjFile(filename, vertices, faces);
+        if (normalize) {
+            vertices = normalizeVertices(vertices);
+        }
+        _triMesh = new TriMeshPBD(vertices, faces);
+        _triMeshFilename = filename;
+        _normalizedVertices = normalize;
     }
 
     void getDynamicMeshRenderData(std::vector<TetVertex>& V, std::vector<unsigned int>& I) {
@@ -141,6 +156,7 @@ public:
 protected:
     // scene geometry
     TETMeshPBD* _tetMesh;
+    TriMeshPBD* _triMesh;
     vector<KINEMATIC_SHAPE*> _kinematicShapes;
 
     // solver and materials
@@ -162,6 +178,7 @@ protected:
 
     // tet mesh filename
     std::string _tetMeshFilename;
+    std::string _triMeshFilename;
 
     // did we normalize the vertices when we read them in?
     bool _normalizedVertices;

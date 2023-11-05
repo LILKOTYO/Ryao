@@ -7,6 +7,7 @@
 #include "Geometry/include/Sphere.h"
 #include "Geometry/include/TETMesh.h"
 #include "Geometry/include/TETMeshFaster.h"
+#include "Geometry/include/FileIO.h"
 #include "Hyperelastic/include/StVK.h"
 #include "Hyperelastic/include/ARAP.h"
 #include "Hyperelastic/include/SNH.h"
@@ -95,19 +96,19 @@ public:
         _kinematicShapes.push_back(sphere);
     }
 
-    void setTetMesh(const std::string& filename, const bool normalizeVertices = true) {
+    void setTetMesh(const std::string& filename, const bool normalize = true) {
         std::vector<VECTOR3> vertices;
         std::vector<VECTOR3I> faces;
         std::vector<VECTOR4I> tets;
         std::vector<VECTOR2I> edges;
 
-        TETMesh::readTetGenMesh(filename, vertices, faces, tets, edges);
-        if (normalizeVertices) {
-            vertices = TETMesh::normalizeVertices(vertices);
+        readTetGenMesh(filename, vertices, faces, tets, edges);
+        if (normalize) {
+            vertices = normalizeVertices(vertices);
         }
         _tetMesh = new TETMeshFaster(vertices, faces, tets);
         _tetMeshFilename = filename;
-        _normalizedVertices = normalizeVertices;
+        _normalizedVertices = normalize;
     }
 
     void getDynamicMeshRenderData(std::vector<TetVertex>& V, std::vector<unsigned int>& I) {
