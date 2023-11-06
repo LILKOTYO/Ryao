@@ -4,7 +4,7 @@ project(Ryao)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_definitions(-DPROJECT_ROOT_DIR="${CMAKE_SOURCE_DIR}")
 
-set(CMAKE_TOOLCHAIN_FILE D:/vcpkg/scripts/buildsystems/vcpkg.cmake)
+# set(CMAKE_TOOLCHAIN_FILE D:/vcpkg/scripts/buildsystems/vcpkg.cmake)
 
 # engine ilbrary
 add_subdirectory(core/Platform)
