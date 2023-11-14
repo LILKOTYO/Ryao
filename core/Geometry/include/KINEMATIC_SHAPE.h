@@ -63,7 +63,7 @@ public:
         VECTOR3& closestPointLocal,
         VECTOR3& normalLocal) const = 0;
 
-    virtual void generateViewerMesh(std::vector<TriVertex>& vertices, std::vector<unsigned int>& indices) = 0;
+    virtual void generateViewerMesh(std::vector<StaticVertex>& vertices, std::vector<unsigned int>& indices) = 0;
 
     RenderType getRenderType() const { return _renderType; };
 protected:

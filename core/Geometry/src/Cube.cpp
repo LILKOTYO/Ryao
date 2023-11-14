@@ -155,7 +155,7 @@ void Cube::getClosestPoint(const VECTOR3& query,
     }
 }
 
-void Cube::generateViewerMesh(vector<TriVertex>& vertices, vector<unsigned int>& indices) {
+void Cube::generateViewerMesh(vector<StaticVertex>& vertices, vector<unsigned int>& indices) {
     vertices.clear();
     indices.clear();
 
@@ -174,52 +174,52 @@ void Cube::generateViewerMesh(vector<TriVertex>& vertices, vector<unsigned int>&
     translate.z = (float)_translation[2];
 
     // front
-    vertices.push_back(TriVertex(glm::vec3(-0.5, -0.5, 0.5), glm::vec3(0.0, 0.0, 1.0)));
-    vertices.push_back(TriVertex(glm::vec3(0.5, -0.5, 0.5), glm::vec3(0.0, 0.0, 1.0)));
-    vertices.push_back(TriVertex(glm::vec3(-0.5, 0.5, 0.5), glm::vec3(0.0, 0.0, 1.0)));
-    vertices.push_back(TriVertex(glm::vec3(0.5, -0.5, 0.5), glm::vec3(0.0, 0.0, 1.0)));
-    vertices.push_back(TriVertex(glm::vec3(0.5, 0.5, 0.5), glm::vec3(0.0, 0.0, 1.0)));
-    vertices.push_back(TriVertex(glm::vec3(-0.5, 0.5, 0.5), glm::vec3(0.0, 0.0, 1.0)));
+    vertices.push_back(StaticVertex(glm::vec3(-0.5, -0.5, 0.5), glm::vec3(0.0, 0.0, 1.0)));
+    vertices.push_back(StaticVertex(glm::vec3(0.5, -0.5, 0.5), glm::vec3(0.0, 0.0, 1.0)));
+    vertices.push_back(StaticVertex(glm::vec3(-0.5, 0.5, 0.5), glm::vec3(0.0, 0.0, 1.0)));
+    vertices.push_back(StaticVertex(glm::vec3(0.5, -0.5, 0.5), glm::vec3(0.0, 0.0, 1.0)));
+    vertices.push_back(StaticVertex(glm::vec3(0.5, 0.5, 0.5), glm::vec3(0.0, 0.0, 1.0)));
+    vertices.push_back(StaticVertex(glm::vec3(-0.5, 0.5, 0.5), glm::vec3(0.0, 0.0, 1.0)));
 
     // top
-    vertices.push_back(TriVertex(glm::vec3(-0.5, 0.5, 0.5), glm::vec3(0.0, 1.0, 0.0)));
-    vertices.push_back(TriVertex(glm::vec3(0.5, 0.5, 0.5), glm::vec3(0.0, 1.0, 0.0)));
-    vertices.push_back(TriVertex(glm::vec3(-0.5, 0.5, -0.5), glm::vec3(0.0, 1.0, 0.0)));
-    vertices.push_back(TriVertex(glm::vec3(0.5, 0.5, 0.5), glm::vec3(0.0, 1.0, 0.0)));
-    vertices.push_back(TriVertex(glm::vec3(0.5, 0.5, -0.5), glm::vec3(0.0, 1.0, 0.0)));
-    vertices.push_back(TriVertex(glm::vec3(-0.5, 0.5, -0.5), glm::vec3(0.0, 1.0, 0.0)));
+    vertices.push_back(StaticVertex(glm::vec3(-0.5, 0.5, 0.5), glm::vec3(0.0, 1.0, 0.0)));
+    vertices.push_back(StaticVertex(glm::vec3(0.5, 0.5, 0.5), glm::vec3(0.0, 1.0, 0.0)));
+    vertices.push_back(StaticVertex(glm::vec3(-0.5, 0.5, -0.5), glm::vec3(0.0, 1.0, 0.0)));
+    vertices.push_back(StaticVertex(glm::vec3(0.5, 0.5, 0.5), glm::vec3(0.0, 1.0, 0.0)));
+    vertices.push_back(StaticVertex(glm::vec3(0.5, 0.5, -0.5), glm::vec3(0.0, 1.0, 0.0)));
+    vertices.push_back(StaticVertex(glm::vec3(-0.5, 0.5, -0.5), glm::vec3(0.0, 1.0, 0.0)));
 
     // back
-    vertices.push_back(TriVertex(glm::vec3(-0.5, 0.5, -0.5), glm::vec3(0.0, 0.0, -1.0)));
-    vertices.push_back(TriVertex(glm::vec3(0.5, 0.5, -0.5), glm::vec3(0.0, 0.0, -1.0)));
-    vertices.push_back(TriVertex(glm::vec3(-0.5, -0.5, -0.5), glm::vec3(0.0, 0.0, -1.0)));
-    vertices.push_back(TriVertex(glm::vec3(0.5, 0.5, -0.5), glm::vec3(0.0, 0.0, -1.0)));
-    vertices.push_back(TriVertex(glm::vec3(0.5, -0.5, -0.5), glm::vec3(0.0, 0.0, -1.0)));
-    vertices.push_back(TriVertex(glm::vec3(-0.5, -0.5, -0.5), glm::vec3(0.0, 0.0, -1.0)));
+    vertices.push_back(StaticVertex(glm::vec3(-0.5, 0.5, -0.5), glm::vec3(0.0, 0.0, -1.0)));
+    vertices.push_back(StaticVertex(glm::vec3(0.5, 0.5, -0.5), glm::vec3(0.0, 0.0, -1.0)));
+    vertices.push_back(StaticVertex(glm::vec3(-0.5, -0.5, -0.5), glm::vec3(0.0, 0.0, -1.0)));
+    vertices.push_back(StaticVertex(glm::vec3(0.5, 0.5, -0.5), glm::vec3(0.0, 0.0, -1.0)));
+    vertices.push_back(StaticVertex(glm::vec3(0.5, -0.5, -0.5), glm::vec3(0.0, 0.0, -1.0)));
+    vertices.push_back(StaticVertex(glm::vec3(-0.5, -0.5, -0.5), glm::vec3(0.0, 0.0, -1.0)));
 
     // bottom
-    vertices.push_back(TriVertex(glm::vec3(-0.5, -0.5, -0.5), glm::vec3(0.0, -1.0, 0.0)));
-    vertices.push_back(TriVertex(glm::vec3(0.5, -0.5, -0.5), glm::vec3(0.0, -1.0, 0.0)));
-    vertices.push_back(TriVertex(glm::vec3(-0.5, -0.5, 0.5), glm::vec3(0.0, -1.0, 0.0)));
-    vertices.push_back(TriVertex(glm::vec3(0.5, -0.5, -0.5), glm::vec3(0.0, -1.0, 0.0)));
-    vertices.push_back(TriVertex(glm::vec3(0.5, -0.5, 0.5), glm::vec3(0.0, -1.0, 0.0)));
-    vertices.push_back(TriVertex(glm::vec3(-0.5, -0.5, 0.5), glm::vec3(0.0, -1.0, 0.0)));
+    vertices.push_back(StaticVertex(glm::vec3(-0.5, -0.5, -0.5), glm::vec3(0.0, -1.0, 0.0)));
+    vertices.push_back(StaticVertex(glm::vec3(0.5, -0.5, -0.5), glm::vec3(0.0, -1.0, 0.0)));
+    vertices.push_back(StaticVertex(glm::vec3(-0.5, -0.5, 0.5), glm::vec3(0.0, -1.0, 0.0)));
+    vertices.push_back(StaticVertex(glm::vec3(0.5, -0.5, -0.5), glm::vec3(0.0, -1.0, 0.0)));
+    vertices.push_back(StaticVertex(glm::vec3(0.5, -0.5, 0.5), glm::vec3(0.0, -1.0, 0.0)));
+    vertices.push_back(StaticVertex(glm::vec3(-0.5, -0.5, 0.5), glm::vec3(0.0, -1.0, 0.0)));
 
     // left
-    vertices.push_back(TriVertex(glm::vec3(-0.5, -0.5, -0.5), glm::vec3(-1.0, 0.0, 0.0)));
-    vertices.push_back(TriVertex(glm::vec3(-0.5, -0.5, 0.5), glm::vec3(-1.0, 0.0, 0.0)));
-    vertices.push_back(TriVertex(glm::vec3(-0.5, 0.5, -0.5), glm::vec3(-1.0, 0.0, 0.0)));
-    vertices.push_back(TriVertex(glm::vec3(-0.5, -0.5, 0.5), glm::vec3(-1.0, 0.0, 0.0)));
-    vertices.push_back(TriVertex(glm::vec3(-0.5, 0.5, 0.5), glm::vec3(-1.0, 0.0, 0.0)));
-    vertices.push_back(TriVertex(glm::vec3(-0.5, 0.5, -0.5), glm::vec3(-1.0, 0.0, 0.0)));
+    vertices.push_back(StaticVertex(glm::vec3(-0.5, -0.5, -0.5), glm::vec3(-1.0, 0.0, 0.0)));
+    vertices.push_back(StaticVertex(glm::vec3(-0.5, -0.5, 0.5), glm::vec3(-1.0, 0.0, 0.0)));
+    vertices.push_back(StaticVertex(glm::vec3(-0.5, 0.5, -0.5), glm::vec3(-1.0, 0.0, 0.0)));
+    vertices.push_back(StaticVertex(glm::vec3(-0.5, -0.5, 0.5), glm::vec3(-1.0, 0.0, 0.0)));
+    vertices.push_back(StaticVertex(glm::vec3(-0.5, 0.5, 0.5), glm::vec3(-1.0, 0.0, 0.0)));
+    vertices.push_back(StaticVertex(glm::vec3(-0.5, 0.5, -0.5), glm::vec3(-1.0, 0.0, 0.0)));
 
     // right 
-    vertices.push_back(TriVertex(glm::vec3(0.5, -0.5, 0.5), glm::vec3(1.0, 0.0, 0.0)));
-    vertices.push_back(TriVertex(glm::vec3(0.5, -0.5, -0.5), glm::vec3(1.0, 0.0, 0.0)));
-    vertices.push_back(TriVertex(glm::vec3(0.5, 0.5, 0.5), glm::vec3(1.0, 0.0, 0.0)));
-    vertices.push_back(TriVertex(glm::vec3(0.5, -0.5, -0.5), glm::vec3(1.0, 0.0, 0.0)));
-    vertices.push_back(TriVertex(glm::vec3(0.5, 0.5, -0.5), glm::vec3(1.0, 0.0, 0.0)));
-    vertices.push_back(TriVertex(glm::vec3(0.5, 0.5, 0.5), glm::vec3(1.0, 0.0, 0.0)));
+    vertices.push_back(StaticVertex(glm::vec3(0.5, -0.5, 0.5), glm::vec3(1.0, 0.0, 0.0)));
+    vertices.push_back(StaticVertex(glm::vec3(0.5, -0.5, -0.5), glm::vec3(1.0, 0.0, 0.0)));
+    vertices.push_back(StaticVertex(glm::vec3(0.5, 0.5, 0.5), glm::vec3(1.0, 0.0, 0.0)));
+    vertices.push_back(StaticVertex(glm::vec3(0.5, -0.5, -0.5), glm::vec3(1.0, 0.0, 0.0)));
+    vertices.push_back(StaticVertex(glm::vec3(0.5, 0.5, -0.5), glm::vec3(1.0, 0.0, 0.0)));
+    vertices.push_back(StaticVertex(glm::vec3(0.5, 0.5, 0.5), glm::vec3(1.0, 0.0, 0.0)));
 
     for (int i = 0; i < vertices.size(); i++) {
         vertices[i].position = rotate * scale * vertices[i].position + translate;

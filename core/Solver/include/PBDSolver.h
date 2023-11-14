@@ -5,6 +5,7 @@
 #include "Platform/include/Logger.h"
 #include "Platform/include/Timer.h"
 #include "Geometry/include/TETMeshPBD.h"
+#include "Geometry/include/TriMeshPBD.h"
 #include "PBDConstraint/include/PBDConstraint.h"
 #include "PBDConstraint/include/SpringConstraint.h"
 #include "PBDConstraint/include/VolumeConstraint.h"
@@ -15,8 +16,10 @@ namespace SOLVER {
 class PBDSolver {
 public:
     PBDSolver(const TETMeshPBD& tetMesh);
+    PBDSolver(const TriMeshPBD& triMesh);
     ~PBDSolver() {};
     void initialize(const TETMeshPBD& tetMesh);
+    void initialize(const TriMeshPBD& triMesh);
 
     void addRegularConstraints(PBD::PBDConstraint* constraint);
 

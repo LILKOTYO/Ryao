@@ -30,7 +30,7 @@ public:
         VECTOR3& closestPointLocal,
         VECTOR3& normalLocal) const override;
 
-    virtual void generateViewerMesh(std::vector<TriVertex>& vertices, std::vector<unsigned int>& indices) override;
+    virtual void generateViewerMesh(std::vector<StaticVertex>& vertices, std::vector<unsigned int>& indices) override;
 };
 
 }

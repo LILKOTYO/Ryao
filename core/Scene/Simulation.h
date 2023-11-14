@@ -62,7 +62,7 @@ public:
         _frameNumber++;
     };
 
-    void addCube(const VECTOR3& center, const REAL& scale, std::vector<TriVertex>& V,  std::vector<unsigned int>& I) {
+    void addCube(const VECTOR3& center, const REAL& scale, std::vector<StaticVertex>& V,  std::vector<unsigned int>& I) {
         Cube* cube = new Cube(center, scale);
         cube->generateViewerMesh(V, I);
         _kinematicShapes.push_back(cube);
@@ -74,7 +74,7 @@ public:
     }
 
     void addCylinder(const VECTOR3& center, const REAL& radius, const REAL& height, int segment,
-                     std::vector<TriVertex>& V,  std::vector<unsigned int>& I) {
+                     std::vector<StaticVertex>& V,  std::vector<unsigned int>& I) {
         Cylinder* cylinder = new Cylinder(center, radius, height, segment);
         cylinder->generateViewerMesh(V, I);
         _kinematicShapes.push_back(cylinder);
@@ -85,7 +85,7 @@ public:
         _kinematicShapes.push_back(cylinder);
     }
 
-    void addSphere(const VECTOR3& center, const REAL& scale, std::vector<TriVertex>& V,  std::vector<unsigned int>& I) {
+    void addSphere(const VECTOR3& center, const REAL& scale, std::vector<StaticVertex>& V,  std::vector<unsigned int>& I) {
         Sphere* sphere = new Sphere(center, scale);
         sphere->generateViewerMesh(V, I);
         _kinematicShapes.push_back(sphere);
@@ -111,7 +111,7 @@ public:
         _normalizedVertices = normalize;
     }
 
-    void getDynamicMeshRenderData(std::vector<TetVertex>& V, std::vector<unsigned int>& I) {
+    void getDynamicMeshRenderData(std::vector<DynamicVertex>& V, std::vector<unsigned int>& I) {
         if (_tetMesh == nullptr) {
             RYAO_ERROR("No tet mesh is loaded!");
             return;
@@ -122,7 +122,7 @@ public:
         const std::vector<VECTOR3I> indices = _tetMesh->surfaceTriangles();
         for (int i = 0; i < vertices.size(); i++) {
             VECTOR3 p = vertices[i];
-            V.push_back(TetVertex(glm::vec3(p[0], p[1], p[2])));
+            V.push_back(DynamicVertex(glm::vec3(p[0], p[1], p[2])));
         }
         for (int i = 0; i < indices.size(); i++) {
             I.push_back(indices[i][0]);

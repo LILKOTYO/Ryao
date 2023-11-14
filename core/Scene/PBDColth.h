@@ -1,5 +1,5 @@
-#ifndef RYAO_PBDBUNNYDROP_H
-#define RYAO_PBDBUNNYDROP_H
+#ifndef RYAO_PBDCLOTH_H
+#define RYAO_PBDCLOTH_H
 
 #include "PBDSimulation.h"
 
@@ -18,7 +18,7 @@ class PBDCloth : public PBDSimulation {
         _sceneName = "pbd_cloth";
 
         // read in the mesh file
-        setTetMesh(PROJECT_ROOT_DIR "/resources/tetgen/bunny");
+        setTriMesh(PROJECT_ROOT_DIR "/resources/obj/dress");
 
         using namespace Eigen;
         using namespace std;
@@ -33,12 +33,12 @@ class PBDCloth : public PBDSimulation {
         _initialA = M;
         _initialTranslation = half;
 
-        for (int i = 0; i < _tetMesh->totalVertices(); i++) {
-            (_tetMesh->restVertices())[i] = _initialA * (_tetMesh->restVertices())[i] + _initialTranslation;
-            (_tetMesh->vertices())[i] = (_tetMesh->restVertices())[i];
+        for (int i = 0; i < _triMesh->totalVertices(); i++) {
+            (_triMesh->restVertices())[i] = _initialA * (_triMesh->restVertices())[i] + _initialTranslation;
+            (_triMesh->vertices())[i] = (_triMesh->restVertices())[i];
         }
 
-        _solver = new SOLVER::PBDSolver(*_tetMesh);
+        _solver = new SOLVER::PBDSolver(*_triMesh);
 
         _gravity = VECTOR3(0.0, -0.2, 0.0);
         _solver->setGravity(_gravity);
@@ -46,17 +46,9 @@ class PBDCloth : public PBDSimulation {
         //    _solver->setFixed(1, true);
         //    _solver->setFixed(10, true);
 
-        PBD::PBDConstraint* vConstraints = new PBD::VolumeConstraint();
-        for (int i = 0; i < _tetMesh->tets().size(); i++) {
-            VECTOR4I tet = _tetMesh->tet(i);
-            std::vector<int> idx = { tet[0], tet[1], tet[2], tet[3] };
-            vConstraints->addConstraint(idx, _tetMesh->vertices());
-        }
-        _solver->addRegularConstraints(vConstraints);
-
         PBD::PBDConstraint* eConstraints = new PBD::SpringConstraint();
-        for (int i = 0; i < _tetMesh->edges().size(); i++) {
-            VECTOR2I edge = _tetMesh->edges()[i];
+        for (int i = 0; i < _triMesh->edges().size(); i++) {
+            VECTOR2I edge = _triMesh->edges()[i];
             std::vector<int> idx = { edge[0], edge[1] };
             eConstraints->addConstraint(idx, _tetMesh->vertices());
         }
@@ -70,4 +62,4 @@ class PBDCloth : public PBDSimulation {
 
 }
 
-#endif //RYAO_PBDBUNNYDROP_H
+#endif //RYAO_PBDCLOTH_H

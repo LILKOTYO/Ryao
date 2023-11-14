@@ -11,6 +11,7 @@
 #include <Timer.h>
 #include "Scene/BunnyDrop.h"
 #include "Scene/PBDBunnyDrop.h"
+#include "Scene/PBDColth.h"
 
 int main()
 {
@@ -36,7 +37,8 @@ int main()
 //    viewer.registerTETMeshToViewer();
 
 // For XPBD Simulation
-    Ryao::PBDSimulation* simulation = new Ryao::PBDBunnyDrop();
+    //Ryao::PBDSimulation* simulation = new Ryao::PBDBunnyDrop();
+    Ryao::PBDSimulation* simulation = new Ryao::PBDCloth();
     simulation->buildScene();
 
     viewer.setSimulation(simulation);

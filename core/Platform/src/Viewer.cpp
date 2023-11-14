@@ -233,10 +233,10 @@ void Viewer::addViewerCube(const VECTOR3 &center, const REAL &scale, Material& m
         RYAO_ERROR("Set the viewer's simulation first!");
         return;
     }
-    vector<TriVertex> cubeV;
+    vector<StaticVertex> cubeV;
     vector<unsigned int> cubeI;
     _simulation->addCube(center, scale, cubeV, cubeI);
-    ViewerTriMesh* cube = new ViewerTriMesh(cubeV, cubeI, material, DRAWARRAY);
+    ViewerStaticMesh* cube = new ViewerStaticMesh(cubeV, cubeI, material, DRAWARRAY);
     addViewerStaticMesh(cube);
 }
 
@@ -246,10 +246,10 @@ void Viewer::addViewerCylinder(const VECTOR3 &center, const REAL &radius, const 
         RYAO_ERROR("Set the viewer's simulation first!");
         return;
     }
-    vector<TriVertex> cylinderV;
+    vector<StaticVertex> cylinderV;
     vector<unsigned int> cylinderI;
     _simulation->addCylinder(center, radius, height, segment, cylinderV, cylinderI);
-    ViewerTriMesh* cylinder = new ViewerTriMesh(cylinderV, cylinderI, material, DRAWELEMENT);
+    ViewerStaticMesh* cylinder = new ViewerStaticMesh(cylinderV, cylinderI, material, DRAWELEMENT);
     addViewerStaticMesh(cylinder);
 }
 
@@ -258,10 +258,10 @@ void Viewer::addViewerSphere(const VECTOR3 &center, const REAL &scale, Material 
         RYAO_ERROR("Set the viewer's simulation first!");
         return;
     }
-    vector<TriVertex> sphereV;
+    vector<StaticVertex> sphereV;
     vector<unsigned int> sphereI;
     _simulation->addSphere(center, scale, sphereV, sphereI);
-    ViewerTriMesh* sphere = new ViewerTriMesh(sphereV, sphereI, material, DRAWELEMENT);
+    ViewerStaticMesh* sphere = new ViewerStaticMesh(sphereV, sphereI, material, DRAWELEMENT);
     addViewerStaticMesh(sphere);
 }
 
@@ -277,10 +277,10 @@ void Viewer::registerShapeToViewer() {
         VECTOR3 spec(0.2, 0.3, 0.3);
         Material material(ambi, diff, spec, 0.3);
         for (int i = 0; i < shapeList.size(); i++) {
-            vector<TriVertex> V;
+            vector<StaticVertex> V;
             vector<unsigned int> I;
             shapeList[i]->generateViewerMesh(V, I);
-            ViewerTriMesh* shape = new ViewerTriMesh(V, I, material, shapeList[i]->getRenderType());
+            ViewerStaticMesh* shape = new ViewerStaticMesh(V, I, material, shapeList[i]->getRenderType());
             addViewerStaticMesh(shape);
         }
     } else if (_pbdSimulation != nullptr) {
@@ -294,10 +294,10 @@ void Viewer::registerShapeToViewer() {
         VECTOR3 spec(0.2, 0.3, 0.3);
         Material material(ambi, diff, spec, 0.3);
         for (int i = 0; i < shapeList.size(); i++) {
-            vector<TriVertex> V;
+            vector<StaticVertex> V;
             vector<unsigned int> I;
             shapeList[i]->generateViewerMesh(V, I);
-            ViewerTriMesh* shape = new ViewerTriMesh(V, I, material, shapeList[i]->getRenderType());
+            ViewerStaticMesh* shape = new ViewerStaticMesh(V, I, material, shapeList[i]->getRenderType());
             addViewerStaticMesh(shape);
         }
     } else {
@@ -312,23 +312,23 @@ void Viewer::registerDynamicMeshToViewer() {
         VECTOR3 diff(0.2, 0.3, 0.3);
         VECTOR3 spec(0.2, 0.3, 0.3);
         Material material(ambi, diff, spec, 0.3);
-        vector<TetVertex> V;
+        vector<DynamicVertex> V;
         vector<unsigned int> I;
         _simulation->getDynamicMeshRenderData(V, I);
 
-        ViewerTetMesh* tetmesh = new ViewerTetMesh(V, I, material);
-        addViewerDynamicMesh(tetmesh);
+        ViewerDynamicMesh* dmesh = new ViewerDynamicMesh(V, I, material);
+        addViewerDynamicMesh(dmesh);
     } else if (_pbdSimulation != nullptr) {
         VECTOR3 ambi(0.2, 0.3, 0.3);
         VECTOR3 diff(0.2, 0.3, 0.3);
         VECTOR3 spec(0.2, 0.3, 0.3);
         Material material(ambi, diff, spec, 0.3);
-        vector<TetVertex> V;
+        vector<DynamicVertex> V;
         vector<unsigned int> I;
         _pbdSimulation->getDynamicMeshRenderData(V, I);
 
-        ViewerTetMesh* tetmesh = new ViewerTetMesh(V, I, material);
-        addViewerDynamicMesh(tetmesh);
+        ViewerDynamicMesh* dmesh = new ViewerDynamicMesh(V, I, material);
+        addViewerDynamicMesh(dmesh);
     } else {
         RYAO_ERROR("Set the viewer's simulation first!");
         return;

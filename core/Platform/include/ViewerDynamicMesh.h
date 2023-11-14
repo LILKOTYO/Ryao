@@ -1,5 +1,5 @@
-#ifndef VIEWERTETMESH_H
-#define VIEWERTETMESH_H
+#ifndef VIEWERDYNAMICMESH_H
+#define VIEWERDYNAMICMESH_H
 
 #include "RYAO.h"
 #include "Shader.h"
@@ -14,10 +14,10 @@
 
 namespace Ryao {
 
-    class ViewerTetMesh {
+    class ViewerDynamicMesh {
     public:
         // ViewerMesh Data
-        std::vector<TetVertex> _vertices;
+        std::vector<DynamicVertex> _vertices;
         std::vector<unsigned int> _indices;
         unsigned int _VAO;
 
@@ -26,9 +26,9 @@ namespace Ryao {
         Shader _shaderLine;
 
         // Construct
-        ViewerTetMesh(std::vector<TetVertex>& vertices, std::vector<unsigned int>& indices, Material& material)
+        ViewerDynamicMesh(std::vector<DynamicVertex>& vertices, std::vector<unsigned int>& indices, Material& material)
             : _vertices(vertices), _indices(indices), _material(material),
-            _shaderFill(Shader(PROJECT_ROOT_DIR "/shaders/ViewerTetMeshFill.vert", PROJECT_ROOT_DIR "/shaders/ViewerTetMeshFill.frag")),
+            _shaderFill(Shader(PROJECT_ROOT_DIR "/shaders/ViewerDynamicMeshFill.vert", PROJECT_ROOT_DIR "/shaders/ViewerDynamicMeshFill.frag")),
             _shaderLine(Shader(PROJECT_ROOT_DIR "/shaders/ViewerMeshLine.vert", PROJECT_ROOT_DIR "/shaders/ViewerMeshLine.frag")) {
             // now that we have all the required data, set the vertex buffers and its attribute pointers.
             RYAO_INFO("Load Viewer TET Mesh ...");
@@ -36,7 +36,7 @@ namespace Ryao {
             RYAO_INFO("Successfully Loaded Viewer Mesh! ");
         }
 
-        ViewerTetMesh(std::vector<TetVertex>& vertices, std::vector<unsigned int>& indices, Material& material,
+        ViewerDynamicMesh(std::vector<DynamicVertex>& vertices, std::vector<unsigned int>& indices, Material& material,
             const char* fillVertexPath, const char* fillFragmentPath,
             const char* lineVertexPath, const char* lineFragmentPath)
             : _vertices(vertices), _indices(indices), _material(material),
@@ -48,7 +48,7 @@ namespace Ryao {
             RYAO_INFO("Successfully Loaded Viewer Mesh! ");
         }
 
-        ~ViewerTetMesh() {}
+        ~ViewerDynamicMesh() {}
 
         /**
          * @brief Render the Viewer Mesh, as the tetmesh will deform and move, so we need to update the vertices and 
@@ -74,4 +74,4 @@ namespace Ryao {
 
 } // Ryao
 
-#endif // !VIEWERTETMESH_H
+#endif // !VIEWERDYNAMICMESH_H

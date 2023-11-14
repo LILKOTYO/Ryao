@@ -3,8 +3,8 @@
 
 #include "Camera.h"
 #include "Shader.h"
-#include "ViewerTriMesh.h"
-#include "ViewerTetMesh.h"
+#include "ViewerStaticMesh.h"
+#include "ViewerDynamicMesh.h"
 #include "ReferencePlane.h"
 #include "Logger.h"
 #include "RYAO.h"
@@ -101,8 +101,8 @@ public:
 	double* getLastY();
 	bool getisDrag();
 
-	void addViewerDynamicMesh(ViewerTetMesh* dMesh)	{ _viewerDynamicMeshList.push_back(dMesh); }
-	void addViewerStaticMesh(ViewerTriMesh* sMesh)	{ _viewerStaticMeshList.push_back(sMesh); }
+	void addViewerDynamicMesh(ViewerDynamicMesh* dMesh)	{ _viewerDynamicMeshList.push_back(dMesh); }
+	void addViewerStaticMesh(ViewerStaticMesh* sMesh)	{ _viewerStaticMeshList.push_back(sMesh); }
 	void addShader(Shader* shader)			{ _shaderList.push_back(shader); }
 	void addArrow(Arrow* arrow)				{ _arrowList.push_back(arrow); }
     void addViewerCube(const VECTOR3& center, const REAL& scale, Material& material);
@@ -115,8 +115,8 @@ public:
 	void launch();
 private:
 	// data 
-	std::vector<ViewerTetMesh*> _viewerDynamicMeshList;
-	std::vector<ViewerTriMesh*> _viewerStaticMeshList;
+	std::vector<ViewerDynamicMesh*> _viewerDynamicMeshList;
+	std::vector<ViewerStaticMesh*> _viewerStaticMeshList;
 	std::vector<Shader*> _shaderList;
 	std::vector<Arrow*> _arrowList;
 

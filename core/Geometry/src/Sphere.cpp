@@ -90,7 +90,7 @@ void Sphere::getClosestPoint(const VECTOR3& query,
     normalLocal = closestPointLocal;
 }
 
-void Sphere::generateViewerMesh(std::vector<TriVertex>& vertices, std::vector<unsigned int>& indices) {
+void Sphere::generateViewerMesh(std::vector<StaticVertex>& vertices, std::vector<unsigned int>& indices) {
     vertices.clear();
     indices.clear();
 
@@ -121,7 +121,7 @@ void Sphere::generateViewerMesh(std::vector<TriVertex>& vertices, std::vector<un
 
             glm::vec3 pn(cosPhi * sinTheta, cosTheta, sinPhi * sinTheta);
 
-            vertices.push_back(TriVertex(pn, pn));
+            vertices.push_back(StaticVertex(pn, pn));
         }
     }
 

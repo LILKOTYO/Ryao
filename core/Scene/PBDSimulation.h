@@ -33,6 +33,7 @@ public:
 
         _solver = nullptr;
         _tetMesh = nullptr;
+        _triMesh = nullptr;
         _hyperelastic = nullptr;
     }
 
@@ -59,7 +60,7 @@ public:
         _frameNumber++;
     };
 
-    void addCube(const VECTOR3& center, const REAL& scale, std::vector<TriVertex>& V,  std::vector<unsigned int>& I) {
+    void addCube(const VECTOR3& center, const REAL& scale, std::vector<StaticVertex>& V,  std::vector<unsigned int>& I) {
         Cube* cube = new Cube(center, scale);
         cube->generateViewerMesh(V, I);
         _kinematicShapes.push_back(cube);
@@ -71,7 +72,7 @@ public:
     }
 
     void addCylinder(const VECTOR3& center, const REAL& radius, const REAL& height, int segment,
-                     std::vector<TriVertex>& V,  std::vector<unsigned int>& I) {
+                     std::vector<StaticVertex>& V,  std::vector<unsigned int>& I) {
         Cylinder* cylinder = new Cylinder(center, radius, height, segment);
         cylinder->generateViewerMesh(V, I);
         _kinematicShapes.push_back(cylinder);
@@ -82,7 +83,7 @@ public:
         _kinematicShapes.push_back(cylinder);
     }
 
-    void addSphere(const VECTOR3& center, const REAL& scale, std::vector<TriVertex>& V,  std::vector<unsigned int>& I) {
+    void addSphere(const VECTOR3& center, const REAL& scale, std::vector<StaticVertex>& V,  std::vector<unsigned int>& I) {
         Sphere* sphere = new Sphere(center, scale);
         sphere->generateViewerMesh(V, I);
         _kinematicShapes.push_back(sphere);
@@ -121,27 +122,51 @@ public:
         _normalizedVertices = normalize;
     }
 
-    void getDynamicMeshRenderData(std::vector<TetVertex>& V, std::vector<unsigned int>& I) {
-        if (_tetMesh == nullptr) {
-            RYAO_ERROR("No tet mesh is loaded!");
-            return;
-        }
+    void getDynamicMeshRenderData(std::vector<DynamicVertex>& V, std::vector<unsigned int>& I) {
         V.clear();
         I.clear();
-        const std::vector<VECTOR3>& vertices = _tetMesh->vertices();
-        const std::vector<VECTOR3I>& indices = _tetMesh->surfaceTriangles();
-        size_t vSize = vertices.size();
-        size_t iSize = indices.size();
-        V.reserve(vSize);
-        I.reserve(iSize * 3);
-        for (int i = 0; i < vSize; i++) {
-            VECTOR3 p = vertices[i];
-            V.push_back(TetVertex(glm::vec3(p[0], p[1], p[2])));
+
+        if (_tetMesh == nullptr && _triMesh == nullptr) {
+            RYAO_ERROR("No dynamic mesh is loaded!");
+            return;
         }
-        for (int i = 0; i < iSize; i++) {
-            I.push_back(indices[i][0]);
-            I.push_back(indices[i][1]);
-            I.push_back(indices[i][2]);
+        
+        if (_tetMesh) {
+            const std::vector<VECTOR3>& vertices = _tetMesh->vertices();
+            const std::vector<VECTOR3I>& indices = _tetMesh->surfaceTriangles();
+            size_t vSize = vertices.size();
+            size_t iSize = indices.size();
+            V.reserve(vSize);
+            I.reserve(iSize * 3);
+            for (int i = 0; i < vSize; i++) {
+                VECTOR3 p = vertices[i];
+                V.push_back(DynamicVertex(glm::vec3(p[0], p[1], p[2])));
+            }
+            for (int i = 0; i < iSize; i++) {
+                I.push_back(indices[i][0]);
+                I.push_back(indices[i][1]);
+                I.push_back(indices[i][2]);
+            }
+            RYAO_INFO("Dynamic tet mesh {} loaded!", _tetMeshFilename);
+        }
+
+        if (_triMesh) {
+            const std::vector<VECTOR3>& vertices = _triMesh->vertices();
+            const std::vector<VECTOR3I>& indices = _triMesh->faces();
+            size_t vSize = vertices.size();
+            size_t iSize = indices.size();
+            V.reserve(vSize);
+            I.reserve(iSize * 3);
+            for (int i = 0; i < vSize; i++) {
+                VECTOR3 p = vertices[i];
+                V.push_back(DynamicVertex(glm::vec3(p[0], p[1], p[2])));
+            }
+            for (int i = 0; i < iSize; i++) {
+                I.push_back(indices[i][0]);
+                I.push_back(indices[i][1]);
+                I.push_back(indices[i][2]);
+            }
+            RYAO_INFO("Dynamic tri mesh {} loaded!", _triMeshFilename);
         }
     }
 

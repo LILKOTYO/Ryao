@@ -1,8 +1,8 @@
-#include <ViewerTetMesh.h>
+#include <ViewerDynamicMesh.h>
 #include "Timer.h"
 
 namespace Ryao {
-void ViewerTetMesh::Draw(Camera& camera, const std::vector<VECTOR3>& vertices, unsigned int width, unsigned int height) {
+void ViewerDynamicMesh::Draw(Camera& camera, const std::vector<VECTOR3>& vertices, unsigned int width, unsigned int height) {
     Timer functionTimer(__FUNCTION__);
     // draw mesh
     glBindVertexArray(_VAO);
@@ -51,7 +51,7 @@ void ViewerTetMesh::Draw(Camera& camera, const std::vector<VECTOR3>& vertices, u
     glBindVertexArray(0);
 }
 
-void ViewerTetMesh::SetupViewerMesh() {
+void ViewerDynamicMesh::SetupViewerMesh() {
     // create buffers/arrays
     glGenVertexArrays(1, &_VAO);
     glGenBuffers(1, &_VBO);
@@ -64,7 +64,7 @@ void ViewerTetMesh::SetupViewerMesh() {
     // The effect is that we can simply pass a pointer to the struct and it translates perfectly to a glm::vec3/2 array which
     // again translates to 3/2 floats which translates to a byte array.
 
-    glBufferData(GL_ARRAY_BUFFER, _vertices.size() * sizeof(TetVertex), &_vertices[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, _vertices.size() * sizeof(DynamicVertex), &_vertices[0], GL_STATIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, _indices.size() * sizeof(unsigned int), &_indices[0], GL_STATIC_DRAW);
@@ -72,14 +72,14 @@ void ViewerTetMesh::SetupViewerMesh() {
     // set the vertex attribute pointers
     // vertex Positions
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(TetVertex), (void*)offsetof(TetVertex, position));
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(DynamicVertex), (void*)offsetof(DynamicVertex, position));
 }
 
-void ViewerTetMesh::UpdateFrameData(const std::vector<VECTOR3>& v) {
+void ViewerDynamicMesh::UpdateFrameData(const std::vector<VECTOR3>& v) {
     Timer functionTimer(__FUNCTION__);
     glBindVertexArray(_VAO);
     glBindBuffer(GL_ARRAY_BUFFER, _VBO);
-    glBufferData(GL_ARRAY_BUFFER, _vertices.size() * sizeof(TetVertex), NULL, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, _vertices.size() * sizeof(DynamicVertex), NULL, GL_STATIC_DRAW);
 
 #pragma omp parallel
 #pragma omp for schedule(static)
@@ -89,7 +89,7 @@ void ViewerTetMesh::UpdateFrameData(const std::vector<VECTOR3>& v) {
         _vertices[i].position.z = v[i][2];
     }
 
-    glBufferSubData(GL_ARRAY_BUFFER, 0, _vertices.size() * sizeof(TetVertex), &_vertices[0]);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, _vertices.size() * sizeof(DynamicVertex), &_vertices[0]);
 }
 
 }

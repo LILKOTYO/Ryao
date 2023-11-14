@@ -165,7 +165,7 @@ void Cylinder::getClosestPoint(const VECTOR3& query,
     }
 }
 
-void Cylinder::generateViewerMesh(vector<TriVertex>& vertices, vector<unsigned int>& indices) {
+void Cylinder::generateViewerMesh(vector<StaticVertex>& vertices, vector<unsigned int>& indices) {
     vertices.clear();
     indices.clear();
 
@@ -193,20 +193,20 @@ void Cylinder::generateViewerMesh(vector<TriVertex>& vertices, vector<unsigned i
     glm::vec3 bottomCenter(0.0f, -0.5f, 0.0f);
 
     // Add the top and bottom center vertices to the vertices array
-    vertices.push_back(TriVertex(topCenter, glm::vec3(0.0, 1.0, 0.0)));
+    vertices.push_back(StaticVertex(topCenter, glm::vec3(0.0, 1.0, 0.0)));
 
     for (int i = 1; i < _segment + 1; i++) {
         float x = cos((float)(i - 1) * segmentAngle);
         float z = sin((float)(i - 1) * segmentAngle);
-        vertices.push_back(TriVertex(glm::vec3(x, 0.5, z), glm::vec3(x, 0.0, z)));
+        vertices.push_back(StaticVertex(glm::vec3(x, 0.5, z), glm::vec3(x, 0.0, z)));
     }
 
-    vertices.push_back(TriVertex(bottomCenter, glm::vec3(0.0, -1.0, 0.0)));
+    vertices.push_back(StaticVertex(bottomCenter, glm::vec3(0.0, -1.0, 0.0)));
 
     for (int i = 1; i < _segment + 1; i++) {
         float x = cos((float)(i - 1) * segmentAngle);
         float z = sin((float)(i - 1) * segmentAngle);
-        vertices.push_back(TriVertex(glm::vec3(x, -0.5, z), glm::vec3(x, 0.0, z)));
+        vertices.push_back(StaticVertex(glm::vec3(x, -0.5, z), glm::vec3(x, 0.0, z)));
     }
 
     for (int i = 0; i < vertices.size(); i++) {

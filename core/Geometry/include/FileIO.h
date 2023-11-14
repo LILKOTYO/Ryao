@@ -12,7 +12,7 @@
 
 namespace Ryao {
 
-inline std::vector<TetVertex> normalizeVertices(const std::vector<TetVertex>& vertices) {
+inline std::vector<DynamicVertex> normalizeVertices(const std::vector<DynamicVertex>& vertices) {
     assert(vertices.size() > 0);
     glm::vec3 mins = vertices[0].position;
     glm::vec3 maxs = vertices[0].position;
@@ -25,7 +25,7 @@ inline std::vector<TetVertex> normalizeVertices(const std::vector<TetVertex>& ve
     const glm::vec3 lengths = maxs - mins;
     const REAL maxLengthInv = 1.0 / std::max(lengths.x, std::max(lengths.y, lengths.z));
 
-    std::vector<TetVertex> normalized = vertices;
+    std::vector<DynamicVertex> normalized = vertices;
     for (unsigned int i = 0; i < vertices.size(); i++) {
         //normalized[x].position -= mins;
         normalized[i].position.x -= mins.x;
@@ -79,8 +79,9 @@ inline bool readObjFile(const std::string& filename,
     vertices.clear();
     faces.clear();
     std::vector<VECTOR3> tmp;
-    FILE* file = fopen(filename.c_str(), "r");
-    RYAO_INFO("Reading in {} file", filename.c_str());
+    std::string objName = filename + ".obj";
+    FILE* file = fopen(objName.c_str(), "r");
+    RYAO_INFO("Reading in {} file", objName.c_str());
 
     if (file == NULL) {
         RYAO_ERROR("Failed to open file!");

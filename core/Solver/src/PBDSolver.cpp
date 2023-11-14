@@ -7,6 +7,10 @@ PBDSolver::PBDSolver(const TETMeshPBD& tetMesh) {
     initialize(tetMesh);
 }
 
+PBDSolver::PBDSolver(const TriMeshPBD& triMesh) {
+    initialize(triMesh);
+}
+
 void PBDSolver::initialize(const TETMeshPBD& tetMesh) {
     _constraints = std::vector<PBD::PBDConstraint*>();
     _collisions = std::vector<PBD::PBDConstraint*>();
@@ -16,6 +20,28 @@ void PBDSolver::initialize(const TETMeshPBD& tetMesh) {
     _velocity.assign(tetMesh.totalVertices(), VECTOR3(0.0, 0.0, 0.0));
     _prePosition.resize(tetMesh.totalVertices());
     _prePosition.assign(tetMesh.totalVertices(), VECTOR3(0.0, 0.0, 0.0));
+
+    _isFixed.resize(_DOFs);
+    _isFixed.assign(_DOFs, false);
+
+    _gravity = VECTOR3(0.0, -0.0, 0.0);
+    _wind = VECTOR3(0.0, 0.0, 0.0);
+
+    _name = string("PBDSolver");
+    _subStep = 10;
+    _deltaT = 1.0 / 30.0;
+    _subDeltaT = _deltaT / 10.0;
+}
+
+void PBDSolver::initialize(const TriMeshPBD& triMesh) {
+    _constraints = std::vector<PBD::PBDConstraint*>();
+    _collisions = std::vector<PBD::PBDConstraint*>();
+
+    _DOFs = triMesh.DOFs();
+    _velocity.resize(triMesh.totalVertices());
+    _velocity.assign(triMesh.totalVertices(), VECTOR3(0.0, 0.0, 0.0));
+    _prePosition.resize(triMesh.totalVertices());
+    _prePosition.assign(triMesh.totalVertices(), VECTOR3(0.0, 0.0, 0.0));
 
     _isFixed.resize(_DOFs);
     _isFixed.assign(_DOFs, false);

@@ -48,6 +48,8 @@ namespace Ryao {
 
         const vector<VECTOR2I>& edges() const { return _edges; };
 
+        const vector<VECTOR3I>& faces() const { return _faces; };
+
         const vector<pair<int, int>>& vertexFaceCollisions() const { return _vertexFaceCollisions; };
 
         const vector<pair<int, int>>& edgeEdgeCollisions() const { return _edgeEdgeCollisions; };

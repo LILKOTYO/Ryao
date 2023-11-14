@@ -35,20 +35,20 @@ typedef Eigen::SparseMatrix<REAL> SPARSE_MATRIX;
 
 typedef Eigen::Quaterniond QUATERNIOND;
 
-struct TriVertex {
+struct StaticVertex {
 	// position 
 	glm::vec3 position;
 	// normal 
 	glm::vec3 normal;
 	// constructor
-	TriVertex(glm::vec3 p, glm::vec3 n) : position(p), normal(n) {}
+	StaticVertex(glm::vec3 p, glm::vec3 n) : position(p), normal(n) {}
 };
 
-struct TetVertex {
+struct DynamicVertex {
 	// position
 	glm::vec3 position;
 	// constructor
-	TetVertex(glm::vec3 p) : position(p) {}
+	DynamicVertex(glm::vec3 p) : position(p) {}
 };
 
 struct LightDir {
