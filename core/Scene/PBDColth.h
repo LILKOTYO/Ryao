@@ -42,15 +42,14 @@ class PBDCloth : public PBDSimulation {
 
         _gravity = VECTOR3(0.0, -0.2, 0.0);
         _solver->setGravity(_gravity);
-        //
-        //    _solver->setFixed(1, true);
-        //    _solver->setFixed(10, true);
+        _solver->setFixed(1, true);
+        _solver->setFixed(10, true);
 
         PBD::PBDConstraint* eConstraints = new PBD::SpringConstraint();
         for (int i = 0; i < _triMesh->edges().size(); i++) {
             VECTOR2I edge = _triMesh->edges()[i];
             std::vector<int> idx = { edge[0], edge[1] };
-            eConstraints->addConstraint(idx, _tetMesh->vertices());
+            eConstraints->addConstraint(idx, _triMesh->vertices());
         }
         _solver->addRegularConstraints(eConstraints);
 

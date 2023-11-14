@@ -174,7 +174,7 @@ void Viewer::launch() {
         } else if (_pbdSimulation != nullptr) {
             if (_viewerDynamicMeshList.size() > 0) {
                 for (int i = 0; i < _viewerDynamicMeshList.size(); i++)
-                    _viewerDynamicMeshList[i]->Draw(_camera, _pbdSimulation->getTetMeshVertices(), _SCR_WIDTH, _SCR_HEIGHT);
+                    _viewerDynamicMeshList[i]->Draw(_camera, _pbdSimulation->getMeshVertices(), _SCR_WIDTH, _SCR_HEIGHT);
             }
             if (!_pause)
                 _pbdSimulation->stepSimulation();

@@ -72,52 +72,110 @@ inline std::vector<VECTOR3> normalizeVertices(const std::vector<VECTOR3>& vertic
     return normalized;
 }
 
+inline int split(std::string str, std::string pattern, std::vector<std::string>& words)
+{
+    std::string::size_type pos;
+    std::string word;
+    int num = 0;
+    str += pattern;
+    std::string::size_type size = str.size();
+    for (auto i = 0; i < size; i++) {
+        pos = str.find(pattern, i);
+        if (pos == i) {
+            continue;//if first string is pattern
+        }
+        if (pos < size) {
+            word = str.substr(i, pos - i);
+            words.push_back(word);
+            i = pos + pattern.size() - 1;
+            num++;
+        }
+    }
+    return num;
+}
+
 inline bool readObjFile(const std::string& filename,
     std::vector<VECTOR3>& vertices,
     std::vector<VECTOR3I>& faces) {
     // erase whatever was in the vectors before
     vertices.clear();
     faces.clear();
-    std::vector<VECTOR3> tmp;
     std::string objName = filename + ".obj";
-    FILE* file = fopen(objName.c_str(), "r");
+    std::ifstream fin(objName);
+    std::string str;
+    std::vector<std::string> words;
     RYAO_INFO("Reading in {} file", objName.c_str());
+    int num = 0;
 
-    if (file == NULL) {
-        RYAO_ERROR("Failed to open file!");
-        return false;
-    }
-
-    char nextChar = getc(file);
-
-    // get the vertices
-    while (nextChar == 'v' && nextChar != EOF) {
-        ungetc(nextChar, file);
-
-        double v[3];
-        fscanf(file, "v %lf %lf %lf\n", &v[0], &v[1], &v[2]);
-        vertices.push_back(VECTOR3(v[0], v[1], v[2]));
-
-        nextChar = getc(file);
-    }
-    if (nextChar == EOF) {
-        RYAO_ERROR("File contains only vertices and no faces!");
-        return false;
+    while (!fin.eof()) {
+        std::getline(fin, str);
+        words.clear();
+        num = split(str, " ", words);
+        if (num == 4 && words[0] == "v") {
+            float x = atof(words[1].c_str());
+            float y = atof(words[2].c_str());
+            float z = atof(words[3].c_str());
+            vertices.push_back(VECTOR3(x, y, z));
+        }
+        //else if (num == 4 && words[0] == "vt") {
+        //    vt.x = atof(words[1].c_str());
+        //    vt.y = atof(words[2].c_str());
+        //    vt_array.push_back(vt);
+        //}
+        //else if (num == 4 && words[0] == "vn") {
+        //    vn.x = atof(words[1].c_str());
+        //    vn.y = atof(words[2].c_str());
+        //    vn.z = atof(words[3].c_str());
+        //    vn_array.push_back(vn);
+        //}
+        else if (num == 4 && words[0] == "f") {
+            VECTOR3I v_index;
+            //VECTOR3I vt_index;
+            for (int i = 1; i < words.size(); ++i) {
+                std::vector<std::string> str_tmp;
+                split(words[i], "/", str_tmp);
+                v_index[i - 1] = atoi(str_tmp[0].c_str()) - 1;//modify start from 0
+                //vt_index[i - 1] = atoi(str_tmp[1].c_str()) - 1;
+            }
+            faces.push_back(v_index);
+        }
     }
     RYAO_INFO("Found {} vertices", vertices.size());
-
-    // get the faces
-    while (nextChar == 'f' && nextChar != EOF) {
-        ungetc(nextChar, file);
-
-        int face[3];
-        fscanf(file, "f %i %i %i\n", &face[0], &face[1], &face[2]);
-        faces.push_back(VECTOR3I(face[0], face[1], face[2]));
-
-        nextChar = getc(file);
-    }
     RYAO_INFO("Found {} faces", faces.size());
-    fclose(file);
+    //std::vector<VECTOR3> tmp;
+    //FILE* file = fopen(objName.c_str(), "r");
+
+    //if (file == NULL) {
+    //    RYAO_ERROR("Failed to open file!");
+    //    return false;
+    //}
+
+    //char nextChar = getc(file);
+
+    //// get the vertices
+    //while (nextChar == 'v' && nextChar != EOF) {
+    //    ungetc(nextChar, file);
+
+    //    double v[3];
+    //    fscanf(file, "v %lf %lf %lf\n", &v[0], &v[1], &v[2]);
+    //    vertices.push_back(VECTOR3(v[0], v[1], v[2]));
+
+    //    nextChar = getc(file);
+    //}
+    //RYAO_INFO("Found {} vertices", vertices.size());
+
+    //// get the faces
+    //while (nextChar == 'f' && nextChar != EOF) {
+    //    ungetc(nextChar, file);
+
+    //    int face[3];
+    //    fscanf(file, "f %i %i %i\n", &face[0], &face[1], &face[2]);
+    //    faces.push_back(VECTOR3I(face[0], face[1], face[2]));
+
+    //    nextChar = getc(file);
+    //}
+    //RYAO_INFO("Found {} faces", faces.size());
+    //fclose(file);
 
     return true;
 }

@@ -55,7 +55,14 @@ public:
 
     // simulation loop
     virtual void stepSimulation(const bool verbose = true) {
-        _solver->Solve(_tetMesh->vertices(), _tetMesh->invMass());
+        if (_tetMesh)
+            _solver->Solve(_tetMesh->vertices(), _tetMesh->invMass());
+        else if (_triMesh)
+			_solver->Solve(_triMesh->vertices(), _triMesh->invMass());
+		else {
+			RYAO_ERROR("No dynamic mesh is loaded!");
+			return;
+		}
 
         _frameNumber++;
     };
@@ -174,8 +181,15 @@ public:
         return _kinematicShapes;
     }
 
-    const std::vector<VECTOR3>& getTetMeshVertices() const {
-        return _tetMesh->vertices();
+    const std::vector<VECTOR3>& getMeshVertices() const {
+        if (_tetMesh)
+            return _tetMesh->vertices();
+        else if (_triMesh)
+            return _triMesh->vertices();
+        else {
+			RYAO_ERROR("No dynamic mesh is loaded!");
+			return std::vector<VECTOR3>();
+        }
     }
 
 protected:
